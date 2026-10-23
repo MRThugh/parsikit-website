@@ -34,12 +34,20 @@ export function computePageMetadata(
   let description = 'Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani.';
   let schemaType: SeoMetadata['schemaType'] = 'SoftwareApplication';
 
-  // Base alternates for static non-doc routes
-  let alternateEnUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('en', route)}`;
-  let alternateFaUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('fa', route)}`;
-  let alternatePrsUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('prs-af', route)}`;
-  let alternateTgUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('tg', route)}`;
-  let alternateXDefaultUrl: string | undefined = alternateEnUrl;
+  // Base alternates for static non-doc routes (all 4 languages guaranteed)
+  let alternateEnUrl: string | undefined = undefined;
+  let alternateFaUrl: string | undefined = undefined;
+  let alternatePrsUrl: string | undefined = undefined;
+  let alternateTgUrl: string | undefined = undefined;
+  let alternateXDefaultUrl: string | undefined = undefined;
+
+  if (route === 'home' || route === 'playground' || route === 'architecture' || route === 'changelog') {
+    alternateEnUrl = `${BASE_SITE_URL}${buildRoutePath('en', route)}`;
+    alternateFaUrl = `${BASE_SITE_URL}${buildRoutePath('fa', route)}`;
+    alternatePrsUrl = `${BASE_SITE_URL}${buildRoutePath('prs-af', route)}`;
+    alternateTgUrl = `${BASE_SITE_URL}${buildRoutePath('tg', route)}`;
+    alternateXDefaultUrl = alternateEnUrl;
+  }
 
   if (route === 'home') {
     if (lang === 'fa') {

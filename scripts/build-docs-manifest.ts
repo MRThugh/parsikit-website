@@ -314,33 +314,94 @@ export const ALL_DOCS: DocEntry[] = ${JSON.stringify(docs, null, 2)};
 `;
   fs.writeFileSync(path.resolve(process.cwd(), 'src/data/docsManifest.ts'), docsManifestCode);
 
-  // 4. Generate public/sitemap.xml and public/robots.txt
+  // 4. Generate public/sitemap.xml and public/robots.txt with reciprocal xhtml:link alternates
   const siteUrl = 'https://parsikit.dev';
   const langs: AppLang[] = ['fa', 'en', 'prs-af', 'tg'];
-  const urls: string[] = [`${siteUrl}/`];
+  const staticSections = ['playground', 'architecture', 'changelog'];
 
+  const sitemapEntries: string[] = [];
+
+  // Static core routes
   for (const l of langs) {
-    urls.push(`${siteUrl}/${l}`);
-    urls.push(`${siteUrl}/${l}/playground`);
-    urls.push(`${siteUrl}/${l}/architecture`);
-    urls.push(`${siteUrl}/${l}/changelog`);
+    sitemapEntries.push(`  <url>
+    <loc>${siteUrl}/${l}</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="${siteUrl}/en"/>
+    <xhtml:link rel="alternate" hreflang="fa" href="${siteUrl}/fa"/>
+    <xhtml:link rel="alternate" hreflang="fa-IR" href="${siteUrl}/fa"/>
+    <xhtml:link rel="alternate" hreflang="prs" href="${siteUrl}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="prs-AF" href="${siteUrl}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="tg" href="${siteUrl}/tg"/>
+    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${siteUrl}/tg"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/en"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>`);
+
+    for (const sec of staticSections) {
+      sitemapEntries.push(`  <url>
+    <loc>${siteUrl}/${l}/${sec}</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="${siteUrl}/en/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="fa" href="${siteUrl}/fa/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="fa-IR" href="${siteUrl}/fa/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="prs" href="${siteUrl}/prs-af/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="prs-AF" href="${siteUrl}/prs-af/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="tg" href="${siteUrl}/tg/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${siteUrl}/tg/${sec}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/en/${sec}"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>`);
+    }
   }
 
+  // Multilingual documentation routes
   for (const doc of docs) {
-    urls.push(`${siteUrl}/${doc.lang}/docs/${doc.slug}`);
+    const alternates: string[] = [];
+    const enUrl = doc.lang === 'en' ? `${siteUrl}/en/docs/${doc.slug}` : doc.counterparts?.en ? `${siteUrl}/en/docs/${doc.counterparts.en}` : undefined;
+    const faUrl = doc.lang === 'fa' ? `${siteUrl}/fa/docs/${doc.slug}` : doc.counterparts?.fa ? `${siteUrl}/fa/docs/${doc.counterparts.fa}` : undefined;
+    const prsUrl = doc.lang === 'prs-af' ? `${siteUrl}/prs-af/docs/${doc.slug}` : doc.counterparts?.['prs-af'] ? `${siteUrl}/prs-af/docs/${doc.counterparts['prs-af']}` : undefined;
+    const tgUrl = doc.lang === 'tg' ? `${siteUrl}/tg/docs/${doc.slug}` : doc.counterparts?.tg ? `${siteUrl}/tg/docs/${doc.counterparts.tg}` : undefined;
+    const xDefaultUrl = enUrl || faUrl;
+
+    if (enUrl) alternates.push(`    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>`);
+    if (faUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa" href="${faUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa-IR" href="${faUrl}"/>`);
+    }
+    if (prsUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs" href="${prsUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs-AF" href="${prsUrl}"/>`);
+    }
+    if (tgUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg" href="${tgUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${tgUrl}"/>`);
+    }
+    if (xDefaultUrl) alternates.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${xDefaultUrl}"/>`);
+
+    sitemapEntries.push(`  <url>
+    <loc>${siteUrl}/${doc.lang}/docs/${doc.slug}</loc>
+${alternates.join('\n')}
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
   }
 
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls
-  .map(
-    url => `  <url>
-    <loc>${url}</loc>
+  <url>
+    <loc>${siteUrl}/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="${siteUrl}/en"/>
+    <xhtml:link rel="alternate" hreflang="fa" href="${siteUrl}/fa"/>
+    <xhtml:link rel="alternate" hreflang="fa-IR" href="${siteUrl}/fa"/>
+    <xhtml:link rel="alternate" hreflang="prs" href="${siteUrl}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="prs-AF" href="${siteUrl}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="tg" href="${siteUrl}/tg"/>
+    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${siteUrl}/tg"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/en"/>
     <changefreq>weekly</changefreq>
-    <priority>${url.includes('/docs/') ? '0.8' : '1.0'}</priority>
-  </url>`
-  )
-  .join('\n')}
+    <priority>1.0</priority>
+  </url>
+${sitemapEntries.join('\n')}
 </urlset>`;
   fs.writeFileSync(path.resolve(process.cwd(), 'public/sitemap.xml'), sitemapXml);
 

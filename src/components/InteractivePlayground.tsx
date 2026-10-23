@@ -540,6 +540,17 @@ export function InteractivePlayground() {
             </div>
           </div>
         )}
+
+        {/* Client-side execution disclosure */}
+        <div className="mt-8 pt-4 border-t border-stone-200/60 dark:border-white/5 text-center text-xs text-stone-500 dark:text-stone-400">
+          <span>
+            {isRtl
+              ? '⚡ اجرای مستقیم در مرورگر: الگوریتم‌های فوق با پیاده‌سازی مستقل تایپ‌اسکریپت و بدون ارسال اطلاعات به سرورهای خارجی به صورت محلی در مرورگر شما ارزیابی می‌شوند.'
+              : lang === 'tg'
+              ? '⚡ Иҷрои мустақим дар браузер: Алгоритмҳо комилан дар дохили браузери шумо бидуни фиристодани додаҳо ба серверҳои беруна тафтиш мешаванд.'
+              : '⚡ Client-side In-Browser Execution: All algorithms run locally in your browser via zero-latency TypeScript implementations of ParsiKit domain logic with no external backend calls.'}
+          </span>
+        </div>
       </div>
     </section>
   );

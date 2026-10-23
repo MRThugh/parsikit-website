@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   BookOpen,
   ChevronRight,
@@ -15,9 +15,8 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ALL_DOCS } from '../data/docsManifest';
-import { LOCALES } from '../i18n/config';
 import { getTranslations } from '../i18n/translations';
-import { CodeBlock } from './CodeBlock';
+import { renderMarkdownToHtml } from '../lib/markdown';
 
 export function DocumentationView() {
   const { lang, activeDocSlug, setActiveDocSlug, navigateToDoc, toggleLang, isRtl } = useApp();
@@ -111,140 +110,31 @@ export function DocumentationView() {
     }
   };
 
-  // Safe and clean Markdown rendering
-  const renderMarkdownContent = (content: string) => {
-    const lines = content.split('\n');
-    const elements: React.ReactNode[] = [];
-    let inCodeBlock = false;
-    let codeLanguage = 'python';
-    let codeBuffer: string[] = [];
-    let listBuffer: string[] = [];
+  // Render markdown with complete GFM syntax, tables, and link transformations
+  const renderedHtml = useMemo(
+    () => renderMarkdownToHtml(currentDoc.content),
+    [currentDoc.content]
+  );
 
-    const flushList = (key: number) => {
-      if (listBuffer.length > 0) {
-        elements.push(
-          <ul key={`ul-${key}`} className="my-3 space-y-1.5 list-disc list-inside text-sm text-stone-700 dark:text-stone-300">
-            {listBuffer.map((li, liIdx) => (
-              <li key={liIdx} className="leading-relaxed">
-                {li}
-              </li>
-            ))}
-          </ul>
-        );
-        listBuffer = [];
-      }
-    };
+  const handleArticleClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = (e.target as HTMLElement).closest('a');
+    if (!target) return;
+    const href = target.getAttribute('href');
+    if (!href) return;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-
-      // Code block start/end
-      if (line.startsWith('```')) {
-        flushList(i);
-        if (inCodeBlock) {
-          elements.push(
-            <div key={`code-${i}`} dir="ltr" className="my-4">
-              <CodeBlock
-                code={codeBuffer.join('\n')}
-                language={codeLanguage}
-              />
-            </div>
-          );
-          codeBuffer = [];
-          inCodeBlock = false;
-        } else {
-          inCodeBlock = true;
-          codeLanguage = line.replace(/^```/, '').trim() || 'python';
-        }
-        continue;
-      }
-
-      if (inCodeBlock) {
-        codeBuffer.push(line);
-        continue;
-      }
-
-      // Horizontal rule
-      if (line.trim() === '---') {
-        flushList(i);
-        elements.push(<hr key={`hr-${i}`} className="my-6 border-stone-200 dark:border-white/10" />);
-        continue;
-      }
-
-      // Headings
-      if (line.startsWith('# ')) {
-        flushList(i);
-        const headingText = line.replace(/^#\s+/, '').trim();
-        elements.push(
-          <h1 key={`h1-${i}`} className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mt-8 mb-4">
-            {headingText}
-          </h1>
-        );
-        continue;
-      }
-
-      if (line.startsWith('## ')) {
-        flushList(i);
-        const headingText = line.replace(/^##\s+/, '').trim();
-        const headingId = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-').replace(/^-+|-+$/g, '');
-        elements.push(
-          <h2
-            key={`h2-${i}`}
-            id={headingId}
-            className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white mt-8 mb-3 pb-2 border-b border-stone-200 dark:border-white/10 scroll-mt-24"
-          >
-            {headingText}
-          </h2>
-        );
-        continue;
-      }
-
-      if (line.startsWith('### ')) {
-        flushList(i);
-        const headingText = line.replace(/^###\s+/, '').trim();
-        const headingId = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-').replace(/^-+|-+$/g, '');
-        elements.push(
-          <h3
-            key={`h3-${i}`}
-            id={headingId}
-            className="text-lg font-bold text-stone-800 dark:text-stone-100 mt-6 mb-2 scroll-mt-24"
-          >
-            {headingText}
-          </h3>
-        );
-        continue;
-      }
-
-      // Lists
-      if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-        listBuffer.push(line.trim().replace(/^[-*]\s+/, ''));
-        continue;
-      }
-
-      // Table formatting check
-      if (line.trim().startsWith('|')) {
-        flushList(i);
-        elements.push(
-          <div key={`table-line-${i}`} className="font-mono text-xs overflow-x-auto py-1 text-stone-600 dark:text-stone-400">
-            {line}
-          </div>
-        );
-        continue;
-      }
-
-      // Standard paragraphs
-      if (line.trim()) {
-        flushList(i);
-        elements.push(
-          <p key={`p-${i}`} className="my-3 text-stone-700 dark:text-stone-300 text-sm sm:text-base leading-relaxed">
-            {line}
-          </p>
-        );
-      }
+    // External links or in-page anchor links use default browser behavior
+    if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {
+      return;
     }
 
-    flushList(lines.length);
-    return elements;
+    // Relative markdown link -> SPA navigation
+    e.preventDefault();
+    const cleanSlug = href
+      .replace(/^\//, '')
+      .replace(/^docs\//, '')
+      .replace(/^(fa|en|prs-af|tg)\/docs\//, '')
+      .replace(/\.md$/, '');
+    navigateToDoc(cleanSlug);
   };
 
   return (
@@ -370,9 +260,11 @@ export function DocumentationView() {
             </div>
 
             {/* Document Markdown Body */}
-            <article className="prose prose-stone dark:prose-invert max-w-none">
-              {renderMarkdownContent(currentDoc.content)}
-            </article>
+            <article
+              onClick={handleArticleClick}
+              className="prose prose-stone dark:prose-invert max-w-none prose-headings:scroll-mt-24 markdown-body"
+              dangerouslySetInnerHTML={{ __html: renderedHtml }}
+            />
 
             {/* Next / Previous Document Navigation */}
             <div className="mt-12 pt-8 border-t border-stone-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-4">

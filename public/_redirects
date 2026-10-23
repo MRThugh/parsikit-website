@@ -1,0 +1,6 @@
+# Legacy Spanish 301 redirects to canonical English documentation
+/es/docs/*   /en/docs/:splat   301!
+/es/playground   /en/playground   301!
+/es/architecture   /en/architecture   301!
+/es/changelog   /en/changelog   301!
+/es          /en               301!

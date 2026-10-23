@@ -507,15 +507,23 @@ function prerender() {
   }
 
   // Pre-render explicit 301 migration redirect pages for legacy Spanish routes
-  const legacySpanishRoutes = [
+  const legacySpanishRoutes: { source: string; target: string }[] = [
     { source: 'es', target: '/en' },
     { source: 'es/playground', target: '/en/playground' },
     { source: 'es/architecture', target: '/en/architecture' },
     { source: 'es/changelog', target: '/en/changelog' },
+    { source: 'es/docs', target: '/en/docs/installation' },
     { source: 'es/docs/index', target: '/en/docs/index' },
-    { source: 'es/docs/installation', target: '/en/docs/installation' },
-    { source: 'es/docs/quickstart', target: '/en/docs/quickstart' },
   ];
+
+  // Include every single unique doc slug across ALL_DOCS (all 28 unique slugs)
+  const uniqueDocSlugs = Array.from(new Set(ALL_DOCS.map((d) => d.slug)));
+  for (const slug of uniqueDocSlugs) {
+    legacySpanishRoutes.push({
+      source: `es/docs/${slug}`,
+      target: `/en/docs/${slug}`,
+    });
+  }
 
   for (const leg of legacySpanishRoutes) {
     const legDir = path.join(distDir, leg.source);
@@ -528,18 +536,57 @@ function prerender() {
   const notFoundHtml = renderHtmlTemplate(baseHtml, 'en', 'home');
   fs.writeFileSync(path.join(distDir, '404.html'), notFoundHtml);
 
-  // Generate verified sitemap.xml
+  // Generate verified sitemap.xml with xhtml:link alternates (excluding Spanish and non-existent pages)
+  const sitemapEntries = routesToPrerender.map((r) => {
+    const activeDoc = r.docSlug
+      ? ALL_DOCS.find((d) => d.lang === r.lang && d.slug === r.docSlug) || null
+      : null;
+    const meta = computePageMetadata(r.lang, r.route, activeDoc);
+    const alternates: string[] = [];
+
+    if (meta.alternateEnUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}"/>`);
+    }
+    if (meta.alternateFaUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa" href="${meta.alternateFaUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa-IR" href="${meta.alternateFaUrl}"/>`);
+    }
+    if (meta.alternatePrsUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs" href="${meta.alternatePrsUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs-AF" href="${meta.alternatePrsUrl}"/>`);
+    }
+    if (meta.alternateTgUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg" href="${meta.alternateTgUrl}"/>`);
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${meta.alternateTgUrl}"/>`);
+    }
+    if (meta.alternateXDefaultUrl) {
+      alternates.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${meta.alternateXDefaultUrl}"/>`);
+    }
+
+    return `  <url>
+    <loc>${meta.canonicalUrl}</loc>
+${alternates.join('\n')}
+    <changefreq>weekly</changefreq>
+    <priority>${r.route === 'docs' ? '0.8' : '1.0'}</priority>
+  </url>`;
+  });
+
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${allUrls
-  .map(
-    (url) => `  <url>
-    <loc>${url}</loc>
+  <url>
+    <loc>${BASE_SITE_URL}/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="${BASE_SITE_URL}/en"/>
+    <xhtml:link rel="alternate" hreflang="fa" href="${BASE_SITE_URL}/fa"/>
+    <xhtml:link rel="alternate" hreflang="fa-IR" href="${BASE_SITE_URL}/fa"/>
+    <xhtml:link rel="alternate" hreflang="prs" href="${BASE_SITE_URL}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="prs-AF" href="${BASE_SITE_URL}/prs-af"/>
+    <xhtml:link rel="alternate" hreflang="tg" href="${BASE_SITE_URL}/tg"/>
+    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${BASE_SITE_URL}/tg"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_SITE_URL}/en"/>
     <changefreq>weekly</changefreq>
-    <priority>${url.includes('/docs/') ? '0.8' : '1.0'}</priority>
-  </url>`
-  )
-  .join('\n')}
+    <priority>1.0</priority>
+  </url>
+${sitemapEntries.join('\n')}
 </urlset>`;
 
   fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
@@ -553,7 +600,7 @@ Sitemap: ${BASE_SITE_URL}/sitemap.xml
   fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
   fs.writeFileSync(path.resolve(process.cwd(), 'public/robots.txt'), robotsTxt);
 
-  console.log(`Prerender complete: generated ${routesToPrerender.length} static index.html pages and sitemap!`);
+  console.log(`Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} Spanish 301 redirects, and sitemap!`);
 }
 
 prerender();

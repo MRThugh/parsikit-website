@@ -21,6 +21,15 @@
 - [تثبیت اعتبار اسناد و کارت‌ها](tutorials/validation.md) — الگوریتم پیمانه ۱۱ و الگوریتم لون
 - [تقویم نجومی هجری شمسی](tutorials/datetime.md) — تبدیلات دقیق تقویم و محاسبه سال‌های کبیسه
 - [محاسبات ارقام و مبالغ مالی](tutorials/numbers_and_currency.md) — تبدیل اعداد به حروف و مدیریت مبالغ
+- [مدل‌های شیءگرا و کار با Pydantic](tutorials/models.md) — کلاس‌های داده‌ای و اسکیماها
+
+---
+
+## راهنماهای تخصصی و ادغام
+
+- [استفاده در سیستم‌های وب و بک‌اند (FastAPI و Django)](guides/web_backends.md) — ادغام در وب‌سرویس‌ها
+- [امنیت فرم‌ها و پوشش معلومات حساس](guides/forms_and_security.md) — ماسک‌کردن ارقام محرمانه
+- [اتصال به واسط‌های گرافیکی کاربر (GUI)](guides/gui_integration.md) — هماهنگی با Tkinter و PyQt
 
 ---
 
@@ -30,6 +39,8 @@
 - [ماژول پردازش متن (parsikit.text)](api/text.md) — توابع پاکسازی و آماده‌سازی متن
 - [ماژول تثبیت اعتبار (parsikit.validators)](api/validators.md) — توابع چک‌سام و بررسی صحت
 - [ماژول تقویم و زمان (parsikit.datetime)](api/datetime.md) — تبدیل تاریخ میلادی و شمسی
+- [ماژول بازآرایی گرافیکی (parsikit.reshaper)](api/reshaper.md) — پیوند حروف برای موتورهای گرافیکی
+- [ابزارهای توسعه و عیب‌یابی (parsikit.dev)](api/dev_and_gui.md) — تراز بصری و کالبدشکافی متن
 - [مدل‌های شیءگرا (parsikit.models)](api/models.md) — کلاس‌های داده‌ای با اعتبارسنجی خودکار
 
 ---

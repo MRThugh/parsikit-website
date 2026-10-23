@@ -136,8 +136,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setLang = (newLang: AppLang) => {
     if (newLang === lang) return;
     let targetDocSlug = activeDocSlug;
-    if (route === 'docs' && activeDoc?.counterparts?.[newLang]) {
-      targetDocSlug = activeDoc.counterparts[newLang]!;
+    if (route === 'docs') {
+      if (activeDoc?.counterparts?.[newLang]) {
+        targetDocSlug = activeDoc.counterparts[newLang]!;
+      } else {
+        targetDocSlug = 'installation';
+      }
     }
     navigate(route, targetDocSlug, newLang);
   };

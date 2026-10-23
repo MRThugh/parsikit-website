@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FROM REPOSITORY DOCS
- * Count: 84 documents
+ * Count: 94 documents
  */
 
 export interface DocHeading {
@@ -252,7 +252,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/dev_and_gui.md",
     "counterparts": {
-      "en": "api/dev_and_gui"
+      "en": "api/dev_and_gui",
+      "prs-af": "api/dev_and_gui",
+      "tg": "api/dev_and_gui"
     },
     "counterpartSlug": "api/dev_and_gui"
   },
@@ -492,7 +494,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/reshaper.md",
     "counterparts": {
-      "en": "api/reshaper"
+      "en": "api/reshaper",
+      "prs-af": "api/reshaper",
+      "tg": "api/reshaper"
     },
     "counterpartSlug": "api/reshaper"
   },
@@ -930,7 +934,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/guides/gui_integration.md",
     "counterparts": {
-      "en": "guides/gui_integration"
+      "en": "guides/gui_integration",
+      "prs-af": "guides/gui_integration",
+      "tg": "guides/gui_integration"
     },
     "counterpartSlug": "guides/gui_integration"
   },
@@ -971,7 +977,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/guides/web_backends.md",
     "counterparts": {
-      "en": "guides/web_backends"
+      "en": "guides/web_backends",
+      "prs-af": "guides/web_backends",
+      "tg": "guides/web_backends"
     },
     "counterpartSlug": "guides/web_backends"
   },
@@ -1502,7 +1510,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/tutorials/models.md",
     "counterparts": {
-      "en": "tutorials/models"
+      "en": "tutorials/models",
+      "prs-af": "tutorials/models",
+      "tg": "tutorials/models"
     },
     "counterpartSlug": "tutorials/models"
   },
@@ -2118,7 +2128,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/en/api/dev_and_gui.md",
     "counterparts": {
-      "fa": "api/dev_and_gui"
+      "fa": "api/dev_and_gui",
+      "prs-af": "api/dev_and_gui",
+      "tg": "api/dev_and_gui"
     },
     "counterpartSlug": "api/dev_and_gui"
   },
@@ -2348,7 +2360,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/en/api/reshaper.md",
     "counterparts": {
-      "fa": "api/reshaper"
+      "fa": "api/reshaper",
+      "prs-af": "api/reshaper",
+      "tg": "api/reshaper"
     },
     "counterpartSlug": "api/reshaper"
   },
@@ -2791,7 +2805,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/en/guides/gui_integration.md",
     "counterparts": {
-      "fa": "guides/gui_integration"
+      "fa": "guides/gui_integration",
+      "prs-af": "guides/gui_integration",
+      "tg": "guides/gui_integration"
     },
     "counterpartSlug": "guides/gui_integration"
   },
@@ -2832,7 +2848,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/en/guides/web_backends.md",
     "counterparts": {
-      "fa": "guides/web_backends"
+      "fa": "guides/web_backends",
+      "prs-af": "guides/web_backends",
+      "tg": "guides/web_backends"
     },
     "counterpartSlug": "guides/web_backends"
   },
@@ -3293,7 +3311,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/en/tutorials/models.md",
     "counterparts": {
-      "fa": "tutorials/models"
+      "fa": "tutorials/models",
+      "prs-af": "tutorials/models",
+      "tg": "tutorials/models"
     },
     "counterpartSlug": "tutorials/models"
   },
@@ -3653,6 +3673,89 @@ export const ALL_DOCS: DocEntry[] = [
     "counterpartSlug": "api/datetime"
   },
   {
+    "id": "prs-af-api-dev_and_gui",
+    "slug": "api/dev_and_gui",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مرجع ابزارهای عیب‌یابی و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "ابزارهای تخصصی برای تشخیص و عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش معیاری متون زبان دری در رابط‌های گرافیکی (GUI).",
+    "content": "# مرجع ابزارهای عیب‌یابی و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)\n\nابزارهای تخصصی برای تشخیص و عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش معیاری متون زبان دری در رابط‌های گرافیکی (GUI).\n\n---\n\n## ۱. قالب‌بندی بصری هم‌تراز (`pformat` و `persian_fstring`)\n\nکاراکترهای فاقد عرض مانند نیم‌فاصله‌های معیاری (`\\u200C`) و حرکات اعراب در محاسبات معمولی پایتون دارای طول کاراکتری هستند، اما در نمایش هیچ فضایی را اشغال نمی‌نمایند. میتودهای معیاری پایتون در قالب‌بندی ستونی جداول خطاناپذیر نبوده و ساختار جدول‌ها را نامنظم می‌سازند.\n\n### `pformat(template: str, *args, **kwargs) -> str`\nمتن را با در نظر گرفتن عرض واقعی نمایشی (Visual Width) کاراکترها تراز نموده و ستون‌بندی را دقیق می‌سازد. از پسوند `:fa` برای تبدیل هم‌زمان ارقام به ارقام فارسی/دری و درج کامای هزارگان پشتیبانی می‌کند.\n\n```python\nfrom parsikit.dev import pformat\n\nline = pformat(\"{:15} | {:>10:fa}\", \"کتاب‌ها\", 15000)\nprint(line)  # 'کتاب‌ها         |     ۱۵،۰۰۰'\n```\n\n### `persian_fstring(template: str, **kwargs) -> str`\nکارکردی مشابه به `pformat` برای عبارات الگویی با پشتیبانی مستقیم از نام متغیرها در محیط پایتون.\n\n---\n\n## ۲. ابزارهای عیب‌یابی و آزمایش (`parsikit.dev`)\n\n### `inspect_text(text: str) -> dict`\nساختار داخلی متن را کالبدشکافی کرده و تعداد نیم‌فاصله‌ها، وضعیت ارقام، اعراب و حروف عربی را گزارش می‌دهد:\n\n```python\nfrom parsikit.dev import inspect_text\n\nreport = inspect_text(\"نمونه ۱۲۳\")\nprint(report)\n# {'length': ..., 'has_arabic_chars': False, 'has_zwnj': False, 'has_persian_digits': True, ...}\n```\n\n### `debug_text(text: str) -> None`\nگزارش رنگی، دقیق و تحلیلی از مشخصات متن را در ترمینال چاپ می‌نماید.\n\n### `validate_batch(items: list, model_class, silent: bool = False) -> dict`\nمجموعه‌ای از داده‌ها را به شکل دسته‌ای بررسی نموده و خلاصه موارد معتبر و نامعتبر را همراه با جزئیات خطا تفکیک می‌نماید.\n\n---\n\n## ۳. بازآرایی گرافیکی و اتصال به رابط کاربر (`parsikit.reshaper`, `parsikit.gui`)\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\nمتن دری/فارسی را برای موتورهای رندر گرافیکی فاقد سیستم HarfBuzz (مانند Pygame، Pillow، OpenCV و ReportLab) شکل‌دهی و دوجهته‌سازی می‌کند تا حروف چسبیده و بدون نقص نمایش یابند.\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\nپاراگراف‌های طویل را بر اساس حداکثر کاراکتر در هر سطر شکسته و هر خط را به شکل متصل و آماده رسم گرافیکی خروجی می‌دهد.\n\n### `bind_persian_input(widget, input_type: str = \"text\") -> None`\nیک ویجت ورودی متنی را در فریم‌ورک‌های Tkinter یا CustomTkinter به میکانیزم هوشمند اصلاح خودکار کلیدواژه‌ها (تبدیل «ي» و «ك» عربی و اصلاح اعداد) مجهز می‌سازد.\n",
+    "headings": [
+      {
+        "id": "مرجع-ابزارهای-عیب-یابی-و-گرافیک-parsikit-dev-parsikit-gui-parsikit-reshaper",
+        "text": "مرجع ابزارهای عیب‌یابی و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "۱-قالب-بندی-بصری-هم-تراز-pformat-و-persian_fstring",
+        "text": "۱. قالب‌بندی بصری هم‌تراز (`pformat` و `persian_fstring`)",
+        "level": 2
+      },
+      {
+        "id": "pformat-template-str-args-kwargs-str",
+        "text": "`pformat(template: str, *args, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "persian_fstring-template-str-kwargs-str",
+        "text": "`persian_fstring(template: str, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "۲-ابزارهای-عیب-یابی-و-آزمایش-parsikit-dev",
+        "text": "۲. ابزارهای عیب‌یابی و آزمایش (`parsikit.dev`)",
+        "level": 2
+      },
+      {
+        "id": "inspect_text-text-str-dict",
+        "text": "`inspect_text(text: str) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "length-has_arabic_chars-false-has_zwnj-false-has_persian_digits-true",
+        "text": "{'length': ..., 'has_arabic_chars': False, 'has_zwnj': False, 'has_persian_digits': True, ...}",
+        "level": 1
+      },
+      {
+        "id": "debug_text-text-str-none",
+        "text": "`debug_text(text: str) -> None`",
+        "level": 3
+      },
+      {
+        "id": "validate_batch-items-list-model_class-silent-bool-false-dict",
+        "text": "`validate_batch(items: list, model_class, silent: bool = False) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "۳-بازآرایی-گرافیکی-و-اتصال-به-رابط-کاربر-parsikit-reshaper-parsikit-gui",
+        "text": "۳. بازآرایی گرافیکی و اتصال به رابط کاربر (`parsikit.reshaper`, `parsikit.gui`)",
+        "level": 2
+      },
+      {
+        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
+        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "bind_persian_input-widget-input_type-str-text-none",
+        "text": "`bind_persian_input(widget, input_type: str = \"text\") -> None`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/dev_and_gui.md",
+    "counterparts": {
+      "fa": "api/dev_and_gui",
+      "en": "api/dev_and_gui",
+      "tg": "api/dev_and_gui"
+    },
+    "counterpartSlug": "api/dev_and_gui"
+  },
+  {
     "id": "prs-af-api-index",
     "slug": "api/index",
     "lang": "prs-af",
@@ -3765,6 +3868,64 @@ export const ALL_DOCS: DocEntry[] = [
       "tg": "api/number_and_currency"
     },
     "counterpartSlug": "api/number_and_currency"
+  },
+  {
+    "id": "prs-af-api-reshaper",
+    "slug": "api/reshaper",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
+    "summary": "ابزار سبک و بدون وابستگی برای چسباندن حروف فارسی دری (Cursive Shaping) و بازآرایی جهت متن (BiDi) برای نمایش در موتورهای گرافیکی، تصاویر و بازی‌ها.",
+    "content": "# مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)\n\nابزار سبک و بدون وابستگی برای چسباندن حروف فارسی دری (Cursive Shaping) و بازآرایی جهت متن (BiDi) برای نمایش در موتورهای گرافیکی، تصاویر و بازی‌ها.\n\n---\n\n## ۱. هدف و کاربرد تخنیکی\n\nبسیاری از موتورهای گرافیکی در پایتون (نظیر Pygame، OpenCV، Pillow بدون libraqm و سیستم‌های ساخت PDF) متون را به صورت پیش‌فرض از چپ به راست و با فرض الفبای لاتین ترسیم می‌کنند. در نتیجه، حروف زبان دری به شکل ناپیوسته، نامتصل و از چپ به راست چاپ می‌شوند (مانند `س ل ا م` به جای `سلام`).\n\nماژول `parsikit.reshaper` نویسه‌ها را به فرم‌های مناسب پیوند (آغازی، میانی، پایانی و جدا) تبدیل نموده و جهت کلمات را برای نمایشگرهای گرافیکی مرتب می‌سازد.\n\n---\n\n## ۲. توابع عمومی\n\n### تابع `reshape_for_graphics(text: str, reverse: bool = True) -> str`\n\nحروف را به شکل معیاری به هم پیوند داده و در صورت لزوم، ترتیب رسم را برای موتورهای چپ‌به‌راست معکوس می‌کند.\n\n#### پارامترها:\n- **`text`** (`str`): متن دری یا متن دوزبانه (دری و انگلیسی) ورودی.\n- **`reverse`** (`bool`، پیش‌فرض `True`): در صورت `True` بودن، متن را برای سیستم‌های رسم چپ‌به‌راست معکوس می‌کند، در حالی که کلمات لاتین، ارقام، ایمیل‌ها و لینک‌ها جهت خوانش طبیعی خود را حفظ می‌نمایند.\n\n#### خروجی:\n- `str`: متن یونیکد بازآرایی‌شده آماده برای چاپ گرافیکی.\n\n#### نحوه مدیریت جهت (Direction & Reversal):\n- **`reverse=True` (پیش‌فرض):** برای موتورهای گرافیکی مانند Pygame و OpenCV که ترسیم را از چپ شروع می‌کنند. ترتیب حروف برعکس می‌شود تا در بوم از راست به چپ ظاهر شوند؛ ولی اعداد و کلمات لاتین در جهت صحیح LTR باقی می‌مانند.\n- **`reverse=False`:** برای موتورهایی که از قبل قابلیت جهت‌یابی راست‌به‌چپ دارند اما توانایی پیوند حروف فارسی (Shaping) را ندارند. در این حالت صرفاً اتصال حروف انجام شده و ترتیب ترتیبی کاراکترها حفظ می‌گردد.\n\n#### خصوصیات و توانایی‌ها:\n- پشتیبانی کامل از تمام حروف الفبای فارسی دری و کاراکترهای عربی متداول (از جمله `ۀ`، `ك`، `ي`).\n- ترکیب خودکار حروف «لا» (Lam-Alef Ligature) در تمام موقعیت‌های پیوسته و منفرد (`لا`، `لآ`، `لأ`، `لإ`).\n- نادیده‌گرفتن اعراب در زمان محاسبه پیوستگی و حفظ ارتباط حرکات با حرف پایه پس از معکوس‌سازی.\n- جداسازی عبارات انگلیسی، لینک‌های وب و اعداد برای حفظ جهت درست آنها.\n\n#### حدود عملکرد:\nاین ماژول یک ابزار سبک و بدون وابستگی برای حل سریع مشکلات نمایشی است و جایگزین مکمل استاندارد کامل دوجهته یونیکد (Unicode BiDi UAX #9) در متن‌های تودرتوی فوق‌العاده پیچیده چندزبانه نمی‌باشد.\n\n#### مثال کاربردی:\n\n```python\nimport parsikit\n\nraw_text = \"سلام به همه (نسخه 3.3.1)\"\n\n# آماده‌سازی برای Pygame یا Pillow\nready_text = parsikit.reshape_for_graphics(raw_text)\n\n# فقط پیوند حروف بدون معکوس‌سازی\nshaped_only = parsikit.reshape_for_graphics(raw_text, reverse=False)\n```\n\n---\n\n### تابع `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\n\nیک پاراگراف طولانی را بر مبنای عرض مجاز سطرها تقسیم نموده و خطوط را برای ترسیم گرافیکی بازآرایی می‌نماید.\n\n#### پارامترها:\n- **`text`** (`str`): متن پاراگراف.\n- **`max_chars_per_line`** (`int`): حداکثر تعداد کاراکتر در هر سطر.\n- **`reverse`** (`bool`، پیش‌فرض `True`): فعال بودن معکوس‌سازی برای موتورهای LTR.\n\n#### خروجی:\n- `list[str]`: لیستی از خطوط آماده ترسیم.\n\n#### مثال کاربردی:\n\n```python\nimport parsikit\n\nparagraph = \"پارسی‌کیت یک کتابخانه معیاری و باکیفیت برای تحلیل و پردازش اطلاعات به زبان دری در پایتون است.\"\nlines = parsikit.reshape_paragraph_for_graphics(paragraph, max_chars_per_line=30)\nfor line in lines:\n    print(line)\n```\n\n---\n\n## ۳. ارتباط با دیگر بخش‌ها\n\n- توصیه می‌شود پیش از بازآرایی گرافیکی، متن با `parsikit.text.standardize_persian` معیارسازی شود.\n- جهت مدیریت تایپ زنده در فریمورک‌های دسکتاپ، از `parsikit.gui.bind_persian_input` استفاده نمایید.\n",
+    "headings": [
+      {
+        "id": "مرجع-ماژول-بازآرایی-گرافیکی-parsikit-reshaper",
+        "text": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "۱-هدف-و-کاربرد-تخنیکی",
+        "text": "۱. هدف و کاربرد تخنیکی",
+        "level": 2
+      },
+      {
+        "id": "۲-توابع-عمومی",
+        "text": "۲. توابع عمومی",
+        "level": 2
+      },
+      {
+        "id": "تابع-reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "تابع `reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "آماده-سازی-برای-pygame-یا-pillow",
+        "text": "آماده‌سازی برای Pygame یا Pillow",
+        "level": 1
+      },
+      {
+        "id": "فقط-پیوند-حروف-بدون-معکوس-سازی",
+        "text": "فقط پیوند حروف بدون معکوس‌سازی",
+        "level": 1
+      },
+      {
+        "id": "تابع-reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
+        "text": "تابع `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "۳-ارتباط-با-دیگر-بخش-ها",
+        "text": "۳. ارتباط با دیگر بخش‌ها",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/reshaper.md",
+    "counterparts": {
+      "fa": "api/reshaper",
+      "en": "api/reshaper",
+      "tg": "api/reshaper"
+    },
+    "counterpartSlug": "api/reshaper"
   },
   {
     "id": "prs-af-api-text",
@@ -3939,13 +4100,104 @@ export const ALL_DOCS: DocEntry[] = [
     "counterpartSlug": "guides/forms_and_security"
   },
   {
+    "id": "prs-af-guides-gui_integration",
+    "slug": "guides/gui_integration",
+    "lang": "prs-af",
+    "category": "guides",
+    "title": "رهنمود اتصال پارسی‌کیت به واسط‌های گرافیکی کاربر (GUI)",
+    "summary": "پارسی‌کیت ماژول اختصاصی parsikit.gui را برای مدیریت و قالب‌بندی همزمان هنگام تایپ در فریمورک‌های دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.",
+    "content": "# رهنمود اتصال پارسی‌کیت به واسط‌های گرافیکی کاربر (GUI)\n\nپارسی‌کیت ماژول اختصاصی `parsikit.gui` را برای مدیریت و قالب‌بندی همزمان هنگام تایپ در فریمورک‌های دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.\n\n---\n\n## ۱. استفاده در Tkinter و CustomTkinter\n\nتابع `bind_persian_input` با نظارت بر رویداد کلید (`<KeyRelease>`)، متون و ارقام ورودی کاربر را به شکل آنی تنظیم می‌نماید:\n\n```python\nimport tkinter as tk\nimport parsikit\n\nroot = tk.Tk()\nroot.title(\"سامانه فرمت‌بندی هوشمند\")\n\nlabel = tk.Label(root, text=\"نمبر تذکره / هویت:\")\nlabel.pack()\n\nentry_national_code = tk.Entry(root)\nentry_national_code.pack()\n\n# اتصال فرمت خودکار (XXX-XXXXXX-X)\nparsikit.bind_persian_input(entry_national_code, input_type=\"national_code\")\n\ncard_label = tk.Label(root, text=\"نمبر کارت بانکی:\")\ncard_label.pack()\n\nentry_card = tk.Entry(root)\nentry_card.pack()\n\n# اتصال فرمت خودکار ۴ بخشی کارت (XXXX-XXXX-XXXX-XXXX)\nparsikit.bind_persian_input(entry_card, input_type=\"card_number\")\n\nroot.mainloop()\n```\n\n---\n\n## ۲. استفاده در PyQt / PySide\n\nبرای ویجت‌های ورودی `QLineEdit` در کیوت:\n\n```python\nfrom PyQt5.QtWidgets import QApplication, QLineEdit, QVBoxLayout, QWidget\nimport parsikit\n\napp = QApplication([])\nwindow = QWidget()\nlayout = QVBoxLayout()\n\ncard_input = QLineEdit()\ncard_input.setPlaceholderText(\"نمبر کارت ۱۶ رقمی...\")\nparsikit.bind_persian_input(card_input, input_type=\"card_number\")\n\nlayout.addWidget(card_input)\nwindow.setLayout(layout)\nwindow.show()\napp.exec_()\n```\n\n---\n\n## انواع فیلدهای پشتیبانی شده در `bind_persian_input`:\n- `\"text\"`: زیباسازی، تصفیه و اصلاح فواصل متن\n- `\"national_code\"`: قالب ۳-۶-۱ شماره ملی / تذکره\n- `\"card_number\"`: قالب ۴ تکه‌ای شماره کارت بانکی\n- `\"postal_code\"`: قالب ۵-۵ کود پستی (`XXXXX-XXXXX`)\n- `\"sheba\"`: قالب معیاری شماره شبا / حساب بانکی بین‌المللی با فواصل ۴ تایی\n",
+    "headings": [
+      {
+        "id": "رهنمود-اتصال-پارسی-کیت-به-واسط-های-گرافیکی-کاربر-gui",
+        "text": "رهنمود اتصال پارسی‌کیت به واسط‌های گرافیکی کاربر (GUI)",
+        "level": 1
+      },
+      {
+        "id": "۱-استفاده-در-tkinter-و-customtkinter",
+        "text": "۱. استفاده در Tkinter و CustomTkinter",
+        "level": 2
+      },
+      {
+        "id": "اتصال-فرمت-خودکار-xxx-xxxxxx-x",
+        "text": "اتصال فرمت خودکار (XXX-XXXXXX-X)",
+        "level": 1
+      },
+      {
+        "id": "اتصال-فرمت-خودکار-۴-بخشی-کارت-xxxx-xxxx-xxxx-xxxx",
+        "text": "اتصال فرمت خودکار ۴ بخشی کارت (XXXX-XXXX-XXXX-XXXX)",
+        "level": 1
+      },
+      {
+        "id": "۲-استفاده-در-pyqt-pyside",
+        "text": "۲. استفاده در PyQt / PySide",
+        "level": 2
+      },
+      {
+        "id": "انواع-فیلدهای-پشتیبانی-شده-در-bind_persian_input",
+        "text": "انواع فیلدهای پشتیبانی شده در `bind_persian_input`:",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/guides/gui_integration.md",
+    "counterparts": {
+      "fa": "guides/gui_integration",
+      "en": "guides/gui_integration",
+      "tg": "guides/gui_integration"
+    },
+    "counterpartSlug": "guides/gui_integration"
+  },
+  {
+    "id": "prs-af-guides-web_backends",
+    "slug": "guides/web_backends",
+    "lang": "prs-af",
+    "category": "guides",
+    "title": "رهنمود استفاده از پارسی‌کیت در سیستم‌های ویب و بک‌اند (FastAPI و Django)",
+    "summary": "کتابخانه پارسی‌کیت به دلیل برخورداری از ساختار Duck-Typing و سازگاری بومی با اسکیماهای Pydantic v2، گزینه‌ای ایده‌آل برای تصفیه داده‌ها و اعتبارسنجی ورودی‌ها در سرویس‌های پایتون محسوب می‌شود.",
+    "content": "# رهنمود استفاده از پارسی‌کیت در سیستم‌های ویب و بک‌اند (FastAPI و Django)\n\nکتابخانه پارسی‌کیت به دلیل برخورداری از ساختار Duck-Typing و سازگاری بومی با اسکیماهای Pydantic v2، گزینه‌ای ایده‌آل برای تصفیه داده‌ها و اعتبارسنجی ورودی‌ها در سرویس‌های پایتون محسوب می‌شود.\n\n---\n\n## ۱. ادغام در فریمورک FastAPI با Pydantic\n\nمدل‌های دامنه‌ای پارسی‌کیت مستقیماً به حیث نوع فیلدها در اسکیماهای Pydantic قابل استفاده هستند:\n\n```python\nfrom fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\nimport parsikit\n\napp = FastAPI(title=\"سیستم تادیات و خدمات آنلاین\")\n\nclass UserRegisterSchema(BaseModel):\n    name: str\n    national_code: parsikit.NationalCode\n    mobile: parsikit.MobileNumber\n    card: parsikit.BankCard\n\n@app.post(\"/register\")\ndef register_user(payload: UserRegisterSchema):\n    # صحت تمام معلومات در لحظه دریافت تضمین شده است\n    return {\n        \"status\": \"success\",\n        \"clean_national_code\": payload.national_code.clean,\n        \"masked_card\": payload.card.masked,\n        \"bank_name\": payload.card.bank[\"name\"] if payload.card.bank else None,\n        \"mobile_international\": payload.mobile.to_international(),\n        \"operator\": payload.mobile.operator,\n    }\n```\n\nدر صورت ارسال معلومات غیرمعیاری، FastAPI به شکل خودکار پاسخ خطای اعتبارسنجی HTTP 422 بازمی‌گرداند.\n\n---\n\n## ۲. استفاده در فریمورک جنگو (Django Forms & Models)\n\nدر فارم‌های جنگو می‌توانید توابع بررسی صحت را در میتودهای `clean_<field>` فراخوانی نمایید:\n\n```python\nfrom django import forms\nfrom django.core.exceptions import ValidationError\nimport parsikit\n\nclass UserProfileForm(forms.Form):\n    national_code = forms.CharField(max_length=10)\n    mobile = forms.CharField(max_length=15)\n\n    def clean_national_code(self):\n        code = self.cleaned_data[\"national_code\"]\n        if not parsikit.is_valid_national_code(code):\n            raise ValidationError(\"نمبر هویت یا تذکره وارد شده معتبر نمی‌باشد.\")\n        return parsikit.NationalCode(code).clean\n\n    def clean_mobile(self):\n        phone = self.cleaned_data[\"mobile\"]\n        if not parsikit.is_valid_mobile(phone):\n            raise ValidationError(\"شماره موبایل وارد شده صحیح نیست.\")\n        return parsikit.normalize_mobile(phone, prefix=\"0\")\n```\n\n---\n\n## ۳. تصفیه متون پیش از ذخیره‌سازی در پایگاه داده\n\nقبل از ثبت توضیحات، نام‌ها یا آدرس‌ها در دیتابیس، استفاده از تابع `clean_text` جستجوی دقیق و بدون نقص را تضمین می‌کند:\n\n```python\ncleaned_title = parsikit.clean_text(user_input_title)\n```\nاین پروسه حروف عربی «ي» و «ك» را پاکسازی نموده و نیم‌فاصله‌های معیاری را در متن جایگزین می‌سازد.\n",
+    "headings": [
+      {
+        "id": "رهنمود-استفاده-از-پارسی-کیت-در-سیستم-های-ویب-و-بک-اند-fastapi-و-django",
+        "text": "رهنمود استفاده از پارسی‌کیت در سیستم‌های ویب و بک‌اند (FastAPI و Django)",
+        "level": 1
+      },
+      {
+        "id": "۱-ادغام-در-فریمورک-fastapi-با-pydantic",
+        "text": "۱. ادغام در فریمورک FastAPI با Pydantic",
+        "level": 2
+      },
+      {
+        "id": "صحت-تمام-معلومات-در-لحظه-دریافت-تضمین-شده-است",
+        "text": "صحت تمام معلومات در لحظه دریافت تضمین شده است",
+        "level": 1
+      },
+      {
+        "id": "۲-استفاده-در-فریمورک-جنگو-django-forms-models",
+        "text": "۲. استفاده در فریمورک جنگو (Django Forms & Models)",
+        "level": 2
+      },
+      {
+        "id": "۳-تصفیه-متون-پیش-از-ذخیره-سازی-در-پایگاه-داده",
+        "text": "۳. تصفیه متون پیش از ذخیره‌سازی در پایگاه داده",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/guides/web_backends.md",
+    "counterparts": {
+      "fa": "guides/web_backends",
+      "en": "guides/web_backends",
+      "tg": "guides/web_backends"
+    },
+    "counterpartSlug": "guides/web_backends"
+  },
+  {
     "id": "prs-af-index",
     "slug": "index",
     "lang": "prs-af",
     "category": "getting-started",
     "title": "رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)",
     "summary": "به مرکز اسناد و رهنمودهای رسمی کتابخانه پارسی‌کیت (ParsiKit) خوش آمدید.",
-    "content": "# رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)\n\nبه مرکز اسناد و رهنمودهای رسمی کتابخانه **پارسی‌کیت (ParsiKit)** خوش آمدید.\n\nپارسی‌کیت یک کتابخانه معیاری، سریع و سبک در زبان پایتون (Python 3.10+) است که بدون هرگونه وابستگی بیرونی (Zero Dependencies)، ابزارهای همه‌جانبه‌ای را برای تصفیه متون زبان فارسی دری، تثبیت اعتبار شماره‌های هویت و تذکره، کارت‌های بانکی، تقویم هجری شمسی و محاسبات پولی در اختیار توسعه‌دهندگان نرم‌افزار قرار می‌دهد.\n\n---\n\n## بخش‌های اصلی رهنمود\n\n- [رهنمود نصب و راه‌اندازی](installation.md) — طریقه نصب با pip، poetry و uv\n- [آغاز سریع در ۵ دقیقه](quickstart.md) — آشنایی با مثال‌های پرکاربرد و روزمره\n- [پرسش‌های مکرر (FAQ)](faq.md) — پاسخ به سوالات اساسی پیرامون لایسنس و کارکردها\n- [عیب‌یابی و حل مشکلات](troubleshooting.md) — راهکارهای حل خطاهای رایج در پروژه‌ها\n\n---\n\n## آموزش‌های گام‌به‌گام\n\n- [تصفیه متن و نیم‌فاصله‌های معیاری](tutorials/text_processing.md) — معیارسازی حروف و فواصل\n- [تثبیت اعتبار اسناد و کارت‌ها](tutorials/validation.md) — الگوریتم پیمانه ۱۱ و الگوریتم لون\n- [تقویم نجومی هجری شمسی](tutorials/datetime.md) — تبدیلات دقیق تقویم و محاسبه سال‌های کبیسه\n- [محاسبات ارقام و مبالغ مالی](tutorials/numbers_and_currency.md) — تبدیل اعداد به حروف و مدیریت مبالغ\n\n---\n\n## فهرست توابع و ماژول‌ها (API Reference)\n\n- [مرجع جامع API](api/index.md) — فهرست تمام کلاس‌ها و توابع در دسترس\n- [ماژول پردازش متن (parsikit.text)](api/text.md) — توابع پاکسازی و آماده‌سازی متن\n- [ماژول تثبیت اعتبار (parsikit.validators)](api/validators.md) — توابع چک‌سام و بررسی صحت\n- [ماژول تقویم و زمان (parsikit.datetime)](api/datetime.md) — تبدیل تاریخ میلادی و شمسی\n- [مدل‌های شیءگرا (parsikit.models)](api/models.md) — کلاس‌های داده‌ای با اعتبارسنجی خودکار\n\n---\n\n## مشخصات فنی\n\n- **نسخه کنونی:** 3.3.1\n- **نیازمندی پایتون:** Python >= 3.10\n- **مجوز نرم‌افزاری:** MIT License\n- **مولف و مهندس ناظر:** علی کامرانی (MRThugh)\n",
+    "content": "# رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)\n\nبه مرکز اسناد و رهنمودهای رسمی کتابخانه **پارسی‌کیت (ParsiKit)** خوش آمدید.\n\nپارسی‌کیت یک کتابخانه معیاری، سریع و سبک در زبان پایتون (Python 3.10+) است که بدون هرگونه وابستگی بیرونی (Zero Dependencies)، ابزارهای همه‌جانبه‌ای را برای تصفیه متون زبان فارسی دری، تثبیت اعتبار شماره‌های هویت و تذکره، کارت‌های بانکی، تقویم هجری شمسی و محاسبات پولی در اختیار توسعه‌دهندگان نرم‌افزار قرار می‌دهد.\n\n---\n\n## بخش‌های اصلی رهنمود\n\n- [رهنمود نصب و راه‌اندازی](installation.md) — طریقه نصب با pip، poetry و uv\n- [آغاز سریع در ۵ دقیقه](quickstart.md) — آشنایی با مثال‌های پرکاربرد و روزمره\n- [پرسش‌های مکرر (FAQ)](faq.md) — پاسخ به سوالات اساسی پیرامون لایسنس و کارکردها\n- [عیب‌یابی و حل مشکلات](troubleshooting.md) — راهکارهای حل خطاهای رایج در پروژه‌ها\n\n---\n\n## آموزش‌های گام‌به‌گام\n\n- [تصفیه متن و نیم‌فاصله‌های معیاری](tutorials/text_processing.md) — معیارسازی حروف و فواصل\n- [تثبیت اعتبار اسناد و کارت‌ها](tutorials/validation.md) — الگوریتم پیمانه ۱۱ و الگوریتم لون\n- [تقویم نجومی هجری شمسی](tutorials/datetime.md) — تبدیلات دقیق تقویم و محاسبه سال‌های کبیسه\n- [محاسبات ارقام و مبالغ مالی](tutorials/numbers_and_currency.md) — تبدیل اعداد به حروف و مدیریت مبالغ\n- [مدل‌های شیءگرا و کار با Pydantic](tutorials/models.md) — کلاس‌های داده‌ای و اسکیماها\n\n---\n\n## راهنماهای تخصصی و ادغام\n\n- [استفاده در سیستم‌های وب و بک‌اند (FastAPI و Django)](guides/web_backends.md) — ادغام در وب‌سرویس‌ها\n- [امنیت فرم‌ها و پوشش معلومات حساس](guides/forms_and_security.md) — ماسک‌کردن ارقام محرمانه\n- [اتصال به واسط‌های گرافیکی کاربر (GUI)](guides/gui_integration.md) — هماهنگی با Tkinter و PyQt\n\n---\n\n## فهرست توابع و ماژول‌ها (API Reference)\n\n- [مرجع جامع API](api/index.md) — فهرست تمام کلاس‌ها و توابع در دسترس\n- [ماژول پردازش متن (parsikit.text)](api/text.md) — توابع پاکسازی و آماده‌سازی متن\n- [ماژول تثبیت اعتبار (parsikit.validators)](api/validators.md) — توابع چک‌سام و بررسی صحت\n- [ماژول تقویم و زمان (parsikit.datetime)](api/datetime.md) — تبدیل تاریخ میلادی و شمسی\n- [ماژول بازآرایی گرافیکی (parsikit.reshaper)](api/reshaper.md) — پیوند حروف برای موتورهای گرافیکی\n- [ابزارهای توسعه و عیب‌یابی (parsikit.dev)](api/dev_and_gui.md) — تراز بصری و کالبدشکافی متن\n- [مدل‌های شیءگرا (parsikit.models)](api/models.md) — کلاس‌های داده‌ای با اعتبارسنجی خودکار\n\n---\n\n## مشخصات فنی\n\n- **نسخه کنونی:** 3.3.1\n- **نیازمندی پایتون:** Python >= 3.10\n- **مجوز نرم‌افزاری:** MIT License\n- **مولف و مهندس ناظر:** علی کامرانی (MRThugh)\n",
     "headings": [
       {
         "id": "رهنمودهای-جامع-کتابخانه-پارسی-کیت-parsikit",
@@ -3960,6 +4212,11 @@ export const ALL_DOCS: DocEntry[] = [
       {
         "id": "آموزش-های-گام-به-گام",
         "text": "آموزش‌های گام‌به‌گام",
+        "level": 2
+      },
+      {
+        "id": "راهنماهای-تخصصی-و-ادغام",
+        "text": "راهنماهای تخصصی و ادغام",
         "level": 2
       },
       {
@@ -4214,6 +4471,89 @@ export const ALL_DOCS: DocEntry[] = [
     "counterpartSlug": "tutorials/datetime"
   },
   {
+    "id": "prs-af-tutorials-models",
+    "slug": "tutorials/models",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش مدل‌های شیءگرا در پارسی‌کیت (OOP Domain Models)",
+    "summary": "در کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا در ماژول parsikit.models فراهم آورده تا توسعه‌دهندگان بتوانند با داده‌ها و موجودیت‌ها به آسانی کار کنند.",
+    "content": "# آموزش مدل‌های شیءگرا در پارسی‌کیت (OOP Domain Models)\n\nدر کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا در ماژول `parsikit.models` فراهم آورده تا توسعه‌دهندگان بتوانند با داده‌ها و موجودیت‌ها به آسانی کار کنند.\n\n---\n\n## خصوصیات مشترک تمام مدل‌ها\n\nهمه مدل‌های پارسی‌کیت از دو میکسین (Mixin) کاربردی ارث‌بری می‌نمایند:\n1. **`StringLikeMixin` (شبه‌رشته):** امکان تعامل مشابه با یک استرینگ معمولی پایتون (`len(obj)`، دسترسی با اسلایس `obj[:3]` و سنجش برابری با استرینگ `obj == \"...\"`).\n2. **`PydanticValidationMixin`:** امکان استفاده مستقیم به حیث نوع فیلد در اسکیماهای Pydantic v2 (مانند فریمورک FastAPI).\n3. **متد `to_dict()`:** صدور اطلاعات و تحلیل‌های مربوطه در قالب دیکشنری پایتون.\n\n---\n\n## ۱. مدل متن (`PersianText`)\n\nیک شیء متنی همراه با متدهای زنجیره‌ای (Chained Methods) برای تصفیه داده‌ها:\n\n```python\nimport parsikit\n\ntext = parsikit.PersianText(\"ي كافيه كتاب ها رو برداري\")\nclean = text.standardize().beautify()\nprint(clean)\n# 'ی کافیه کتاب‌ها رو برداری'\n\n# اتصال به رشته‌های دیگر\ncombined = text + \" و جهان\"\nprint(type(combined))  # <class 'parsikit.models.PersianText'>\n\n# تبدیل متن عددی به رقم\nprice_text = parsikit.PersianText(\"سه میلیارد و پانصد میلیون\")\nprint(price_text.to_number())  # 3500000000\n```\n\n---\n\n## ۲. مدل نمبر هویت (`NationalCode`)\n\n```python\nimport parsikit\n\n# ساخت شیء با اعتبارسنجی پیش‌فرض (strict=True)\nnc = parsikit.NationalCode(\"7730123452\")\n\nprint(nc.clean)      # '7730123452'\nprint(nc.formatted)  # '773-012345-2'\nprint(nc.masked)     # '773-****45-2'\nprint(nc.is_valid)   # True\nprint(len(nc))       # 10\nprint(nc.location)   # {'province': 'فارس', 'city': ...}\n\n# رفتار مشابه به استرینگ\nprint(nc == \"7730123452\")  # True\n\n# صدور دیکشنری\nprint(nc.to_dict())\n```\n\nدر صورت نامعتبر بودن و فعال بودن حالت سخت‌گیرانه (`strict=True`)، خطای `InvalidNationalCodeError` ایجاد می‌شود.\n\n---\n\n## ۳. مدل شماره موبایل (`MobileNumber`)\n\n```python\nmob = parsikit.MobileNumber(\"+98۹۱۲۳۴۵۶۷۸۹\")\n\nprint(mob.to_national())       # '09123456789'\nprint(mob.to_international())  # '+989123456789'\nprint(mob.operator)            # 'MCI'\nprint(mob.masked)              # '0912***6789'\n```\n\n---\n\n## ۴. مدل کارت بانکی (`BankCard`)\n\n```python\ncard = parsikit.BankCard(\"6037991122334455\")\n\nprint(card.formatted)  # '6037-9911-2233-4455'\nprint(card.masked)     # '6037-99**-****-4455'\nprint(card.bank)       # {'name': 'بانک ملی ایران', 'code': 'melli'}\n```\n\n---\n\n## ۵. مدل شبا یا حساب بین‌المللی (`Sheba`)\n\n```python\nsheba = parsikit.Sheba(\"IR050170000000123456789012\")\n\nprint(sheba.formatted)       # 'IR05 0170 0000 0012 3456 7890 12'\nprint(sheba.bank)            # {'name': 'بانک ملی ایران', 'code': 'melli'}\nprint(sheba.account_number)  # '123456789012'\n```\n",
+    "headings": [
+      {
+        "id": "آموزش-مدل-های-شیءگرا-در-پارسی-کیت-oop-domain-models",
+        "text": "آموزش مدل‌های شیءگرا در پارسی‌کیت (OOP Domain Models)",
+        "level": 1
+      },
+      {
+        "id": "خصوصیات-مشترک-تمام-مدل-ها",
+        "text": "خصوصیات مشترک تمام مدل‌ها",
+        "level": 2
+      },
+      {
+        "id": "۱-مدل-متن-persiantext",
+        "text": "۱. مدل متن (`PersianText`)",
+        "level": 2
+      },
+      {
+        "id": "ی-کافیه-کتاب-ها-رو-برداری",
+        "text": "'ی کافیه کتاب‌ها رو برداری'",
+        "level": 1
+      },
+      {
+        "id": "اتصال-به-رشته-های-دیگر",
+        "text": "اتصال به رشته‌های دیگر",
+        "level": 1
+      },
+      {
+        "id": "تبدیل-متن-عددی-به-رقم",
+        "text": "تبدیل متن عددی به رقم",
+        "level": 1
+      },
+      {
+        "id": "۲-مدل-نمبر-هویت-nationalcode",
+        "text": "۲. مدل نمبر هویت (`NationalCode`)",
+        "level": 2
+      },
+      {
+        "id": "ساخت-شیء-با-اعتبارسنجی-پیش-فرض-strict-true",
+        "text": "ساخت شیء با اعتبارسنجی پیش‌فرض (strict=True)",
+        "level": 1
+      },
+      {
+        "id": "رفتار-مشابه-به-استرینگ",
+        "text": "رفتار مشابه به استرینگ",
+        "level": 1
+      },
+      {
+        "id": "صدور-دیکشنری",
+        "text": "صدور دیکشنری",
+        "level": 1
+      },
+      {
+        "id": "۳-مدل-شماره-موبایل-mobilenumber",
+        "text": "۳. مدل شماره موبایل (`MobileNumber`)",
+        "level": 2
+      },
+      {
+        "id": "۴-مدل-کارت-بانکی-bankcard",
+        "text": "۴. مدل کارت بانکی (`BankCard`)",
+        "level": 2
+      },
+      {
+        "id": "۵-مدل-شبا-یا-حساب-بین-المللی-sheba",
+        "text": "۵. مدل شبا یا حساب بین‌المللی (`Sheba`)",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/tutorials/models.md",
+    "counterparts": {
+      "fa": "tutorials/models",
+      "en": "tutorials/models",
+      "tg": "tutorials/models"
+    },
+    "counterpartSlug": "tutorials/models"
+  },
+  {
     "id": "prs-af-tutorials-numbers_and_currency",
     "slug": "tutorials/numbers_and_currency",
     "lang": "prs-af",
@@ -4404,6 +4744,89 @@ export const ALL_DOCS: DocEntry[] = [
     "counterpartSlug": "api/datetime"
   },
   {
+    "id": "tg-api-dev_and_gui",
+    "slug": "api/dev_and_gui",
+    "lang": "tg",
+    "category": "api",
+    "title": "Маълумотномаи абзорҳои ташхис ва график (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "Абзорҳои махсус барои ташхиси хатогиҳои матнӣ, баробарсозии визуалии сутунҳо дар ҷадвалҳо, сабти гузоришҳо (logging) ва намоиши дурусти матн дар интерфейсҳои графикӣ (GUI).",
+    "content": "# Маълумотномаи абзорҳои ташхис ва график (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)\n\nАбзорҳои махсус барои ташхиси хатогиҳои матнӣ, баробарсозии визуалии сутунҳо дар ҷадвалҳо, сабти гузоришҳо (logging) ва намоиши дурусти матн дар интерфейсҳои графикӣ (GUI).\n\n---\n\n## 1. Қолаббандии баробари визуалӣ (`pformat` ва `persian_fstring`)\n\nАломатҳои бебар ба монанди нимафосила (`\\u200C`) ва эъробҳо дарозии рамзӣ доранд, аммо дар намоиши экран ҷой намегиранд. Функсияҳои стандартии Python дар қолаббандии сутунии матнҳо ин хусусиятро ба назар намегиранд ва боиси каҷ шудани ҷадвалҳо мегарданд.\n\n### `pformat(template: str, *args, **kwargs) -> str`\nМатнро бо ба назар гирифтани бари воқеии визуалӣ (Visual Width)-и ҳарфҳо баробар сохта, сутунҳоро мураттаб мекунад. Аз пасванди `:fa` барои табдили ҳамзамони рақамҳо ва гузоштани вергули ҳазориҳо пуштибонӣ менамояд.\n\n```python\nfrom parsikit.dev import pformat\n\nline = pformat(\"{:15} | {:>10:fa}\", \"Китобҳо\", 15000)\nprint(line)  # 'Китобҳо         |     ۱۵،۰۰۰'\n```\n\n### `persian_fstring(template: str, **kwargs) -> str`\nМонанди `pformat` барои ибораҳои қолабӣ бо пуштибонии мустақим аз номи тағйирёбандаҳо дар Python.\n\n---\n\n## 2. Абзорҳои ташхис ва санҷиш (`parsikit.dev`)\n\n### `inspect_text(text: str) -> dict`\nСохтори дохилии матнро таҳлил намуда, шумораи нимафосилаҳо, вазъияти рақамҳо, эъробҳо ва ҳарфҳои арабиро гузориш медиҳад:\n\n```python\nfrom parsikit.dev import inspect_text\n\nreport = inspect_text(\"Намуна 123\")\nprint(report)\n# {'length': ..., 'has_arabic_chars': False, 'has_zwnj': False, 'has_persian_digits': True, ...}\n```\n\n### `debug_text(text: str) -> None`\nГузориши ранга, муфассал ва ташхисиро оид ба хусусиятҳои матн дар терминал чоп мекунад.\n\n### `validate_batch(items: list, model_class, silent: bool = False) -> dict`\nМаҷмӯаи додаҳоро ба таври дастаҷамъӣ санҷида, натиҷаҳои дуруст ва нодурустро ҳамроҳ бо сабаби хато ҷудо мекунад.\n\n---\n\n## 3. Тағйири шакли графикӣ ва пайвастшавӣ ба интерфейс (`parsikit.reshaper`, `parsikit.gui`)\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\nМатнро барои муҳаррикҳои графикии бе дастгирии системаи HarfBuzz (монанди Pygame, Pillow, OpenCV ва ReportLab) пайваст ва самти онро танзим мекунад.\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\nПараграфҳои дарозро аз рӯи шумораи муайяни аломатҳо дар сатр тақсим карда, ҳар сатрро ба таври пайваст барои расмкашӣ омода месозад.\n\n### `bind_persian_input(widget, input_type: str = \"text\") -> None`\nВиҷети воридшавии матниро дар фреймворкҳои Tkinter ё CustomTkinter ба механизми танзими худкори ҳарфҳо ва ислоҳи рақамҳо пайваст менамояд.\n",
+    "headings": [
+      {
+        "id": "маълумотномаи-абзорҳои-ташхис-ва-график-parsikit-dev-parsikit-gui-parsikit-reshaper",
+        "text": "Маълумотномаи абзорҳои ташхис ва график (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "1-қолаббандии-баробари-визуалӣ-pformat-ва-persian_fstring",
+        "text": "1. Қолаббандии баробари визуалӣ (`pformat` ва `persian_fstring`)",
+        "level": 2
+      },
+      {
+        "id": "pformat-template-str-args-kwargs-str",
+        "text": "`pformat(template: str, *args, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "persian_fstring-template-str-kwargs-str",
+        "text": "`persian_fstring(template: str, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "2-абзорҳои-ташхис-ва-санҷиш-parsikit-dev",
+        "text": "2. Абзорҳои ташхис ва санҷиш (`parsikit.dev`)",
+        "level": 2
+      },
+      {
+        "id": "inspect_text-text-str-dict",
+        "text": "`inspect_text(text: str) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "length-has_arabic_chars-false-has_zwnj-false-has_persian_digits-true",
+        "text": "{'length': ..., 'has_arabic_chars': False, 'has_zwnj': False, 'has_persian_digits': True, ...}",
+        "level": 1
+      },
+      {
+        "id": "debug_text-text-str-none",
+        "text": "`debug_text(text: str) -> None`",
+        "level": 3
+      },
+      {
+        "id": "validate_batch-items-list-model_class-silent-bool-false-dict",
+        "text": "`validate_batch(items: list, model_class, silent: bool = False) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "3-тағйири-шакли-графикӣ-ва-пайвастшавӣ-ба-интерфейс-parsikit-reshaper-parsikit-gui",
+        "text": "3. Тағйири шакли графикӣ ва пайвастшавӣ ба интерфейс (`parsikit.reshaper`, `parsikit.gui`)",
+        "level": 2
+      },
+      {
+        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
+        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "bind_persian_input-widget-input_type-str-text-none",
+        "text": "`bind_persian_input(widget, input_type: str = \"text\") -> None`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/dev_and_gui.md",
+    "counterparts": {
+      "fa": "api/dev_and_gui",
+      "en": "api/dev_and_gui",
+      "prs-af": "api/dev_and_gui"
+    },
+    "counterpartSlug": "api/dev_and_gui"
+  },
+  {
     "id": "tg-api-index",
     "slug": "api/index",
     "lang": "tg",
@@ -4506,6 +4929,64 @@ export const ALL_DOCS: DocEntry[] = [
       "prs-af": "api/number_and_currency"
     },
     "counterpartSlug": "api/number_and_currency"
+  },
+  {
+    "id": "tg-api-reshaper",
+    "slug": "api/reshaper",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули бозсозии графикӣ (`parsikit.reshaper`)",
+    "summary": "Абзори сабук ва бидуни вобастагӣ барои пайваст кардани ҳарфҳо (Cursive Shaping) ва баргардонидани самти матн (BiDi) барои муҳаррикҳои графикӣ, аксҳо ва бозиҳо.",
+    "content": "# Модули бозсозии графикӣ (`parsikit.reshaper`)\n\nАбзори сабук ва бидуни вобастагӣ барои пайваст кардани ҳарфҳо (Cursive Shaping) ва баргардонидани самти матн (BiDi) барои муҳаррикҳои графикӣ, аксҳо ва бозиҳо.\n\n---\n\n## 1. Муаррифӣ ва ҳадафи техникӣ\n\nАксари муҳаррикҳои графикӣ дар Python (монанди Pygame, OpenCV, Pillow бидуни libraqm, китобхонаҳои эҷоди PDF ва муҳаррикҳои бозисозӣ) матнро аз чап ба рост чоп мекунанд. Дар натиҷа, ҳарфҳо ба сурати ҷудо-ҷудо ва чаппа намоиш дода мешаванд.\n\nМодули `parsikit.reshaper` бо табдил додани аломатҳо ба шаклҳои муносиби матнии Юникод (ибтидоӣ, миёна, интиҳоӣ ва алоҳида) ва танзими самти калимаҳо ин мушкилотро бидуни ниёз ба китобхонаи иловагӣ ҳал мекунад.\n\n---\n\n## 2. Функсияҳои асосӣ\n\n### Функсияи `reshape_for_graphics(text: str, reverse: bool = True) -> str`\n\nҲарфҳоро ба якдигар мепайвандад ва дар сурати зарурат, самти онро барои муҳаррикҳои аз чап ба рост баргардонида (инверсия) месозад.\n\n#### Параметрҳо:\n- **`text`** (`str`): Матн ё ибораҳои дузабона.\n- **`reverse`** (`bool`, пешфарз `True`): Агар `True` бошад, ҳарфҳоро барои муҳаррикҳои чап-ба-рост баргардон мекунад. Калимаҳои лотинӣ, рақамҳо, суроғаҳои интернетӣ ва почтаҳои электронӣ самти дурусти худро нигоҳ медоранд.\n\n#### Натиҷа:\n- `str`: Матне, ки барои намоиши графикӣ омода шудааст.\n\n#### Мафҳуми самт ва инверсия:\n- **`reverse=True` (Пешфарз):** Барои муҳаррикҳои оддӣ ба мисли Pygame ва OpenCV, ки расмкаширо аз тарафи чап сар мекунанд. Тартиби ҳарфҳо баргардон карда мешавад, аммо рақамҳо ва калимаҳои лотинӣ бетағйир мемонанд.\n- **`reverse=False`:** Барои муҳаррикҳое, ки самти ҷараёни матнро идора карда метавонанд, вале қобилияти пайваст кардани ҳарфҳоро (font cursive shaping) надоранд. Дар ин ҳолат танҳо пайвасткунии ҳарфҳо анҷом мешавад.\n\n#### Имкониятҳои фаннӣ:\n- Пайваст кардани тамоми алифбо ва аломатҳои арабӣ (аз ҷумла `ۀ`, `ك`, `ي`).\n- Таркиби худкори пайвасти ҳарфи Лом-Алиф (`لا`, `لآ`, `لأ`, `لإ`).\n- Нигоҳ доштани аломатҳои эъробӣ баъд аз инверсияи самт.\n- Ҷудосозии калимаҳои лотинӣ ва рақамҳо барои пешгирӣ аз вайроншавии тартиби хониш.\n\n#### Мисоли амалӣ:\n\n```python\nimport parsikit\n\nraw_text = \"Салом дунё (нусхаи 3.3.1)\"\n\n# Омодасозӣ барои Pygame ё Pillow\nready_text = parsikit.reshape_for_graphics(raw_text)\n\n# Танҳо пайвасти ҳарфҳо бидуни инверсия\nshaped_only = parsikit.reshape_for_graphics(raw_text, reverse=False)\n```\n\n---\n\n### Функсияи `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\n\nПараграфи дарозро мутобиқи бари муайяншуда ба сатрҳо тақсим карда, ҳар сатрро барои кашидани графикӣ бозсозӣ менамояд.\n\n#### Параметрҳо:\n- **`text`** (`str`): Матн.\n- **`max_chars_per_line`** (`int`): Шумораи ҳадди аксари аломатҳо дар як сатр.\n- **`reverse`** (`bool`, пешфарз `True`): Фаъол будани инверсия барои муҳаррикҳои LTR.\n\n#### Натиҷа:\n- `list[str]`: Рӯйхати сатрҳои омодашуда.\n\n#### Мисоли амалӣ:\n\n```python\nimport parsikit\n\ntext = \"ParsiKit китобхонаи сареъ ва мустақил барои коркарди додаҳо дар Python мебошад.\"\nlines = parsikit.reshape_paragraph_for_graphics(text, max_chars_per_line=30)\nfor line in lines:\n    print(line)\n```\n\n---\n\n## 3. Робита бо дигар бахшҳо\n\n- Тавсия мешавад, ки қабл аз бозсозӣ, матнро бо `parsikit.text.standardize_persian` танзим намоед.\n- Барои воридсозии зинда дар Tkinter ё PyQt аз `parsikit.gui.bind_persian_input` истифода баред.\n",
+    "headings": [
+      {
+        "id": "модули-бозсозии-графикӣ-parsikit-reshaper",
+        "text": "Модули бозсозии графикӣ (`parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "1-муаррифӣ-ва-ҳадафи-техникӣ",
+        "text": "1. Муаррифӣ ва ҳадафи техникӣ",
+        "level": 2
+      },
+      {
+        "id": "2-функсияҳои-асосӣ",
+        "text": "2. Функсияҳои асосӣ",
+        "level": 2
+      },
+      {
+        "id": "функсияи-reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "Функсияи `reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "омодасозӣ-барои-pygame-ё-pillow",
+        "text": "Омодасозӣ барои Pygame ё Pillow",
+        "level": 1
+      },
+      {
+        "id": "танҳо-пайвасти-ҳарфҳо-бидуни-инверсия",
+        "text": "Танҳо пайвасти ҳарфҳо бидуни инверсия",
+        "level": 1
+      },
+      {
+        "id": "функсияи-reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
+        "text": "Функсияи `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "3-робита-бо-дигар-бахшҳо",
+        "text": "3. Робита бо дигар бахшҳо",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/reshaper.md",
+    "counterparts": {
+      "fa": "api/reshaper",
+      "en": "api/reshaper",
+      "prs-af": "api/reshaper"
+    },
+    "counterpartSlug": "api/reshaper"
   },
   {
     "id": "tg-api-text",
@@ -4670,13 +5151,104 @@ export const ALL_DOCS: DocEntry[] = [
     "counterpartSlug": "guides/forms_and_security"
   },
   {
+    "id": "tg-guides-gui_integration",
+    "slug": "guides/gui_integration",
+    "lang": "tg",
+    "category": "guides",
+    "title": "Роҳнамои пайвастшавӣ ба интерфейсҳои графикӣ (GUI)",
+    "summary": "ParsiKit модули махсуси parsikit.gui-ро барои идора ва танзими ҳамзамони матн дар вақти навиштан дар барномаҳои мизи корӣ (ба мисли Tkinter, CustomTkinter, PyQt ва PySide) пешниҳод менамояд.",
+    "content": "# Роҳнамои пайвастшавӣ ба интерфейсҳои графикӣ (GUI)\n\nParsiKit модули махсуси `parsikit.gui`-ро барои идора ва танзими ҳамзамони матн дар вақти навиштан дар барномаҳои мизи корӣ (ба мисли Tkinter, CustomTkinter, PyQt ва PySide) пешниҳод менамояд.\n\n---\n\n## 1. Истифода дар Tkinter ва CustomTkinter\n\nФунксияи `bind_persian_input` ба ҳодисаи тугмаҳо (`<KeyRelease>`) пайваст шуда, матн ва рақамҳои воридшударо фавран ислоҳ менамояд:\n\n```python\nimport tkinter as tk\nimport parsikit\n\nroot = tk.Tk()\nroot.title(\"Системаи воридоти ҳушманд\")\n\nlabel = tk.Label(root, text=\"Рақами муаррифӣ:\")\nlabel.pack()\n\nentry_national_code = tk.Entry(root)\nentry_national_code.pack()\n\n# Танзими худкори формат (XXX-XXXXXX-X)\nparsikit.bind_persian_input(entry_national_code, input_type=\"national_code\")\n\ncard_label = tk.Label(root, text=\"Шумораи корти бонкӣ:\")\ncard_label.pack()\n\nentry_card = tk.Entry(root)\nentry_card.pack()\n\n# Танзими худкори 4-қисмаи корти бонкӣ (XXXX-XXXX-XXXX-XXXX)\nparsikit.bind_persian_input(entry_card, input_type=\"card_number\")\n\nroot.mainloop()\n```\n\n---\n\n## 2. Истифода дар PyQt / PySide\n\nБарои виҷетҳои `QLineEdit` дар PyQt:\n\n```python\nfrom PyQt5.QtWidgets import QApplication, QLineEdit, QVBoxLayout, QWidget\nimport parsikit\n\napp = QApplication([])\nwindow = QWidget()\nlayout = QVBoxLayout()\n\ncard_input = QLineEdit()\ncard_input.setPlaceholderText(\"Рақами 16-рақамаи корт...\")\nparsikit.bind_persian_input(card_input, input_type=\"card_number\")\n\nlayout.addWidget(card_input)\nwindow.setLayout(layout)\nwindow.show()\napp.exec_()\n```\n\n---\n\n## Намудҳои майдонҳои дастгиришаванда дар `bind_persian_input`:\n- `\"text\"`: Зебосозӣ ва баробар кардани фосилаҳо дар матн\n- `\"national_code\"`: Формати 3-6-1-и рақами миллӣ\n- `\"card_number\"`: Формати 4-қисмаи рақами корти бонкӣ\n- `\"postal_code\"`: Формати 5-5-и индекси почта (`XXXXX-XXXXX`)\n- `\"sheba\"`: Формати стандартии суратҳисоби бонкӣ бо фосилаҳои 4-рақамӣ\n",
+    "headings": [
+      {
+        "id": "роҳнамои-пайвастшавӣ-ба-интерфейсҳои-графикӣ-gui",
+        "text": "Роҳнамои пайвастшавӣ ба интерфейсҳои графикӣ (GUI)",
+        "level": 1
+      },
+      {
+        "id": "1-истифода-дар-tkinter-ва-customtkinter",
+        "text": "1. Истифода дар Tkinter ва CustomTkinter",
+        "level": 2
+      },
+      {
+        "id": "танзими-худкори-формат-xxx-xxxxxx-x",
+        "text": "Танзими худкори формат (XXX-XXXXXX-X)",
+        "level": 1
+      },
+      {
+        "id": "танзими-худкори-4-қисмаи-корти-бонкӣ-xxxx-xxxx-xxxx-xxxx",
+        "text": "Танзими худкори 4-қисмаи корти бонкӣ (XXXX-XXXX-XXXX-XXXX)",
+        "level": 1
+      },
+      {
+        "id": "2-истифода-дар-pyqt-pyside",
+        "text": "2. Истифода дар PyQt / PySide",
+        "level": 2
+      },
+      {
+        "id": "намудҳои-майдонҳои-дастгиришаванда-дар-bind_persian_input",
+        "text": "Намудҳои майдонҳои дастгиришаванда дар `bind_persian_input`:",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/guides/gui_integration.md",
+    "counterparts": {
+      "fa": "guides/gui_integration",
+      "en": "guides/gui_integration",
+      "prs-af": "guides/gui_integration"
+    },
+    "counterpartSlug": "guides/gui_integration"
+  },
+  {
+    "id": "tg-guides-web_backends",
+    "slug": "guides/web_backends",
+    "lang": "tg",
+    "category": "guides",
+    "title": "Роҳнамои истифода дар веб-хидматҳо (FastAPI ва Django)",
+    "summary": "ParsiKit ба шарофати мутобиқати хуб бо Pydantic v2 яке аз беҳтарин интихобҳо барои санҷиш ва тозакунии додаҳо дар API-ҳои Python мебошад.",
+    "content": "# Роҳнамои истифода дар веб-хидматҳо (FastAPI ва Django)\n\nParsiKit ба шарофати мутобиқати хуб бо Pydantic v2 яке аз беҳтарин интихобҳо барои санҷиш ва тозакунии додаҳо дар API-ҳои Python мебошад.\n\n---\n\n## 1. Истифода дар FastAPI бо Pydantic\n\nМоделҳои ParsiKit мустақиман метавонанд ҳамчун намуди майдонҳо (field types) дар схемаҳои Pydantic истифода шаванд:\n\n```python\nfrom fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\nimport parsikit\n\napp = FastAPI(title=\"Системаи пардохтҳои онлайнӣ\")\n\nclass UserRegisterSchema(BaseModel):\n    name: str\n    national_code: parsikit.NationalCode\n    mobile: parsikit.MobileNumber\n    card: parsikit.BankCard\n\n@app.post(\"/register\")\ndef register_user(payload: UserRegisterSchema):\n    # Ҳамаи майдонҳо дар вақти воридшавӣ пурра тафтиш шудаанд\n    return {\n        \"status\": \"success\",\n        \"clean_national_code\": payload.national_code.clean,\n        \"masked_card\": payload.card.masked,\n        \"bank_name\": payload.card.bank[\"name\"] if payload.card.bank else None,\n        \"mobile_international\": payload.mobile.to_international(),\n        \"operator\": payload.mobile.operator,\n    }\n```\n\nАгар корбар маълумоти нодуруст ворид кунад, FastAPI ба таври худкор посухи хатогии HTTP 422 бармегардонад.\n\n---\n\n## 2. Истифода дар Django (Django Forms & Models)\n\nДар шаклҳои (forms) Django метавонед санҷишро дар методҳои `clean_<field>` даъват намоед:\n\n```python\nfrom django import forms\nfrom django.core.exceptions import ValidationError\nimport parsikit\n\nclass UserProfileForm(forms.Form):\n    national_code = forms.CharField(max_length=10)\n    mobile = forms.CharField(max_length=15)\n\n    def clean_national_code(self):\n        code = self.cleaned_data[\"national_code\"]\n        if not parsikit.is_valid_national_code(code):\n            raise ValidationError(\"Рақами муаррифӣ нодуруст аст.\")\n        return parsikit.NationalCode(code).clean\n\n    def clean_mobile(self):\n        phone = self.cleaned_data[\"mobile\"]\n        if not parsikit.is_valid_mobile(phone):\n            raise ValidationError(\"Рақами мобилӣ нодуруст аст.\")\n        return parsikit.normalize_mobile(phone, prefix=\"0\")\n```\n\n---\n\n## 3. Тозакунии матн пеш аз сабт дар пойгоҳи додаҳо\n\nҚабл аз сабти шарҳҳо, номҳо ё суроғаҳо дар пойгоҳи додаҳо, истифодаи `clean_text` ҷустуҷӯи дақиқро кафолат медиҳад:\n\n```python\ncleaned_title = parsikit.clean_text(user_input_title)\n```\nИн амал ҳарфҳои арабиро ба стандарти мувофиқ табдил дода, нимафосилаҳои дурустро ҷойгузин месозад.\n",
+    "headings": [
+      {
+        "id": "роҳнамои-истифода-дар-веб-хидматҳо-fastapi-ва-django",
+        "text": "Роҳнамои истифода дар веб-хидматҳо (FastAPI ва Django)",
+        "level": 1
+      },
+      {
+        "id": "1-истифода-дар-fastapi-бо-pydantic",
+        "text": "1. Истифода дар FastAPI бо Pydantic",
+        "level": 2
+      },
+      {
+        "id": "ҳамаи-майдонҳо-дар-вақти-воридшавӣ-пурра-тафтиш-шудаанд",
+        "text": "Ҳамаи майдонҳо дар вақти воридшавӣ пурра тафтиш шудаанд",
+        "level": 1
+      },
+      {
+        "id": "2-истифода-дар-django-django-forms-models",
+        "text": "2. Истифода дар Django (Django Forms & Models)",
+        "level": 2
+      },
+      {
+        "id": "3-тозакунии-матн-пеш-аз-сабт-дар-пойгоҳи-додаҳо",
+        "text": "3. Тозакунии матн пеш аз сабт дар пойгоҳи додаҳо",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/guides/web_backends.md",
+    "counterparts": {
+      "fa": "guides/web_backends",
+      "en": "guides/web_backends",
+      "prs-af": "guides/web_backends"
+    },
+    "counterpartSlug": "guides/web_backends"
+  },
+  {
     "id": "tg-index",
     "slug": "index",
     "lang": "tg",
     "category": "getting-started",
     "title": "Роҳнамои расмии китобхонаи ParsiKit",
     "summary": "Ба маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи ParsiKit хуш омадед.",
-    "content": "# Роҳнамои расмии китобхонаи ParsiKit\n\nБа маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи **ParsiKit** хуш омадед.\n\nParsiKit як китобхонаи мустақил, боэътимод ва сабук дар забони Python (3.10+) мебошад, ки бидуни ниёз ба вобастагиҳои беруна (Zero Dependencies), маҷмӯаи васеи абзорҳоро барои коркард ва поксозии матн, санҷиши рақамҳои миллӣ ва кортҳои бонкӣ, тақвими шамсӣ ва ҳисоботи молӣ пешниҳод менамояд.\n\n---\n\n## Бахшҳои асосии ҳуҷҷатҳо\n\n- [Роҳнамои насб ва омодасозӣ](installation.md) — тарзи насб бо pip, poetry ва uv\n- [Оғози зуд дар 5 дақиқа](quickstart.md) — мисолҳои амалӣ ва оғоз бо функсияҳои асосӣ\n- [Саволҳои маъмул (FAQ)](faq.md) — ҷавоб ба саволҳо оид ба иҷозатнома ва имкониятҳо\n- [Бартараф кардани хатогиҳо](troubleshooting.md) — ҳалли мушкилоти эҳтимолӣ\n\n---\n\n## Омӯзишҳои қадам ба қадам\n\n- [Поксозии матн ва нимафосилаҳо](tutorials/text_processing.md) — стандартикунонии ҳуруф ва фосилаҳо\n- [Санҷиши эътибори рақамҳо ва кортҳо](tutorials/validation.md) — алгоритми Модуло 11 ва алгоритми Лун\n- [Тақвими нуҷумии ҳиҷрии шамсӣ](tutorials/datetime.md) — табдили дақиқи санаҳо ва ҳисоби соли кабиса\n- [Табдили ададҳо ба калимаҳо](tutorials/numbers_and_currency.md) — хониши лафзии рақамҳо ва ҳисобҳои молӣ\n\n---\n\n## Феҳристи тавобеъ ва модулҳо (API Reference)\n\n- [Мундариҷаи куллии API](api/index.md) — феҳристи тамоми модулҳо ва классҳо\n- [Модули коркарди матн (parsikit.text)](api/text.md) — тавобеи поксозӣ ва омодасозии матн\n- [Модули тафтиши эътибор (parsikit.validators)](api/validators.md) — санҷиши чексам ва чеки рақамҳо\n- [Модули тақвим ва замон (parsikit.datetime)](api/datetime.md) — табдили санаҳои мелодӣ ва шамсӣ\n- [Моделҳои объектгаро (parsikit.models)](api/models.md) — моделҳои маълумотӣ бо санҷиши худкор\n\n---\n\n## Мушаххасоти техникӣ\n\n- **Нусхаи ҷорӣ:** 3.3.1\n- **Талаботи Python:** Python >= 3.10\n- **Иҷозатнома:** MIT License\n- **Муаллиф ва роҳбари лоиҳа:** Алӣ Комронӣ (MRThugh)\n",
+    "content": "# Роҳнамои расмии китобхонаи ParsiKit\n\nБа маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи **ParsiKit** хуш омадед.\n\nParsiKit як китобхонаи мустақил, боэътимод ва сабук дар забони Python (3.10+) мебошад, ки бидуни ниёз ба вобастагиҳои беруна (Zero Dependencies), маҷмӯаи васеи абзорҳоро барои коркард ва поксозии матн, санҷиши рақамҳои миллӣ ва кортҳои бонкӣ, тақвими шамсӣ ва ҳисоботи молӣ пешниҳод менамояд.\n\n---\n\n## Бахшҳои асосии ҳуҷҷатҳо\n\n- [Роҳнамои насб ва омодасозӣ](installation.md) — тарзи насб бо pip, poetry ва uv\n- [Оғози зуд дар 5 дақиқа](quickstart.md) — мисолҳои амалӣ ва оғоз бо функсияҳои асосӣ\n- [Саволҳои маъмул (FAQ)](faq.md) — ҷавоб ба саволҳо оид ба иҷозатнома ва имкониятҳо\n- [Бартараф кардани хатогиҳо](troubleshooting.md) — ҳалли мушкилоти эҳтимолӣ\n\n---\n\n## Омӯзишҳои қадам ба қадам\n\n- [Поксозии матн ва нимафосилаҳо](tutorials/text_processing.md) — стандартикунонии ҳуруф ва фосилаҳо\n- [Санҷиши эътибори рақамҳо ва кортҳо](tutorials/validation.md) — алгоритми Модуло 11 ва алгоритми Лун\n- [Тақвими нуҷумии ҳиҷрии шамсӣ](tutorials/datetime.md) — табдили дақиқи санаҳо ва ҳисоби соли кабиса\n- [Табдили ададҳо ба калимаҳо](tutorials/numbers_and_currency.md) — хониши лафзии рақамҳо ва ҳисобҳои молӣ\n- [Моделҳои объектгаро ва Pydantic](tutorials/models.md) — синфҳои маълумотӣ ва схемаҳо\n\n---\n\n## Роҳнамоҳои фаннӣ ва ҳамгироӣ\n\n- [Истифода дар веб-хидматҳо (FastAPI ва Django)](guides/web_backends.md) — ҳамгироӣ дар API-ҳо\n- [Амнияти шаклҳо ва пинҳонсозии додаҳои ҳассос](guides/forms_and_security.md) — ниқобгузории рақамҳо\n- [Пайвастшавӣ ба интерфейсҳои графикӣ (GUI)](guides/gui_integration.md) — пайваст бо Tkinter ва PyQt\n\n---\n\n## Феҳристи тавобеъ ва модулҳо (API Reference)\n\n- [Мундариҷаи куллии API](api/index.md) — феҳристи тамоми модулҳо ва классҳо\n- [Модули коркарди матн (parsikit.text)](api/text.md) — тавобеи поксозӣ ва омодасозии матн\n- [Модули тафтиши эътибор (parsikit.validators)](api/validators.md) — санҷиши чексам ва чеки рақамҳо\n- [Модули тақвим ва замон (parsikit.datetime)](api/datetime.md) — табдили санаҳои мелодӣ ва шамсӣ\n- [Модули бозсозии графикӣ (parsikit.reshaper)](api/reshaper.md) — пайвасти ҳарфҳо барои график\n- [Абзорҳои ташхис ва график (parsikit.dev)](api/dev_and_gui.md) — ташхис ва баробарсозии матн\n- [Моделҳои объектгаро (parsikit.models)](api/models.md) — моделҳои маълумотӣ бо санҷиши худкор\n\n---\n\n## Мушаххасоти техникӣ\n\n- **Нусхаи ҷорӣ:** 3.3.1\n- **Талаботи Python:** Python >= 3.10\n- **Иҷозатнома:** MIT License\n- **Муаллиф ва роҳбари лоиҳа:** Алӣ Комронӣ (MRThugh)\n",
     "headings": [
       {
         "id": "роҳнамои-расмии-китобхонаи-parsikit",
@@ -4691,6 +5263,11 @@ export const ALL_DOCS: DocEntry[] = [
       {
         "id": "омӯзишҳои-қадам-ба-қадам",
         "text": "Омӯзишҳои қадам ба қадам",
+        "level": 2
+      },
+      {
+        "id": "роҳнамоҳои-фаннӣ-ва-ҳамгироӣ",
+        "text": "Роҳнамоҳои фаннӣ ва ҳамгироӣ",
         "level": 2
       },
       {
@@ -4923,6 +5500,89 @@ export const ALL_DOCS: DocEntry[] = [
       "prs-af": "tutorials/datetime"
     },
     "counterpartSlug": "tutorials/datetime"
+  },
+  {
+    "id": "tg-tutorials-models",
+    "slug": "tutorials/models",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши моделҳои объектгаро дар ParsiKit (Domain Models)",
+    "summary": "Дар баробари функсияҳои мустақил, ParsiKit маҷмӯаи синфҳои объектгароро дар модули parsikit.models пешниҳод кардааст, то барномасозон тавонанд бо додаҳо ба осонӣ кор кунанд.",
+    "content": "# Омӯзиши моделҳои объектгаро дар ParsiKit (Domain Models)\n\nДар баробари функсияҳои мустақил, ParsiKit маҷмӯаи синфҳои объектгароро дар модули `parsikit.models` пешниҳод кардааст, то барномасозон тавонанд бо додаҳо ба осонӣ кор кунанд.\n\n---\n\n## Хусусиятҳои умумии ҳамаи моделҳо\n\nҲамаи моделҳои ParsiKit аз ду Mixin-и қудратманд баҳра мебаранд:\n1. **`StringLikeMixin` (монанди сатр):** Имкони рафтор ба мисли як сатри оддии Python (`len(obj)`, истифодаи слайсҳо `obj[:3]` ва муқоиса бо сатр `obj == \"...\"`).\n2. **`PydanticValidationMixin`:** Имкони истифодаи мустақим ҳамчун намуди майдон дар схемаҳои Pydantic v2 (барои мисол дар FastAPI).\n3. **Методи `to_dict()`:** Баровардани тамоми маълумот ва тафсилот дар шакли луғати Python (dictionary).\n\n---\n\n## 1. Модели матн (`PersianText`)\n\nСатри матние, ки дорои методҳои пайдарпай (Chained Methods) барои поксозӣ мебошад:\n\n```python\nimport parsikit\n\ntext = parsikit.PersianText(\"ي كافيه كتاب ها رو برداري\")\nclean = text.standardize().beautify()\nprint(clean)\n# 'ی کافیه کتاب‌ها رو برداری'\n\n# Пайваст кардан бо дигар сатрҳо\ncombined = text + \" ва ҷаҳон\"\nprint(type(combined))  # <class 'parsikit.models.PersianText'>\n\n# Табдили адади лафзӣ ба рақам\nprice_text = parsikit.PersianText(\"се миллиард ва панҷсад миллион\")\nprint(price_text.to_number())  # 3500000000\n```\n\n---\n\n## 2. Модели рақами муаррифӣ (`NationalCode`)\n\n```python\nimport parsikit\n\n# Сохтани объект бо санҷиши пешфарз (strict=True)\nnc = parsikit.NationalCode(\"7730123452\")\n\nprint(nc.clean)      # '7730123452'\nprint(nc.formatted)  # '773-012345-2'\nprint(nc.masked)     # '773-****45-2'\nprint(nc.is_valid)   # True\nprint(len(nc))       # 10\nprint(nc.location)   # {'province': 'Форс', 'city': ...}\n\n# Муқоиса ба мисли сатри оддӣ\nprint(nc == \"7730123452\")  # True\n\n# Натиҷа ҳамчун луғат\nprint(nc.to_dict())\n```\n\nДар сурати нодуруст будани рақам ва фаъол будани `strict=True`, хатогии `InvalidNationalCodeError` рух медиҳад.\n\n---\n\n## 3. Модели рақами мобилӣ (`MobileNumber`)\n\n```python\nmob = parsikit.MobileNumber(\"+989123456789\")\n\nprint(mob.to_national())       # '09123456789'\nprint(mob.to_international())  # '+989123456789'\nprint(mob.operator)            # 'MCI'\nprint(mob.masked)              # '0912***6789'\n```\n\n---\n\n## 4. Модели корти бонкӣ (`BankCard`)\n\n```python\ncard = parsikit.BankCard(\"6037991122334455\")\n\nprint(card.formatted)  # '6037-9911-2233-4455'\nprint(card.masked)     # '6037-99**-****-4455'\nprint(card.bank)       # {'name': 'Бонки Миллӣ', 'code': 'melli'}\n```\n\n---\n\n## 5. Модели суратҳисоби бонкӣ (`Sheba`)\n\n```python\nsheba = parsikit.Sheba(\"IR050170000000123456789012\")\n\nprint(sheba.formatted)       # 'IR05 0170 0000 0012 3456 7890 12'\nprint(sheba.bank)            # {'name': 'Бонки Миллӣ', 'code': 'melli'}\nprint(sheba.account_number)  # '123456789012'\n```\n",
+    "headings": [
+      {
+        "id": "омӯзиши-моделҳои-объектгаро-дар-parsikit-domain-models",
+        "text": "Омӯзиши моделҳои объектгаро дар ParsiKit (Domain Models)",
+        "level": 1
+      },
+      {
+        "id": "хусусиятҳои-умумии-ҳамаи-моделҳо",
+        "text": "Хусусиятҳои умумии ҳамаи моделҳо",
+        "level": 2
+      },
+      {
+        "id": "1-модели-матн-persiantext",
+        "text": "1. Модели матн (`PersianText`)",
+        "level": 2
+      },
+      {
+        "id": "ی-کافیه-کتاب-ها-رو-برداری",
+        "text": "'ی کافیه کتاب‌ها رو برداری'",
+        "level": 1
+      },
+      {
+        "id": "пайваст-кардан-бо-дигар-сатрҳо",
+        "text": "Пайваст кардан бо дигар сатрҳо",
+        "level": 1
+      },
+      {
+        "id": "табдили-адади-лафзӣ-ба-рақам",
+        "text": "Табдили адади лафзӣ ба рақам",
+        "level": 1
+      },
+      {
+        "id": "2-модели-рақами-муаррифӣ-nationalcode",
+        "text": "2. Модели рақами муаррифӣ (`NationalCode`)",
+        "level": 2
+      },
+      {
+        "id": "сохтани-объект-бо-санҷиши-пешфарз-strict-true",
+        "text": "Сохтани объект бо санҷиши пешфарз (strict=True)",
+        "level": 1
+      },
+      {
+        "id": "муқоиса-ба-мисли-сатри-оддӣ",
+        "text": "Муқоиса ба мисли сатри оддӣ",
+        "level": 1
+      },
+      {
+        "id": "натиҷа-ҳамчун-луғат",
+        "text": "Натиҷа ҳамчун луғат",
+        "level": 1
+      },
+      {
+        "id": "3-модели-рақами-мобилӣ-mobilenumber",
+        "text": "3. Модели рақами мобилӣ (`MobileNumber`)",
+        "level": 2
+      },
+      {
+        "id": "4-модели-корти-бонкӣ-bankcard",
+        "text": "4. Модели корти бонкӣ (`BankCard`)",
+        "level": 2
+      },
+      {
+        "id": "5-модели-суратҳисоби-бонкӣ-sheba",
+        "text": "5. Модели суратҳисоби бонкӣ (`Sheba`)",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/tutorials/models.md",
+    "counterparts": {
+      "fa": "tutorials/models",
+      "en": "tutorials/models",
+      "prs-af": "tutorials/models"
+    },
+    "counterpartSlug": "tutorials/models"
   },
   {
     "id": "tg-tutorials-numbers_and_currency",

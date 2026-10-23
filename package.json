@@ -8,11 +8,12 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "sync:upstream": "tsx scripts/sync-upstream.ts",
     "sync:docs": "tsx scripts/build-docs-manifest.ts",
-    "build": "npm run sync:docs && vite build && tsx scripts/prerender.ts",
+    "build": "npm run sync:docs && vite build && tsx scripts/prerender.ts && npm run validate",
+    "validate": "tsx scripts/validate-production.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/lib/logic.test.ts"
+    "test": "tsx --test src/lib/logic.test.ts src/lib/router.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

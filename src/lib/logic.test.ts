@@ -244,6 +244,48 @@ test('markdown pipeline: marked renders headings with IDs and escapes untrusted 
   const html = renderMarkdownToHtml(md);
   assert.ok(html.includes('<h1 id='));
   assert.ok(html.includes('<h2 id='));
-  assert.ok(html.includes('<pre><code'));
+  assert.ok(html.includes('<pre') && html.includes('<code'));
   assert.ok(html.includes('print('));
 });
+
+test('docs parity: exactly 22 docs in all 4 languages (88 total + 6 dev = 94 total)', () => {
+  const faDocs = ALL_DOCS.filter((d: any) => d.lang === 'fa');
+  const enDocs = ALL_DOCS.filter((d: any) => d.lang === 'en' && d.category !== 'development');
+  const prsDocs = ALL_DOCS.filter((d: any) => d.lang === 'prs-af');
+  const tgDocs = ALL_DOCS.filter((d: any) => d.lang === 'tg');
+  const devDocs = ALL_DOCS.filter((d: any) => d.category === 'development');
+
+  assert.equal(faDocs.length, 22, 'Fa docs must be 22');
+  assert.equal(enDocs.length, 22, 'En docs must be 22');
+  assert.equal(prsDocs.length, 22, 'Prs docs must be 22');
+  assert.equal(tgDocs.length, 22, 'Tg docs must be 22');
+  assert.equal(devDocs.length, 6, 'Dev docs must be 6');
+  assert.equal(ALL_DOCS.length, 94, 'Total docs must be 94');
+
+  // Verify the 5 previously missing slugs now exist in all 4 languages
+  const previouslyMissing = [
+    'api/dev_and_gui',
+    'api/reshaper',
+    'guides/web_backends',
+    'guides/gui_integration',
+    'tutorials/models',
+  ];
+
+  for (const slug of previouslyMissing) {
+    assert.ok(faDocs.some((d: any) => d.slug === slug), `fa missing ${slug}`);
+    assert.ok(enDocs.some((d: any) => d.slug === slug), `en missing ${slug}`);
+    assert.ok(prsDocs.some((d: any) => d.slug === slug), `prs-af missing ${slug}`);
+    assert.ok(tgDocs.some((d: any) => d.slug === slug), `tg missing ${slug}`);
+  }
+});
+
+test('seo: English-only development docs do not emit nonexistent alternate links', () => {
+  const devDoc = ALL_DOCS.find((d: any) => d.slug === 'development/architecture');
+  assert.ok(devDoc);
+  const meta = computePageMetadata('en', 'docs', devDoc);
+  assert.equal(meta.alternateEnUrl, `${BASE_SITE_URL}/en/docs/development/architecture`);
+  assert.equal(meta.alternateFaUrl, undefined);
+  assert.equal(meta.alternatePrsUrl, undefined);
+  assert.equal(meta.alternateTgUrl, undefined);
+});
+

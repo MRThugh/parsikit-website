@@ -368,6 +368,14 @@
     "url": "https://parsikit.dev/prs-af/docs/api/datetime"
   },
   {
+    "slug": "api/dev_and_gui",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مرجع ابزارهای عیب‌یابی و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "ابزارهای تخصصی برای تشخیص و عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش معیاری متون زبان دری در رابط‌های گرافیکی (GUI).",
+    "url": "https://parsikit.dev/prs-af/docs/api/dev_and_gui"
+  },
+  {
     "slug": "api/index",
     "lang": "prs-af",
     "category": "api",
@@ -390,6 +398,14 @@
     "title": "ماژول اعداد و ارز (parsikit.currency)",
     "summary": "ماژول parsikit.currency و توابع مربوطه، تبدیل ارقام به نوشتار حروفی و محاسبات پولی را مدیریت می‌نمایند.",
     "url": "https://parsikit.dev/prs-af/docs/api/number_and_currency"
+  },
+  {
+    "slug": "api/reshaper",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
+    "summary": "ابزار سبک و بدون وابستگی برای چسباندن حروف فارسی دری (Cursive Shaping) و بازآرایی جهت متن (BiDi) برای نمایش در موتورهای گرافیکی، تصاویر و بازی‌ها.",
+    "url": "https://parsikit.dev/prs-af/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -422,6 +438,22 @@
     "title": "راهنمای امنیت داده‌ها و اعتبارسنجی فرم‌ها",
     "summary": "این راهنما شیوه پیاده‌سازی اعتبارسنجی امن و جلوگیری از نشت اطلاعات حساس (PII) را بیان می‌کند.",
     "url": "https://parsikit.dev/prs-af/docs/guides/forms_and_security"
+  },
+  {
+    "slug": "guides/gui_integration",
+    "lang": "prs-af",
+    "category": "guides",
+    "title": "رهنمود اتصال پارسی‌کیت به واسط‌های گرافیکی کاربر (GUI)",
+    "summary": "پارسی‌کیت ماژول اختصاصی parsikit.gui را برای مدیریت و قالب‌بندی همزمان هنگام تایپ در فریمورک‌های دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.",
+    "url": "https://parsikit.dev/prs-af/docs/guides/gui_integration"
+  },
+  {
+    "slug": "guides/web_backends",
+    "lang": "prs-af",
+    "category": "guides",
+    "title": "رهنمود استفاده از پارسی‌کیت در سیستم‌های ویب و بک‌اند (FastAPI و Django)",
+    "summary": "کتابخانه پارسی‌کیت به دلیل برخورداری از ساختار Duck-Typing و سازگاری بومی با اسکیماهای Pydantic v2، گزینه‌ای ایده‌آل برای تصفیه داده‌ها و اعتبارسنجی ورودی‌ها در سرویس‌های پایتون محسوب می‌شود.",
+    "url": "https://parsikit.dev/prs-af/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -464,6 +496,14 @@
     "url": "https://parsikit.dev/prs-af/docs/tutorials/datetime"
   },
   {
+    "slug": "tutorials/models",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش مدل‌های شیءگرا در پارسی‌کیت (OOP Domain Models)",
+    "summary": "در کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا در ماژول parsikit.models فراهم آورده تا توسعه‌دهندگان بتوانند با داده‌ها و موجودیت‌ها به آسانی کار کنند.",
+    "url": "https://parsikit.dev/prs-af/docs/tutorials/models"
+  },
+  {
     "slug": "tutorials/numbers_and_currency",
     "lang": "prs-af",
     "category": "tutorials",
@@ -504,6 +544,14 @@
     "url": "https://parsikit.dev/tg/docs/api/datetime"
   },
   {
+    "slug": "api/dev_and_gui",
+    "lang": "tg",
+    "category": "api",
+    "title": "Маълумотномаи абзорҳои ташхис ва график (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "Абзорҳои махсус барои ташхиси хатогиҳои матнӣ, баробарсозии визуалии сутунҳо дар ҷадвалҳо, сабти гузоришҳо (logging) ва намоиши дурусти матн дар интерфейсҳои графикӣ (GUI).",
+    "url": "https://parsikit.dev/tg/docs/api/dev_and_gui"
+  },
+  {
     "slug": "api/index",
     "lang": "tg",
     "category": "api",
@@ -526,6 +574,14 @@
     "title": "Модули ҳисобҳои молӣ ва калимаҳо (parsikit.currency)",
     "summary": "Табдили ададҳо ба калимаҳои хоно ва ҳисобҳои воҳидҳои пулӣ.",
     "url": "https://parsikit.dev/tg/docs/api/number_and_currency"
+  },
+  {
+    "slug": "api/reshaper",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули бозсозии графикӣ (`parsikit.reshaper`)",
+    "summary": "Абзори сабук ва бидуни вобастагӣ барои пайваст кардани ҳарфҳо (Cursive Shaping) ва баргардонидани самти матн (BiDi) барои муҳаррикҳои графикӣ, аксҳо ва бозиҳо.",
+    "url": "https://parsikit.dev/tg/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -558,6 +614,22 @@
     "title": "Роҳнамои амнияти додаҳо ва санҷиши шаклҳо",
     "summary": "Усулҳои амнияти маълумот ва ниқоббандии додаҳои ҳассос.",
     "url": "https://parsikit.dev/tg/docs/guides/forms_and_security"
+  },
+  {
+    "slug": "guides/gui_integration",
+    "lang": "tg",
+    "category": "guides",
+    "title": "Роҳнамои пайвастшавӣ ба интерфейсҳои графикӣ (GUI)",
+    "summary": "ParsiKit модули махсуси parsikit.gui-ро барои идора ва танзими ҳамзамони матн дар вақти навиштан дар барномаҳои мизи корӣ (ба мисли Tkinter, CustomTkinter, PyQt ва PySide) пешниҳод менамояд.",
+    "url": "https://parsikit.dev/tg/docs/guides/gui_integration"
+  },
+  {
+    "slug": "guides/web_backends",
+    "lang": "tg",
+    "category": "guides",
+    "title": "Роҳнамои истифода дар веб-хидматҳо (FastAPI ва Django)",
+    "summary": "ParsiKit ба шарофати мутобиқати хуб бо Pydantic v2 яке аз беҳтарин интихобҳо барои санҷиш ва тозакунии додаҳо дар API-ҳои Python мебошад.",
+    "url": "https://parsikit.dev/tg/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -598,6 +670,14 @@
     "title": "Омӯзиши тақвими нуҷумии ҳиҷрии шамсӣ",
     "summary": "Тарзи табдили таърих ва муҳосибаи соли кабиса бо ParsiKit.",
     "url": "https://parsikit.dev/tg/docs/tutorials/datetime"
+  },
+  {
+    "slug": "tutorials/models",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши моделҳои объектгаро дар ParsiKit (Domain Models)",
+    "summary": "Дар баробари функсияҳои мустақил, ParsiKit маҷмӯаи синфҳои объектгароро дар модули parsikit.models пешниҳод кардааст, то барномасозон тавонанд бо додаҳо ба осонӣ кор кунанд.",
+    "url": "https://parsikit.dev/tg/docs/tutorials/models"
   },
   {
     "slug": "tutorials/numbers_and_currency",
