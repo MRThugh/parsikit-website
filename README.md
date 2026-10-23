@@ -67,7 +67,8 @@ ParsiKit strictly supports exactly four user-facing languages:
    - Unknown document slugs or unsupported locale prefixes immediately render a localized, accessible 404 page with `noindex` directives.
 
 5. **Markdown Security & Link Resolution Architecture**
-   - **Protocol Allowlist**: Links are verified against a strict protocol allowlist permitting only `http:`, `https:`, `mailto:`, in-page anchors (`#`), and internal relative documentation paths. Dangerous schemes (`javascript:`, `data:`, `vbscript:`, `file:`, `blob:`) and entity-obfuscated or control-character bypasses are strictly blocked.
+   - **Protocol Allowlist**: Links are verified against a strict protocol allowlist permitting only case-insensitive `http:`, `https:`, and `mailto:` (handling lowercase, uppercase, and mixed-case schemes such as `HTTPS://`, `MaIlTo:`), in-page anchors (`#`), and internal relative documentation paths. Dangerous schemes (`javascript:`, `data:`, `vbscript:`, `file:`, `blob:`, `intent:`) and entity-obfuscated or control-character bypasses (`\u0000-\u001F`, `&#x61;`, etc.) are strictly blocked and rendered as `[unsafe link blocked]`.
+   - **Protocol-Relative URL Rejection**: Protocol-relative links (`//example.com`) are explicitly rejected as unsafe references to prevent protocol-downgrade and domain hijacking.
    - **HTML Sanitization**: All raw HTML tags within Markdown documents are escaped prior to DOM insertion, preventing XSS and attribute injection while preserving legitimate code snippets and inline code blocks.
    - **Directory-Relative Resolution**: Links in Markdown (e.g. `../tutorials/datetime.md?mode=basic#setup`) are resolved against the directory of the current document, preserving query parameters and anchors, while blocking path traversals that escape the documentation root namespace.
 
@@ -77,7 +78,14 @@ ParsiKit strictly supports exactly four user-facing languages:
    - **Hosting Platform Limitation**: The deployment target is GitHub Pages, which serves static assets and does not support server-side HTTP 301 headers. Consequently, redirect stubs are labeled as *verified client-side HTML redirect fallbacks*. Server-level rules (`public/_redirects`) are maintained for reverse-proxy and edge-compatible hosts (Cloudflare Pages, Netlify).
    - Spanish is completely removed from active locales, sitemaps, and navigation.
 
-7. **Accessibility & Purposeful Motion**
+7. **Comprehensive Production Artifact Validator**
+   - `scripts/validate-production.ts` performs a 100% comprehensive audit of all generated HTML files across `dist/` (rather than a sample), validating document metadata, lang/dir attributes, unique canonical tags matching expected origin and route, robots directives, and all asset and link references.
+   - Strict custom XML parser (`parseXml`) audits `dist/sitemap.xml` for well-formedness, root `<urlset>` declaration, absolute URL consistency, uniqueness, absence of 404/Spanish routes, and matching generated files in `dist/`.
+   - Validates reciprocal `hreflang` alternate links across all active pages.
+   - Audits local assets (`<script src>`, `<link href>`, `<img src>`, media) and internal anchors (`<a href>`) with directory index resolution, URL decoding, and traversal protection outside `dist/`.
+   - Accompanied by a 26-test regression and fixture suite covering 24 distinct positive and negative failure modes.
+
+8. **Accessibility & Purposeful Motion**
    - WCAG 2.2 AA compliant contrast and minimum 44×44px touch targets.
    - Full `prefers-reduced-motion` compliance across all animations using Motion for React (`motion/react` v12).
    - Keyboard accessible modals (`Cmd+K` documentation search) with Arrow Key navigation.
@@ -101,8 +109,8 @@ ParsiKit strictly supports exactly four user-facing languages:
 ## 💻 Development & Build Commands
 
 ```bash
-# 1. Install dependencies
-npm install
+# 1. Reproducible dependency installation (requires committed package-lock.json)
+npm ci
 
 # 2. Start local development server (runs on port 3000)
 npm run dev
@@ -110,16 +118,16 @@ npm run dev
 # 3. Synchronize documentation & metadata from repository sources
 npm run sync:docs
 
-# 4. Run automated test suite (20 tests covering algorithms, i18n, routing, SEO, and parity)
+# 4. Run automated test suite (59 unit, security, i18n, routing, and validator fixture tests)
 npm test
 
 # 5. Type-check codebase with strict TypeScript
 npm run lint
 
-# 6. Build production bundle, prerender all 110 static pages, generate redirects and sitemap, and validate
+# 6. Build production bundle, prerender all static pages, generate redirects and sitemap, and validate
 npm run build
 
-# 7. Audit production build integrity
+# 7. Audit production build integrity across all generated artifacts
 npm run validate
 
 # 8. Preview production build locally

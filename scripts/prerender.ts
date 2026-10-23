@@ -547,6 +547,10 @@ function prerender() {
     allUrls.push(`${BASE_SITE_URL}${routePath}`);
   }
 
+  // Pre-render root index.html with canonical to /en and proper alternates
+  const rootIndexHtml = renderHtmlTemplate(baseHtml, 'en', 'home');
+  fs.writeFileSync(path.join(distDir, 'index.html'), rootIndexHtml);
+
   // Pre-render explicit 301 migration redirect pages for legacy Spanish routes
   const legacySpanishRoutes: { source: string; target: string }[] = [
     { source: 'es', target: '/en' },

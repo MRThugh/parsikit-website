@@ -9,20 +9,48 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+export type UrlClassification =
+  | { type: 'external'; protocol: 'http:' | 'https:' | 'mailto:'; href: string }
+  | { type: 'anchor'; href: string }
+  | { type: 'internal'; href: string }
+  | { type: 'unsafe'; reason: string };
+
 /**
- * Strict protocol allowlist and URL security validator.
- * Only permits: http:, https:, mailto:, in-page anchors, and internal relative paths.
- * Rejects javascript:, data:, vbscript:, file:, blob:, and any obfuscated or entity-encoded forms.
+ * Classifies a URL using an allowlist approach with case-insensitive scheme parsing.
+ *
+ * Policy:
+ * 1. Control characters: Any leading, trailing, or embedded ASCII control characters (0x00-0x1F, 0x7F-0x9F) are rejected.
+ * 2. Protocol-relative URLs (//example.com) are rejected as unsafe because they lack an explicit allowed protocol.
+ * 3. In-page anchors (#section) are permitted if they do not contain invalid quote/bracket characters.
+ * 4. External URLs: Only http:, https:, and mailto: schemes (case-insensitive) are allowed.
+ * 5. Dangerous schemes: javascript:, data:, vbscript:, file:, blob:, intent: (including obfuscated/entity-encoded variants) are rejected.
+ * 6. Internal links: Relative documentation paths (e.g. ./text.md, ../guide.md, /fa/docs/...) are permitted.
  */
-export function isSafeUrl(rawUrl: string): boolean {
-  if (!rawUrl || typeof rawUrl !== 'string') return false;
+export function classifyUrl(rawUrl: string): UrlClassification {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return { type: 'unsafe', reason: 'empty or invalid URL' };
+  }
 
-  // 1. Strip ASCII control characters and whitespace
-  const sanitized = rawUrl.replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '');
-  if (!sanitized) return false;
+  // 1. Reject URLs with leading, trailing, or embedded control characters
+  if (/[\u0000-\u001F\u007F-\u009F]/.test(rawUrl)) {
+    return { type: 'unsafe', reason: 'contains ASCII control characters' };
+  }
 
-  // 2. Decode entities and percent encodings to uncover obfuscated schemes
-  let decoded = sanitized;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return { type: 'unsafe', reason: 'whitespace only' };
+  }
+
+  // 2. Reject protocol-relative URLs (e.g. //example.com) to prevent scheme inheritance / open redirect attacks
+  if (trimmed.startsWith('//')) {
+    return {
+      type: 'unsafe',
+      reason: 'protocol-relative URLs (//) are rejected; explicit scheme is required',
+    };
+  }
+
+  // 3. Decode HTML entities and percent-encoding to uncover hidden/obfuscated schemes
+  let decoded = trimmed;
   decoded = decoded
     .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)));
@@ -41,19 +69,22 @@ export function isSafeUrl(rawUrl: string): boolean {
     normalized.startsWith('intent:') ||
     normalized.includes('javascript:')
   ) {
-    return false;
+    return { type: 'unsafe', reason: 'dangerous scheme detected' };
   }
 
-  // 3. Anchor-only links are safe if they contain no HTML or quotes
-  if (sanitized.startsWith('#')) {
-    return !/[<>"']/.test(sanitized);
+  // 4. Anchor-only links (#section)
+  if (trimmed.startsWith('#')) {
+    if (/[<>"']/.test(trimmed)) {
+      return { type: 'unsafe', reason: 'anchor contains invalid characters' };
+    }
+    return { type: 'anchor', href: trimmed };
   }
 
-  // 4. Scheme validation: if URL contains a scheme delimiter ':'
-  const firstColon = sanitized.indexOf(':');
-  const firstSlash = sanitized.indexOf('/');
-  const firstQuestion = sanitized.indexOf('?');
-  const firstHash = sanitized.indexOf('#');
+  // 5. Scheme validation: detect whether the URL specifies an absolute scheme
+  const firstColon = trimmed.indexOf(':');
+  const firstSlash = trimmed.indexOf('/');
+  const firstQuestion = trimmed.indexOf('?');
+  const firstHash = trimmed.indexOf('#');
 
   const hasScheme =
     firstColon !== -1 &&
@@ -63,20 +94,31 @@ export function isSafeUrl(rawUrl: string): boolean {
 
   if (hasScheme) {
     try {
-      const parsed = new URL(sanitized);
+      const parsed = new URL(trimmed);
       const protocol = parsed.protocol.toLowerCase();
-      return ['http:', 'https:', 'mailto:'].includes(protocol);
+      if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:') {
+        return {
+          type: 'external',
+          protocol: protocol as 'http:' | 'https:' | 'mailto:',
+          href: trimmed,
+        };
+      }
+      return { type: 'unsafe', reason: `unsupported scheme ${protocol}` };
     } catch {
-      return false;
+      return { type: 'unsafe', reason: 'malformed scheme URL' };
     }
   }
 
-  // 5. Internal relative or root-relative path: reject raw HTML and attribute breaks
-  if (/[<>"']/.test(sanitized)) {
-    return false;
+  // 6. Internal relative or root-relative path: reject HTML tags and attribute breakers
+  if (/[<>"']/.test(trimmed)) {
+    return { type: 'unsafe', reason: 'internal path contains invalid characters' };
   }
 
-  return true;
+  return { type: 'internal', href: trimmed };
+}
+
+export function isSafeUrl(rawUrl: string): boolean {
+  return classifyUrl(rawUrl).type !== 'unsafe';
 }
 
 export function isDangerousScheme(url: string): boolean {
@@ -100,21 +142,18 @@ export function resolveRelativeDocLink(
   href: string,
   lang?: string
 ): string | null {
-  if (!isSafeUrl(href)) {
+  const classification = classifyUrl(href);
+  if (classification.type === 'unsafe') {
     return null;
   }
 
-  // Handle external URLs
-  if (
-    href.startsWith('http://') ||
-    href.startsWith('https://') ||
-    href.startsWith('mailto:')
-  ) {
+  // Handle external URLs (case-insensitive http:, https:, mailto:)
+  if (classification.type === 'external') {
     return href;
   }
 
   // Handle in-page anchors
-  if (href.startsWith('#')) {
+  if (classification.type === 'anchor') {
     return href;
   }
 
@@ -209,22 +248,18 @@ function createSecureRenderer(baseSlug?: string, lang?: string) {
   renderer.link = function ({ href, title, tokens }) {
     const text = this.parser.parseInline(tokens);
     const rawHref = href || '#';
+    const classification = classifyUrl(rawHref);
 
-    if (!isSafeUrl(rawHref)) {
+    if (classification.type === 'unsafe') {
       return `<span class="text-red-500 font-mono text-xs">[unsafe link blocked]</span>`;
     }
 
-    const isExternal =
-      rawHref.startsWith('http://') ||
-      rawHref.startsWith('https://') ||
-      rawHref.startsWith('mailto:');
-
-    if (isExternal) {
+    if (classification.type === 'external') {
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
       return `<a href="${escapeHtml(rawHref)}"${titleAttr} rel="noopener noreferrer" target="_blank" class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
     }
 
-    if (rawHref.startsWith('#')) {
+    if (classification.type === 'anchor') {
       return `<a href="${escapeHtml(rawHref)}" class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
     }
 
@@ -240,7 +275,8 @@ function createSecureRenderer(baseSlug?: string, lang?: string) {
   // 4. Safe image renderer with scheme validation
   renderer.image = function ({ href, title, text }) {
     const rawHref = href || '';
-    if (!isSafeUrl(rawHref)) {
+    const classification = classifyUrl(rawHref);
+    if (classification.type === 'unsafe') {
       return `<span class="text-red-500 font-mono text-xs">[unsafe image blocked]</span>`;
     }
     const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';

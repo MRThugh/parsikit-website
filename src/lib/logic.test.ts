@@ -29,7 +29,7 @@ import { ALL_DOCS } from '../data/docsManifest';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { parsePyprojectData } from '../../scripts/build-docs-manifest';
 import { renderMarkdownToHtml } from '../../scripts/render-markdown';
-import { escapeHtml, isDangerousScheme, isSafeUrl, resolveRelativeDocLink } from './markdown';
+import { escapeHtml, isDangerousScheme, isSafeUrl, classifyUrl, resolveRelativeDocLink } from './markdown';
 import { LOCALES, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
 import { TRANSLATIONS } from '../i18n/translations';
 
@@ -290,37 +290,93 @@ test('seo: English-only development docs do not emit nonexistent alternate links
   assert.equal(meta.alternateTgUrl, undefined);
 });
 
-test('markdown security: strict allowlist and obfuscated protocol blocking', () => {
+test('markdown security: strict allowlist, mixed-case schemes, and obfuscated protocol blocking', () => {
   // 1. Basic escaping
   assert.equal(escapeHtml('<script>alert("xss")</script>'), '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
 
   // 2. Dangerous scheme detection
   assert.equal(isSafeUrl('javascript:alert(1)'), false);
+  assert.equal(classifyUrl('javascript:alert(1)').type, 'unsafe');
   assert.equal(isSafeUrl('data:text/html,<script>alert(1)</script>'), false);
   assert.equal(isSafeUrl('vbscript:msgbox(1)'), false);
   assert.equal(isSafeUrl('file:///etc/passwd'), false);
   assert.equal(isSafeUrl('blob:https://example.com/uuid'), false);
 
-  // 3. Mixed-case and whitespace/control-char obfuscation
-  assert.equal(isSafeUrl('JaVaScRiPt:alert(1)'), false);
-  assert.equal(isSafeUrl('   javascript:alert(1)'), false);
-  assert.equal(isSafeUrl('\u0000javascript:alert(1)'), false);
-  assert.equal(isSafeUrl('\x01javascript:alert(1)'), false);
+  // 3. Mixed-case and uppercase scheme handling for valid external links
+  assert.equal(isSafeUrl('https://example.com'), true);
+  assert.equal(classifyUrl('https://example.com').type, 'external');
+  assert.equal(isSafeUrl('HTTPS://example.com'), true);
+  assert.equal(classifyUrl('HTTPS://example.com').type, 'external');
+  assert.equal(isSafeUrl('HtTpS://example.com/path?q=1#section'), true);
+  assert.equal(classifyUrl('HtTpS://example.com/path?q=1#section').type, 'external');
+  assert.equal(isSafeUrl('http://example.com'), true);
+  assert.equal(classifyUrl('http://example.com').type, 'external');
+  assert.equal(isSafeUrl('HTTP://example.com'), true);
+  assert.equal(classifyUrl('HTTP://example.com').type, 'external');
+  assert.equal(isSafeUrl('mailto:test@example.com'), true);
+  assert.equal(classifyUrl('mailto:test@example.com').type, 'external');
 
-  // 4. Entity and percent-encoding obfuscation
+  // 4. In-page anchors and relative links
+  assert.equal(isSafeUrl('#section'), true);
+  assert.equal(classifyUrl('#section').type, 'anchor');
+  assert.equal(isSafeUrl('../guide.md?mode=basic#setup'), true);
+  assert.equal(classifyUrl('../guide.md?mode=basic#setup').type, 'internal');
+
+  // 5. Mixed-case dangerous schemes (must be blocked)
+  assert.equal(isSafeUrl('JaVaScRiPt:alert(1)'), false);
+  assert.equal(classifyUrl('JaVaScRiPt:alert(1)').type, 'unsafe');
+  assert.equal(isSafeUrl('vBsCrIpT:msgbox(1)'), false);
+
+  // 6. Protocol-relative URLs (//example.com) policy: rejected as unsafe
+  assert.equal(isSafeUrl('//example.com'), false);
+  assert.equal(classifyUrl('//example.com').type, 'unsafe');
+  assert.equal(isSafeUrl('//evil.com/phish'), false);
+
+  // 7. Entity and percent-encoding obfuscation
   assert.equal(isSafeUrl('jav&#x61;script:alert(1)'), false);
   assert.equal(isSafeUrl('&#106;avascript:alert(1)'), false);
   assert.equal(isSafeUrl('%6a%61%76%61%73%63%72%69%70%74:alert(1)'), false);
 
-  // 5. Allowed safe schemes
-  assert.equal(isSafeUrl('https://example.com'), true);
-  assert.equal(isSafeUrl('http://example.com/api'), true);
-  assert.equal(isSafeUrl('mailto:info@parsikit.dev'), true);
-  assert.equal(isSafeUrl('#setup-heading'), true);
-  assert.equal(isSafeUrl('/en/docs/installation'), true);
-  assert.equal(isSafeUrl('../tutorials/datetime.md'), true);
+  // 8. Leading and embedded ASCII control characters
+  assert.equal(isSafeUrl('\u0000https://example.com'), false);
+  assert.equal(isSafeUrl('http\u0000s://example.com'), false);
+  assert.equal(isSafeUrl('   javascript:alert(1)'), false);
+  assert.equal(isSafeUrl('\u0000javascript:alert(1)'), false);
+  assert.equal(isSafeUrl('\x01javascript:alert(1)'), false);
 
-  // 6. Actual rendered HTML checks
+  // 9. Malformed URLs and unsupported schemes
+  assert.equal(isSafeUrl('ftp://example.com/file'), false);
+  assert.equal(isSafeUrl('unknown-scheme://test'), false);
+
+  // 10. Actual rendered HTML assertions for all required link types
+  // Mixed-case HTTPS link -> external with rel="noopener noreferrer" and target="_blank"
+  const upperHttpsHtml = renderMarkdownToHtml('[Example](HTTPS://example.com)');
+  assert.ok(upperHttpsHtml.includes('href="HTTPS://example.com"'));
+  assert.ok(upperHttpsHtml.includes('rel="noopener noreferrer"'));
+  assert.ok(upperHttpsHtml.includes('target="_blank"'));
+
+  const mixedHttpsHtml = renderMarkdownToHtml('[Example](HtTpS://example.com/path?q=1#section)');
+  assert.ok(mixedHttpsHtml.includes('href="HtTpS://example.com/path?q=1#section"'));
+  assert.ok(mixedHttpsHtml.includes('rel="noopener noreferrer"'));
+  assert.ok(mixedHttpsHtml.includes('target="_blank"'));
+
+  const upperHttpHtml = renderMarkdownToHtml('[Example](HTTP://example.com)');
+  assert.ok(upperHttpHtml.includes('href="HTTP://example.com"'));
+  assert.ok(upperHttpHtml.includes('rel="noopener noreferrer"'));
+  assert.ok(upperHttpHtml.includes('target="_blank"'));
+
+  const mailtoHtml = renderMarkdownToHtml('[Contact](mailto:test@example.com)');
+  assert.ok(mailtoHtml.includes('href="mailto:test@example.com"'));
+  assert.ok(mailtoHtml.includes('rel="noopener noreferrer"'));
+
+  const anchorHtml = renderMarkdownToHtml('[Section](#section)');
+  assert.ok(anchorHtml.includes('href="#section"'));
+  assert.ok(!anchorHtml.includes('target="_blank"'));
+
+  const protocolRelativeHtml = renderMarkdownToHtml('[ProtoRel](//example.com)');
+  assert.ok(protocolRelativeHtml.includes('[unsafe link blocked]'));
+  assert.ok(!protocolRelativeHtml.includes('href="//example.com"'));
+
   const xssLink = renderMarkdownToHtml('[malicious](javascript:alert(1))');
   assert.ok(xssLink.includes('[unsafe link blocked]'));
   assert.ok(!xssLink.includes('href="javascript:'));
@@ -330,6 +386,14 @@ test('markdown security: strict allowlist and obfuscated protocol blocking', () 
 
   const obfuscatedXss = renderMarkdownToHtml('[malicious](jav&#x61;script:alert(1))');
   assert.ok(obfuscatedXss.includes('[unsafe link blocked]'));
+
+  const entityControlXss = renderMarkdownToHtml('[malicious](java&#x09;script:alert(1))');
+  assert.ok(entityControlXss.includes('[unsafe link blocked]'));
+  assert.ok(!entityControlXss.includes('href="'));
+
+  const embeddedControlXss = renderMarkdownToHtml('[malicious](jav\x00ascript:alert(1))');
+  assert.ok(!embeddedControlXss.includes('<a '));
+  assert.ok(!embeddedControlXss.includes('href="'));
 
   const maliciousImg = renderMarkdownToHtml('![bad image](javascript:alert(1))');
   assert.ok(maliciousImg.includes('[unsafe image blocked]'));
@@ -342,19 +406,13 @@ test('markdown security: strict allowlist and obfuscated protocol blocking', () 
   assert.ok(!rawHtmlEvent.includes('<img src="x" onerror="alert(1)">'));
   assert.ok(rawHtmlEvent.includes('&lt;img'));
 
-  // 7. Legitimate HTML inside code block and inline code remains safe and readable
+  // 11. Legitimate HTML inside code block and inline code remains safe and readable
   const codeBlockHtml = renderMarkdownToHtml('```html\n<div class="sample">Hello World</div>\n```');
   assert.ok(codeBlockHtml.includes('&lt;div class=&quot;sample&quot;&gt;Hello World&lt;/div&gt;'));
   assert.ok(codeBlockHtml.includes('<pre dir="ltr"'));
 
   const inlineCodeHtml = renderMarkdownToHtml('Use `<span class="badge">` in HTML');
   assert.ok(inlineCodeHtml.includes('&lt;span class=&quot;badge&quot;&gt;'));
-
-  // 8. Safe external HTTPS link with rel="noopener noreferrer" and target="_blank"
-  const safeExt = renderMarkdownToHtml('[Official Repo](https://github.com/MRThugh/ParsiKit)');
-  assert.ok(safeExt.includes('href="https://github.com/MRThugh/ParsiKit"'));
-  assert.ok(safeExt.includes('rel="noopener noreferrer"'));
-  assert.ok(safeExt.includes('target="_blank"'));
 });
 
 test('markdown links: directory-relative link resolution with query, fragment & traversal protection', () => {
