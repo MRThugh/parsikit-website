@@ -1,11 +1,12 @@
 import React from 'react';
-import { Layers, ShieldCheck, Zap, Database, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Database, Zap, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CodeBlock } from './CodeBlock';
+import { getTranslations } from '../i18n/translations';
 
 export function ArchitectureView() {
-  const { lang, navigateToDoc } = useApp();
-  const isRtl = lang === 'fa';
+  const { lang, navigateToDoc, isRtl } = useApp();
+  const t = getTranslations(lang);
 
   const cacheSnippet = `import threading
 from collections import OrderedDict
@@ -36,38 +37,54 @@ class ThreadSafeLRUCache:
   const layers = [
     {
       level: 'Layer 4',
-      nameEn: 'Developer Tools & UI Integrations',
-      nameFa: 'ابزارهای توسعه‌دهنده و رابط کاربری',
+      name: lang === 'fa' ? 'ابزارهای توسعه‌دهنده و رابط کاربری' : lang === 'prs-af' ? 'ابزارهای انجنیری و رابط کاربری' : lang === 'tg' ? 'Абзорҳои таҳиякунанда ва интерфейс' : 'Developer Tools & UI Integrations',
       modules: 'parsikit.dev · parsikit.gui · parsikit.config',
-      descEn: 'Visual terminal alignment (pformat), text debugging, GUI font reshaping, global settings.',
-      descFa: 'تراز بصری متن‌ها در ترمینال، عیب‌یابی متن، اتصال به ابزارهای گرافیکی و تنظیمات سراسری.',
+      desc: lang === 'fa'
+        ? 'تراز بصری متن‌ها در ترمینال، عیب‌یابی متن، اتصال به ابزارهای گرافیکی و تنظیمات سراسری.'
+        : lang === 'prs-af'
+        ? 'تراز بصری متون در کنسول، عیب‌یابی متن، اتصال به ابزارهای گرافیکی و تنظیمات عمومی سیستم.'
+        : lang === 'tg'
+        ? 'Танзими визуалии матнҳо дар терминал, ташхиси хатогиҳо ва пайвастшавӣ ба абзорҳои графикӣ.'
+        : 'Visual terminal alignment (pformat), text debugging, GUI font reshaping, global settings.',
       color: 'border-l-sky-500',
     },
     {
       level: 'Layer 3',
-      nameEn: 'Object-Oriented Domain Models',
-      nameFa: 'مدل‌های شیءگرا و اعتبارسنجی دامنه',
+      name: lang === 'fa' ? 'مدل‌های شیءگرا و اعتبارسنجی دامنه' : lang === 'prs-af' ? 'مدل‌های شیءگرا و اعتبارسنجی هویت' : lang === 'tg' ? 'Моделҳои объектгаро ва тасдиқи додаҳо' : 'Object-Oriented Domain Models',
       modules: 'parsikit.models',
-      descEn: 'Rich value objects (NationalCode, BankCard, MobileNumber, Sheba) with native Pydantic v2 support.',
-      descFa: 'کپسوله‌سازی مقادیر با اعتبارسنجی خودکار، متدهای استخراج استان و اپراتور، و پشتیبانی از Pydantic v2.',
+      desc: lang === 'fa'
+        ? 'کپسوله‌سازی مقادیر با اعتبارسنجی خودکار، متدهای استخراج استان و اپراتور، و پشتیبانی از Pydantic v2.'
+        : lang === 'prs-af'
+        ? 'کپسوله‌سازی مقادیر با بررسی خودکار صحت، استخراج ولایت و اپراتور، و هماهنگی کامل با Pydantic.'
+        : lang === 'tg'
+        ? 'Моделҳои маълумотӣ бо санҷиши худкор, муайянсозии оператор ва мутобиқат бо Pydantic.'
+        : 'Rich value objects (NationalCode, BankCard, MobileNumber, Sheba) with native Pydantic v2 support.',
       color: 'border-l-[#126E68]',
     },
     {
       level: 'Layer 2',
-      nameEn: 'Domain Algorithms & Formatters',
-      nameFa: 'الگوریتم‌های محاسباتی و تبدیل فرمت',
+      name: lang === 'fa' ? 'الگوریتم‌های محاسباتی و تبدیل فرمت' : lang === 'prs-af' ? 'الگوریتم‌های محاسباتی و تبدیلات زمانی' : lang === 'tg' ? 'Алгоритмҳои муҳосибавӣ ва тақвимӣ' : 'Domain Algorithms & Formatters',
       modules: 'parsikit.text · parsikit.validators · parsikit.currency · parsikit.datetime',
-      descEn: 'Pure algorithmic transformations: Modulo 11, Luhn, astronomical Jalali calendar, written numbers.',
-      descFa: 'الگوریتم‌های خالص پایتونی بدون هیچ وابستگی: چک‌سام کد ملی، الگوریتم لان، تقویم جلالی و تبدیل اعداد به حروف.',
+      desc: lang === 'fa'
+        ? 'الگوریتم‌های خالص پایتونی بدون هیچ وابستگی: چک‌سام کد ملی، الگوریتم لان، تقویم جلالی و تبدیل اعداد به حروف.'
+        : lang === 'prs-af'
+        ? 'الگوریتم‌های پایتونی خالص بدون وابستگی: چک‌سام تذکره، الگوریتم لون، تقویم هجری شمسی و ارقام به حروف.'
+        : lang === 'tg'
+        ? 'Алгоритмҳои холиси Python: чексами рақами миллӣ, алгоритми Лун, тақвими шамсӣ ва ададҳо ба калимаҳо.'
+        : 'Pure algorithmic transformations: Modulo 11, Luhn, astronomical Jalali calendar, written numbers.',
       color: 'border-l-[#D4A03D]',
     },
     {
       level: 'Layer 1',
-      nameEn: 'Core Infrastructure Primitives',
-      nameFa: 'زیرساخت پایه و مدیریت خطاها',
+      name: lang === 'fa' ? 'زیرساخت پایه و مدیریت خطاها' : lang === 'prs-af' ? 'زیرساخت اساسی و مدیریت استثناها' : lang === 'tg' ? 'Зерсохти аслӣ ва идораи хатоҳо' : 'Core Infrastructure Primitives',
       modules: 'parsikit.cache · parsikit.exceptions',
-      descEn: 'Thread-safe in-memory caching and sanitized Iranian domain exception tree.',
-      descFa: 'کش سریع و امن در چندنخی و درخت خطاهای اختصاصی پاکسازی‌شده بدون نشت اطلاعات کاربر.',
+      desc: lang === 'fa'
+        ? 'کش سریع و امن در چندنخی و درخت خطاهای اختصاصی پاکسازی‌شده بدون نشت اطلاعات کاربر.'
+        : lang === 'prs-af'
+        ? 'سیستم کش سریع و محفوظ در چندنخی و درخت خطاهای اختصاصی بدون افشای اطلاعات حساس کاربران.'
+        : lang === 'tg'
+        ? 'Кеши сареъ барои муҳити бисёрриштагӣ ва идораи хатоҳо бидуни ифшои додаҳои ҳассос.'
+        : 'Thread-safe in-memory caching and sanitized Iranian domain exception tree.',
       color: 'border-l-rose-500',
     },
   ];
@@ -77,24 +94,20 @@ class ThreadSafeLRUCache:
       {/* Header */}
       <div className="mb-12">
         <div className="text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
-          {isRtl ? 'مهندسی و معماری سیستم' : 'Engineering & Technical Architecture'}
+          {t.architecture.principlesTitle}
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-white tracking-tight mb-4">
-          {isRtl
-            ? 'معماری فنی و تصمیمات طراحی پارسی‌کیت'
-            : 'ParsiKit Architecture & Technical Design'}
+          {t.architecture.title}
         </h1>
         <p className="text-base text-stone-600 dark:text-stone-300 leading-relaxed max-w-3xl">
-          {isRtl
-            ? 'پارسی‌کیت با شعار صفر وابستگی خارجی (Zero Dependencies) ساخته شده تا در هر محیطی، از سرورهای مینیمال داکر تا اسکریپت‌های علم داده، بدون خطر ناسازگاری پکیج‌ها با حداکثر سرعت اجرا شود.'
-            : 'Engineered as a zero-dependency, lightweight, high-performance library for Persian language computing and Iranian domestic data structures.'}
+          {t.architecture.subtitle}
         </p>
       </div>
 
       {/* Layer Diagram */}
       <div className="space-y-4 mb-16">
         <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-4">
-          {isRtl ? 'لایه‌بندی ماژول‌های پکیج' : 'Package Layering Architecture'}
+          {t.architecture.layersTitle}
         </h2>
 
         <div className="grid grid-cols-1 gap-3">
@@ -110,15 +123,15 @@ class ThreadSafeLRUCache:
                   </span>
                   <span className="text-stone-300 dark:text-stone-700">·</span>
                   <span className="font-semibold text-sm text-stone-900 dark:text-white">
-                    {isRtl ? layer.nameFa : layer.nameEn}
+                    {layer.name}
                   </span>
                 </div>
                 <p className="text-xs text-stone-600 dark:text-stone-400">
-                  {isRtl ? layer.descFa : layer.descEn}
+                  {layer.desc}
                 </p>
               </div>
 
-              <div className="font-mono text-xs text-[#126E68] dark:text-[#52C5BE] shrink-0 bg-[#126E68]/10 dark:bg-[#126E68]/20 px-3 py-1.5 rounded-lg">
+              <div className="font-mono text-xs text-[#126E68] dark:text-[#52C5BE] shrink-0 bg-[#126E68]/10 dark:bg-[#126E68]/20 px-3 py-1.5 rounded-lg" dir="ltr">
                 {layer.modules}
               </div>
             </div>
@@ -170,7 +183,9 @@ class ThreadSafeLRUCache:
               ? 'برای سرویس‌هایی با ترافیک بالا (مانند درگاه‌های پرداخت، فاکتورهای بانکی و فرم‌های ثبت‌نام)، تبدیل مکرر ارقام به حروف و تقویم با قفل اختصاصی پایتون کش می‌شوند تا هیچ پردازش تکراری روی پردازنده تحمیل نشود.'
               : 'High-throughput APIs (such as payment gateways and accounting microservices) benefit from atomic in-memory caching that eliminates redundant date parsing and integer decomposition.'}
           </p>
-          <CodeBlock code={cacheSnippet} language="python" title="parsikit/cache.py" />
+          <div dir="ltr">
+            <CodeBlock code={cacheSnippet} language="python" title="parsikit/cache.py" />
+          </div>
         </section>
 
         {/* Pillar 3: Defensive Security & PII Protection */}
@@ -202,7 +217,7 @@ class ThreadSafeLRUCache:
           onClick={() => navigateToDoc('development/architecture')}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#126E68] text-white font-medium hover:bg-[#0D544F] transition-colors cursor-pointer text-sm"
         >
-          <span>{isRtl ? 'مشاهده سند کامل معماری در مستندات' : 'Read Full Architecture Specification'}</span>
+          <span>{t.architecture.viewInDocs}</span>
           {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
         </button>
       </div>

@@ -4,16 +4,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { searchDocumentation, type SearchResult } from '../lib/search';
 import { modalOverlayVariants, modalPanelVariants } from '../lib/motion';
+import { getTranslations } from '../i18n/translations';
+import { ALL_DOCS } from '../data/docsManifest';
 
 export function SearchModal() {
-  const { isSearchOpen, closeSearch, navigateToDoc, lang } = useApp();
+  const { isSearchOpen, closeSearch, navigateToDoc, lang, isRtl } = useApp();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const isRtl = lang === 'fa';
+  const t = getTranslations(lang);
 
   useEffect(() => {
     if (isSearchOpen) {
@@ -70,13 +72,15 @@ export function SearchModal() {
     }
   };
 
+  const totalDocsCount = ALL_DOCS.filter((d) => d.lang === lang).length;
+
   return (
     <AnimatePresence>
       {isSearchOpen && (
         <motion.div
           role="dialog"
           aria-modal="true"
-          aria-label={isRtl ? 'جستجو در مستندات' : 'Search documentation'}
+          aria-label={t.search.title}
           variants={modalOverlayVariants}
           initial="hidden"
           animate="visible"
@@ -102,18 +106,14 @@ export function SearchModal() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={
-                  isRtl
-                    ? 'جستجوی مستندات، توابع، مثال‌ها (مثلاً کد ملی، ZWNJ، تومان)...'
-                    : 'Search documentation, functions, guides (e.g. national code, ZWNJ, toman)...'
-                }
+                placeholder={t.search.placeholder}
                 className="flex-1 bg-transparent text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 text-sm md:text-base outline-none min-h-[44px]"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
                   className="p-2 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  aria-label={isRtl ? 'پاک کردن جستجو' : 'Clear search'}
+                  aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -127,12 +127,7 @@ export function SearchModal() {
             <div className="flex-1 overflow-y-auto p-2 divide-y divide-stone-100 dark:divide-white/5">
               {query.trim().length > 0 && results.length === 0 && (
                 <div className="p-8 text-center text-stone-500 dark:text-stone-400 text-sm">
-                  <p>{isRtl ? 'نتیجه‌ای برای این عبارت یافت نشد.' : 'No matching documentation found.'}</p>
-                  <p className="mt-1 text-xs opacity-75">
-                    {isRtl
-                      ? 'کلمات دیگری مانند «کارت بانکی»، «کبیسه» یا «اعتبارسنجی» را امتحان کنید.'
-                      : 'Try keywords like "validator", "card", "zwnj", or "jalali".'}
-                  </p>
+                  <p>{t.search.noResults}</p>
                 </div>
               )}
 
@@ -179,31 +174,18 @@ export function SearchModal() {
                 <div className="p-6 text-center text-xs text-stone-400 space-y-3">
                   <p className="font-medium text-stone-500">{isRtl ? 'موضوعات پیشنهادی:' : 'Suggested topics:'}</p>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {isRtl ? (
-                      <>
-                        {['کد ملی', 'نیم‌فاصله', 'کارت بانکی', 'تقویم جلالی', 'تبدیل به تومان', 'شیءگرایی'].map((tag) => (
-                          <button
-                            key={tag}
-                            onClick={() => setQuery(tag)}
-                            className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-[#126E68]/15 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer min-h-[36px]"
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </>
-                    ) : (
-                      <>
-                        {['National Code', 'ZWNJ', 'Bank Card', 'Jalali Calendar', 'Toman Currency', 'Models'].map((tag) => (
-                          <button
-                            key={tag}
-                            onClick={() => setQuery(tag)}
-                            className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-[#126E68]/15 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer min-h-[36px]"
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </>
-                    )}
+                    {(isRtl
+                      ? ['کد ملی', 'تذکره', 'نیم‌فاصله', 'کارت بانکی', 'تقویم جلالی', 'شماره تماس', 'تبدیل به تومان']
+                      : ['National Code', 'ZWNJ', 'Bank Card', 'Jalali Calendar', 'Currency', 'Models', 'Тақвим']
+                    ).map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => setQuery(tag)}
+                        className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-[#126E68]/15 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer min-h-[36px]"
+                      >
+                        {tag}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -212,11 +194,11 @@ export function SearchModal() {
             {/* Footer shortcuts */}
             <div className="px-4 py-2.5 border-t border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#111716] flex items-center justify-between text-[11px] text-stone-500">
               <div className="flex items-center gap-3">
-                <span>↑↓ {isRtl ? 'حرکت' : 'Navigate'}</span>
-                <span>↵ {isRtl ? 'انتخاب' : 'Select'}</span>
-                <span>ESC {isRtl ? 'خروج' : 'Close'}</span>
+                <span>↑↓ {t.search.navigateHint}</span>
+                <span>↵ {t.search.selectHint}</span>
+                <span>ESC {t.search.closeHint}</span>
               </div>
-              <span className="font-mono">50 {isRtl ? 'سند رسمی' : 'Official Docs'}</span>
+              <span className="font-mono">{totalDocsCount} {isRtl ? 'سند' : 'Docs'}</span>
             </div>
           </motion.div>
         </motion.div>

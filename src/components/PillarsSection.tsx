@@ -11,67 +11,125 @@ import {
 import { useApp } from '../context/AppContext';
 
 export function PillarsSection() {
-  const { lang, navigateToDoc } = useApp();
-  const isRtl = lang === 'fa';
+  const { lang, navigateToDoc, isRtl } = useApp();
+
+  const getPillarTitle = (num: string) => {
+    switch (num) {
+      case '01':
+        return lang === 'fa' ? 'کش سریع درون‌حافظه‌ای و تنظیمات سراسری'
+          : lang === 'prs-af' ? 'سیستم کش سریع درون‌حافظه‌ای و تنظیمات عمومی'
+          : lang === 'tg' ? 'Кеши сареъи дохилихотиравӣ ва танзимоти куллӣ'
+          : 'Thread-Safe LRU Cache & Central Configuration';
+      case '02':
+        return lang === 'fa' ? 'سیستم خطای ساختاریافته ایرانی'
+          : lang === 'prs-af' ? 'سلسله‌مراتب استثناهای ساختاریافته'
+          : lang === 'tg' ? 'Силсилаи сохторбандишудаи хатоҳо'
+          : 'Structured Domain Exception Hierarchy';
+      case '03':
+        return lang === 'fa' ? 'مدل‌های شیءگرا و سازگاری با Pydantic'
+          : lang === 'prs-af' ? 'مدل‌های شیءگرا و هماهنگی با Pydantic'
+          : lang === 'tg' ? 'Моделҳои объектгаро ва ҳамоҳангӣ бо Pydantic'
+          : 'Object-Oriented Domain Models & Pydantic v2';
+      case '04':
+        return lang === 'fa' ? 'ابزارهای عیب‌یابی و تراز بصری فارسی'
+          : lang === 'prs-af' ? 'ابزارهای عیب‌یابی و تراز بصری متون'
+          : lang === 'tg' ? 'Абзорҳои ташхиси хато ва танзими матн'
+          : 'Developer Diagnostics & True Visual Width';
+      case '05':
+        return lang === 'fa' ? 'پکیج امنیت و ماسک داده‌های حساس کاربر'
+          : lang === 'prs-af' ? 'بسته امنیتی و مخفی‌سازی داده‌های حساس'
+          : lang === 'tg' ? 'Маҷмӯаи амният ва ниқоббандии додаҳои ҳассос'
+          : 'Security Suite & Sensitive PII Masking';
+      default:
+        return '';
+    }
+  };
+
+  const getPillarDesc = (num: string) => {
+    switch (num) {
+      case '01':
+        return lang === 'fa'
+          ? 'عملیات سنگین پردازشی (مانند تبدیل ارقام چندمیلیاردی به حروف فارسی یا محاسبات دقیق نجومی تقویم جلالی) با سیستم کش ایمن در چندنخی (Thread-safe) بهینه‌سازی می‌شوند.'
+          : lang === 'prs-af'
+          ? 'عملیات سنگین پردازشی (همچون تبدیل ارقام به حروف یا تبدیلات تقویم هجری شمسی) با سیستم کش چندنخی بهینه‌سازی شده‌اند.'
+          : lang === 'tg'
+          ? 'Амалиёти вазнини ҳисоботӣ (ба монанди табдили рақамҳо ба калимаҳо ё тақвими шамсӣ) бо механизми кешкунӣ суръат бахшида мешаванд.'
+          : 'Repetitive CPU-bound transformations (e.g. converting multi-digit numbers to words or astronomical calendar math) are optimized with an internal thread-safe LRU cache.';
+      case '02':
+        return lang === 'fa'
+          ? 'سلسله‌مراتب خطای اختصاصی و استانداردی مانند InvalidNationalCodeError و InvalidCardNumberError فراهم شده که برای معماری تمیز (Clean Architecture) ایده‌آل است.'
+          : lang === 'prs-af'
+          ? 'سلسله‌مراتب استثناهای اختصاصی مانند InvalidNationalCodeError و InvalidCardNumberError برای مهندسی پاک فراهم شده است.'
+          : lang === 'tg'
+          ? 'Силсилаи хатоҳои хоси ParsiKit барои сохтори мустаҳками меъмории нармафзор.'
+          : 'Never wrestle with generic ValueError crashes. ParsiKit provides a structured, sanitized exception tree tailored to identity and financial standards.';
+      case '03':
+        return lang === 'fa'
+          ? 'رشته‌های خام ورودی را درون شیءهای باارزش مانند NationalCode، MobileNumber، BankCard و Sheba کپسوله کنید که با Pydantic هماهنگ هستند.'
+          : lang === 'prs-af'
+          ? 'کپسوله‌سازی مقادیر خام درون کلاس‌های NationalCode، BankCard و MobileNumber همراه با اعتبارسنجی خودکار.'
+          : lang === 'tg'
+          ? 'Қолаббандии сатрҳои хом дар дохили классҳои NationalCode ва BankCard бо тафтиши фаврӣ.'
+          : 'Wrap raw inputs in rich value objects like NationalCode, MobileNumber, BankCard, or Sheba that validate instantly and serialize with Pydantic v2.';
+      case '04':
+        return lang === 'fa'
+          ? 'پارسی‌کیت پهنای واقعی کاراکترها روی مانیتور را محاسبه کرده و امکان عیب‌یابی متون را میسر می‌سازد.'
+          : lang === 'prs-af'
+          ? 'محاسبه پهنای واقعی کاراکترهای دارای نیم‌فاصله در خروجی کنسول و جدول‌های ترمینال.'
+          : lang === 'tg'
+          ? 'Ҳисоби паҳнои воқеии аломатҳо ва нимафосилаҳо дар намоиши терминал.'
+          : 'Calculate true visual terminal width for flawless CLI tables and logs, alongside interactive text inspection.';
+      case '05':
+        return lang === 'fa'
+          ? 'لاگ‌ها، ردیابی خطاها و پنل‌های مدیریتی را با ماسک کردن ارقام میانی شماره موبایل، کارت بانکی، کد ملی و ایمیل ایمن کنید.'
+          : lang === 'prs-af'
+          ? 'حفظ محرمانگی اطلاعات با ماسک‌کردن ارقام میانی شماره‌های تماس، کارت بانکی و تذکره.'
+          : lang === 'tg'
+          ? 'Ҳифзи махфияти маълумот бо ниқоббандии рақами кортҳо ва телефонҳо дар сабтҳои системавӣ.'
+          : 'Sanitize logs and admin displays by safely masking the middle digits of mobiles, bank cards, national codes, and emails.';
+      default:
+        return '';
+    }
+  };
 
   const pillars = [
     {
       num: '01',
-      titleEn: 'Thread-Safe LRU Cache & Central Configuration',
-      titleFa: 'کش سریع درون‌حافظه‌ای و تنظیمات سراسری',
+      title: getPillarTitle('01'),
       module: 'parsikit.cache & parsikit.config',
-      descEn:
-        'Repetitive CPU-bound transformations (e.g. converting multi-digit numbers to Persian words or astronomical calendar math) are optimized with an internal thread-safe LRU cache. Global parameters like default VAT rates and currency units can be toggled dynamically.',
-      descFa:
-        'عملیات سنگین پردازشی (مانند تبدیل ارقام چندمیلیاردی به حروف فارسی یا محاسبات دقیق نجومی تقویم جلالی) با سیستم کش ایمن در چندنخی (Thread-safe) بهینه‌سازی می‌شوند. همچنین تنظیمات سراسری مالیات و ارز پیش‌فرض به آسانی قابل کنترل است.',
+      desc: getPillarDesc('01'),
       icon: Zap,
       docSlug: 'api/cache',
     },
     {
       num: '02',
-      titleEn: 'Structured Iranian Domain Exception Hierarchy',
-      titleFa: 'سیستم خطای ساختاریافته ایرانی',
+      title: getPillarTitle('02'),
       module: 'parsikit.exceptions',
-      descEn:
-        'Never wrestle with generic ValueError or TypeError crashes. ParsiKit provides a structured, sanitized exception tree tailored to Iranian identity and financial standards (e.g. InvalidNationalCodeError, InvalidCardNumberError) designed for Clean Architecture and DDD.',
-      descFa:
-        'دیگر نیازی به سر و کله زدن با استثناهای کلی پایتون نیست. پارسی‌کیت سلسله‌مراتب خطای اختصاصی و استانداردی مانند InvalidNationalCodeError و InvalidCardNumberError فراهم کرده که برای معماری تمیز (Clean Architecture) و Domain-Driven Design ایده‌آل است.',
+      desc: getPillarDesc('02'),
       icon: AlertTriangle,
       docSlug: 'api/models',
     },
     {
       num: '03',
-      titleEn: 'Object-Oriented Domain Models & Pydantic v2',
-      titleFa: 'مدل‌های شیءگرا و سازگاری با Pydantic',
+      title: getPillarTitle('03'),
       module: 'parsikit.models',
-      descEn:
-        'Wrap raw inputs in rich value objects like NationalCode, MobileNumber, BankCard, Sheba, or VehiclePlate. They validate on instantiation, extract rich metadata (province of issue, card issuer bank, operator), and serialize cleanly with FastAPI.',
-      descFa:
-        'رشته‌های خام ورودی را درون شیءهای باارزش مانند NationalCode، MobileNumber، BankCard و Sheba کپسوله کنید. این مدل‌ها به محض ساخته‌شدن ورودی را اعتبارسنجی می‌کنند، اپراتور سیم‌کارت یا بانک صادرکننده را استخراج کرده و با Pydantic هماهنگ هستند.',
+      desc: getPillarDesc('03'),
       icon: Boxes,
       docSlug: 'tutorials/models',
     },
     {
       num: '04',
-      titleEn: 'Developer Diagnostics & True Visual Width',
-      titleFa: 'ابزارهای عیب‌یابی و تراز بصری فارسی',
+      title: getPillarTitle('04'),
       module: 'parsikit.dev',
-      descEn:
-        'Python formatters often miscalculate the length of strings containing Zero-Width Non-Joiners (ZWNJs) or Arabic diacritics. ParsiKit calculates true visual terminal width for flawless CLI tables and logs, alongside interactive text inspection.',
-      descFa:
-        'فرمت‌کننده‌های استاندارد پهنای متون حاوی نیم‌فاصله یا اعراب را اشتباه محاسبه می‌کنند و تراز جدول‌های ترمینال به هم می‌ریزد. پارسی‌کیت پهنای واقعی کاراکترها روی مانیتور را محاسبه کرده و امکان عیب‌یابی متون را میسر می‌سازد.',
+      desc: getPillarDesc('04'),
       icon: Activity,
-      docSlug: 'api/dev_and_gui',
+      docSlug: 'api/text',
     },
     {
       num: '05',
-      titleEn: 'Security Suite & Sensitive PII Masking',
-      titleFa: 'پکیج امنیت و ماسک داده‌های حساس کاربر',
+      title: getPillarTitle('05'),
       module: 'parsikit.validators & parsikit.text',
-      descEn:
-        'Sanitize logs, monitoring traces, and admin displays by safely masking the middle digits of Iranian mobiles, bank cards, national codes, and emails. Exceptions are sanitized so raw user PII is never exposed in stack traces.',
-      descFa:
-        'لاگ‌ها، ردیابی خطاها و پنل‌های مدیریتی را با ماسک کردن ارقام میانی شماره موبایل، کارت بانکی، کد ملی و ایمیل ایمن کنید. پیام‌های خطا به صورت خودکار پاکسازی می‌شوند تا داده‌های حساس کاربر هرگز نشت نکنند.',
+      desc: getPillarDesc('05'),
       icon: Lock,
       docSlug: 'guides/forms_and_security',
     },
@@ -87,13 +145,13 @@ export function PillarsSection() {
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-stone-900 dark:text-white leading-tight mb-4">
             {isRtl
-              ? 'پنج ستون فنی برای توسعه حرفه‌ای با داده‌های فارسی'
+              ? 'پنج ستون فنی برای توسعه حرفه‌ای با داده‌های زبان فارسی'
               : 'Five Core Architectural Pillars Built for Production'}
           </h2>
           <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
             {isRtl
-              ? 'پارسی‌کیت از اسکریپت‌های ابتدایی عبور کرده و ساختاری استاندارد، ماژولار و امن برای استفاده در سرویس‌های مدرن پایتونی (FastAPI، Django، ربات‌ها و کارهای علم داده) ارائه می‌دهد.'
-              : 'Engineered as an enterprise-ready foundation for Python backends (FastAPI, Django, async tasks, and data science pipelines) handling Iranian data structures.'}
+              ? 'پارسی‌کیت از اسکریپت‌های ابتدایی عبور کرده و ساختاری استاندارد، ماژولار و امن برای استفاده در سرویس‌های مدرن پایتونی ارائه می‌دهد.'
+              : 'Engineered as an enterprise-ready foundation for Python backends (FastAPI, Django, async tasks, and data science pipelines) handling domestic data structures.'}
           </p>
         </div>
 
@@ -116,16 +174,16 @@ export function PillarsSection() {
                     </div>
                   </div>
 
-                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1">
+                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1" dir="ltr">
                     {pillar.module}
                   </span>
 
                   <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-3 group-hover:text-[#126E68] dark:group-hover:text-[#52C5BE] transition-colors">
-                    {isRtl ? pillar.titleFa : pillar.titleEn}
+                    {pillar.title}
                   </h3>
 
                   <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-                    {isRtl ? pillar.descFa : pillar.descEn}
+                    {pillar.desc}
                   </p>
                 </div>
 

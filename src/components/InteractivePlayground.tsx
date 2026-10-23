@@ -34,10 +34,11 @@ import {
   isJalaliLeap,
   formatJalaliDate,
 } from '../lib/jalali';
+import { getTranslations } from '../i18n/translations';
 
 export function InteractivePlayground() {
-  const { lang } = useApp();
-  const isRtl = lang === 'fa';
+  const { lang, isRtl } = useApp();
+  const t = getTranslations(lang);
 
   const [activeTool, setActiveTool] = useState<
     'text' | 'national_code' | 'bank_card' | 'number_words' | 'calendar' | 'mobile'
@@ -81,38 +82,32 @@ export function InteractivePlayground() {
   const tools = [
     {
       id: 'text' as const,
-      nameEn: 'Text & ZWNJ Cleansing',
-      nameFa: 'پاکسازی متن و نیم‌فاصله',
+      name: t.playground.tools.text.name,
       icon: Sparkles,
     },
     {
       id: 'national_code' as const,
-      nameEn: 'National Code Validator',
-      nameFa: 'اعتبارسنجی کد ملی',
+      name: t.playground.tools.nationalCode.name,
       icon: ShieldCheck,
     },
     {
       id: 'bank_card' as const,
-      nameEn: 'Bank Card & Luhn Check',
-      nameFa: 'تشخیص بانک و الگوریتم لان',
+      name: t.playground.tools.bankCard.name,
       icon: CreditCard,
     },
     {
       id: 'number_words' as const,
-      nameEn: 'Number to Words & Currency',
-      nameFa: 'عدد به حروف و تبدیل ارز',
+      name: t.playground.tools.numberWords.name,
       icon: Coins,
     },
     {
       id: 'calendar' as const,
-      nameEn: 'Astronomical Jalali Date',
-      nameFa: 'تبدیل تقویم شمسی و کبیسه',
+      name: t.playground.tools.calendar.name,
       icon: Calendar,
     },
     {
       id: 'mobile' as const,
-      nameEn: 'Mobile Operator & Masking',
-      nameFa: 'تشخیص اپراتور و ماسک شماره',
+      name: t.playground.tools.mobile.name,
       icon: Smartphone,
     },
   ];
@@ -122,17 +117,13 @@ export function InteractivePlayground() {
       {/* Header */}
       <div className="max-w-3xl mb-12">
         <div className="text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
-          {isRtl ? 'آزمایشگاه محاسباتی زنده' : 'Interactive Diagnostic Studio'}
+          {t.playground.runOnline}
         </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-stone-900 dark:text-white mb-3">
-          {isRtl
-            ? 'تست آنلاین الگوریتم‌های پارسی‌کیت در مرورگر'
-            : 'Test ParsiKit Algorithms Directly in Your Browser'}
+          {t.playground.title}
         </h2>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300">
-          {isRtl
-            ? 'الگوریتم‌های محاسباتی پارسی‌کیت را با مقادیر مختلف آزمایش کنید و نتایج استانداردسازی، چک‌سام و ماسک کردن داده‌ها را بررسی کنید.'
-            : 'Experiment with ParsiKit computational models and validation checksums with real-time feedback and safe data transformations.'}
+          {t.playground.subtitle}
         </p>
       </div>
 
@@ -152,7 +143,7 @@ export function InteractivePlayground() {
               }`}
             >
               <Icon className="w-4 h-4" />
-              <span>{isRtl ? tool.nameFa : tool.nameEn}</span>
+              <span>{tool.name}</span>
             </button>
           );
         })}
@@ -165,7 +156,7 @@ export function InteractivePlayground() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="flex flex-col gap-3">
               <label htmlFor="raw-text-input" className="text-sm font-semibold text-stone-900 dark:text-white">
-                {isRtl ? 'متن خام ورودی (حاوی حروف عربی، فاصله اضافی و نیم‌فاصله شکسته):' : 'Raw Input Text:'}
+                {t.playground.tools.text.inputLabel}
               </label>
               <textarea
                 id="raw-text-input"
@@ -173,7 +164,7 @@ export function InteractivePlayground() {
                 onChange={(e) => setTextInput(e.target.value)}
                 rows={5}
                 className="w-full p-3.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] text-stone-900 dark:text-stone-100 text-sm focus:ring-2 focus:ring-[#126E68] outline-none"
-                placeholder={isRtl ? 'متن خود را اینجا تایپ کنید...' : 'Type or paste Persian text here...'}
+                placeholder={isRtl ? 'متن خود را اینجا تایپ کنید...' : 'Type or paste text here...'}
               />
               <div className="flex items-center gap-2">
                 <button
@@ -195,7 +186,7 @@ export function InteractivePlayground() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-stone-900 dark:text-white">
-                  {isRtl ? 'خروجی استانداردسازی‌شده پارسی‌کیت:' : 'ParsiKit Standardized Output:'}
+                  {t.playground.tools.text.outputLabel}
                 </span>
                 <button
                   onClick={() => copyText(textResult.cleaned, 'text')}
@@ -225,7 +216,7 @@ export function InteractivePlayground() {
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
             <div>
               <label htmlFor="national-code-input" className="block text-sm font-semibold text-stone-900 dark:text-white mb-2">
-                {isRtl ? 'کد ملی ۱۰ رقمی را وارد کنید:' : 'Enter 10-Digit Iranian National Code:'}
+                {t.playground.tools.nationalCode.inputLabel}
               </label>
               <input
                 id="national-code-input"
@@ -233,6 +224,7 @@ export function InteractivePlayground() {
                 maxLength={10}
                 value={nationalCodeInput}
                 onChange={(e) => setNationalCodeInput(e.target.value)}
+                dir="ltr"
                 className="w-full p-3.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] text-stone-900 dark:text-stone-100 text-base font-mono tracking-wider focus:ring-2 focus:ring-[#126E68] outline-none min-h-[44px]"
                 placeholder="0010123458"
               />
@@ -276,8 +268,8 @@ export function InteractivePlayground() {
               <div className="flex flex-col gap-1.5 flex-1">
                 <div className="font-bold text-base">
                   {isNationalCodeValid
-                    ? (isRtl ? 'کد ملی از نظر چک‌سام ریاضی (Modulo 11) معتبر است' : 'Valid Iranian National Code (Modulo-11 Checksum Passed)')
-                    : (isRtl ? 'کد ملی نامعتبر است (الگوریتم چک‌سام یا تکرار ارقام رد شد)' : 'Invalid National Code (Checksum failed or repeated identical digits)')}
+                    ? t.playground.tools.nationalCode.validMsg
+                    : t.playground.tools.nationalCode.invalidMsg}
                 </div>
                 <div className="text-xs opacity-90 leading-relaxed font-sans">
                   {isNationalCodeValid
@@ -298,7 +290,7 @@ export function InteractivePlayground() {
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
             <div>
               <label htmlFor="card-number-input" className="block text-sm font-semibold text-stone-900 dark:text-white mb-2">
-                {isRtl ? 'شماره کارت ۱۶ رقمی شتاب را وارد کنید:' : 'Enter 16-Digit Iranian Bank Card:'}
+                {t.playground.tools.bankCard.inputLabel}
               </label>
               <input
                 id="card-number-input"
@@ -306,6 +298,7 @@ export function InteractivePlayground() {
                 maxLength={19}
                 value={cardInput}
                 onChange={(e) => setCardInput(e.target.value)}
+                dir="ltr"
                 className="w-full p-3.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] text-stone-900 dark:text-stone-100 text-base font-mono tracking-wider focus:ring-2 focus:ring-[#126E68] outline-none min-h-[44px]"
                 placeholder="6037991122334455"
               />
@@ -358,12 +351,12 @@ export function InteractivePlayground() {
                   {isCardValid ? (
                     <span className="text-emerald-300 flex items-center gap-1">
                       <CheckCircle2 className="w-4 h-4" />
-                      {isRtl ? 'الگوریتم لان معتبر' : 'Luhn Valid'}
+                      {t.playground.tools.bankCard.validMsg}
                     </span>
                   ) : (
                     <span className="text-rose-300 flex items-center gap-1">
                       <XCircle className="w-4 h-4" />
-                      {isRtl ? 'نامعتبر' : 'Invalid'}
+                      {t.playground.tools.bankCard.invalidMsg}
                     </span>
                   )}
                 </div>
@@ -377,13 +370,14 @@ export function InteractivePlayground() {
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
             <div>
               <label htmlFor="amount-number-input" className="block text-sm font-semibold text-stone-900 dark:text-white mb-2">
-                {isRtl ? 'عدد یا مبلغ مورد نظر را وارد کنید:' : 'Enter Amount or Numerical Value:'}
+                {t.playground.tools.numberWords.inputLabel}
               </label>
               <input
                 id="amount-number-input"
                 type="text"
                 value={numberInput}
                 onChange={(e) => setNumberInput(e.target.value)}
+                dir="ltr"
                 className="w-full p-3.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] text-stone-900 dark:text-stone-100 text-lg font-mono tracking-wider focus:ring-2 focus:ring-[#126E68] outline-none min-h-[44px]"
                 placeholder="3500000"
               />
@@ -402,42 +396,27 @@ export function InteractivePlayground() {
               </div>
             </div>
 
-            {/* Results Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/70 dark:bg-[#0F1514] flex flex-col justify-between">
-                <span className="text-xs text-stone-500 font-medium mb-1">
-                  {isRtl ? 'عدد به حروف فارسی:' : 'Written in Persian Words:'}
-                </span>
-                <span className="text-base font-bold text-stone-900 dark:text-white leading-relaxed">
-                  {numberWordsResult}
-                </span>
+            <div className="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0F1514]">
+              <span className="text-xs font-mono uppercase tracking-wider text-stone-500 block mb-2">
+                {t.playground.tools.numberWords.wordsLabel}
+              </span>
+              <div className="text-lg sm:text-xl font-bold text-[#126E68] dark:text-[#52C5BE] leading-relaxed">
+                {numberWordsResult || '—'}
               </div>
 
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/70 dark:bg-[#0F1514] flex flex-col justify-between">
-                <span className="text-xs text-stone-500 font-medium mb-1">
-                  {isRtl ? 'فرمت پولی فارسی (تومان):' : 'Formatted Currency (Toman):'}
-                </span>
-                <span className="text-base font-bold text-[#126E68] dark:text-[#52C5BE]">
-                  {formatPersianCurrency(numberInput, 'تومان')}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/70 dark:bg-[#0F1514] flex flex-col justify-between">
-                <span className="text-xs text-stone-500 font-medium mb-1">
-                  {isRtl ? 'تبدیل ریال به تومان (تقسیم بر ۱۰):' : 'Rial to Toman (÷ 10):'}
-                </span>
-                <span className="text-base font-mono font-bold text-stone-900 dark:text-white">
-                  {toPersianDigits(rialToToman(numberInput).toLocaleString())} {isRtl ? 'تومان' : 'Toman'}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50/70 dark:bg-[#0F1514] flex flex-col justify-between">
-                <span className="text-xs text-stone-500 font-medium mb-1">
-                  {isRtl ? 'تبدیل تومان به ریال (ضرب‌در ۱۰):' : 'Toman to Rial (× 10):'}
-                </span>
-                <span className="text-base font-mono font-bold text-stone-900 dark:text-white">
-                  {toPersianDigits(tomanToRial(numberInput).toLocaleString())} {isRtl ? 'ریال' : 'Rial'}
-                </span>
+              <div className="mt-6 pt-4 border-t border-stone-200/80 dark:border-white/5 grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-stone-500 block mb-1">{isRtl ? 'قالب‌بندی ریال:' : 'Rial formatting:'}</span>
+                  <span className="font-mono font-semibold text-stone-800 dark:text-stone-200">
+                    {formatPersianCurrency(numberInput, 'ریال')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-stone-500 block mb-1">{isRtl ? 'معادل به تومان:' : 'Toman conversion:'}</span>
+                  <span className="font-mono font-semibold text-stone-800 dark:text-stone-200">
+                    {formatPersianCurrency(rialToToman(numberInput), 'تومان')}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -446,70 +425,69 @@ export function InteractivePlayground() {
         {/* Tool 5: Astronomical Jalali Calendar */}
         {activeTool === 'calendar' && (
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
-            <div>
-              <span className="block text-sm font-semibold text-stone-900 dark:text-white mb-2">
-                {isRtl ? 'تاریخ میلادی را انتخاب کنید:' : 'Select Gregorian Date:'}
-              </span>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label htmlFor="year-select" className="text-xs text-stone-500 block mb-1">{isRtl ? 'سال' : 'Year'}</label>
-                  <input
-                    id="year-select"
-                    type="number"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center text-sm min-h-[44px]"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="month-select" className="text-xs text-stone-500 block mb-1">{isRtl ? 'ماه' : 'Month'}</label>
-                  <input
-                    id="month-select"
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center text-sm min-h-[44px]"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="day-select" className="text-xs text-stone-500 block mb-1">{isRtl ? 'روز' : 'Day'}</label>
-                  <input
-                    id="day-select"
-                    type="number"
-                    min={1}
-                    max={31}
-                    value={selectedDay}
-                    onChange={(e) => setSelectedDay(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center text-sm min-h-[44px]"
-                  />
-                </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-stone-500 mb-1">
+                  {t.playground.tools.calendar.yearLabel}
+                </label>
+                <input
+                  type="number"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  dir="ltr"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center outline-none focus:ring-2 focus:ring-[#126E68] min-h-[44px]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-stone-500 mb-1">
+                  {t.playground.tools.calendar.monthLabel}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  dir="ltr"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center outline-none focus:ring-2 focus:ring-[#126E68] min-h-[44px]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-stone-500 mb-1">
+                  {t.playground.tools.calendar.dayLabel}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={selectedDay}
+                  onChange={(e) => setSelectedDay(Number(e.target.value))}
+                  dir="ltr"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] font-mono text-center outline-none focus:ring-2 focus:ring-[#126E68] min-h-[44px]"
+                />
               </div>
             </div>
 
-            {/* Converted Jalali Date Display */}
-            <div className="p-6 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F1514] border border-[#126E68]/20 dark:border-white/10 flex flex-col items-center justify-center text-center gap-3">
-              <span className="text-xs font-mono text-[#D4A03D] uppercase tracking-wider">
-                {isRtl ? 'تاریخ معادل در تقویم رسمی هجری خورشیدی (جلالی)' : 'Astronomical Solar Hijri Date'}
+            <div className="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0F1514]">
+              <span className="text-xs font-mono uppercase tracking-wider text-stone-500 block mb-2">
+                {t.playground.tools.calendar.jalaliResult}
               </span>
-
-              <div className="text-3xl sm:text-4xl font-extrabold text-[#126E68] dark:text-[#52C5BE]">
-                {toPersianDigits(formatJalaliDate(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd, 'fa'))}
+              <div className="text-xl sm:text-2xl font-bold text-[#126E68] dark:text-[#52C5BE] leading-relaxed mb-4">
+                {formatJalaliDate(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd)}
               </div>
 
-              <div className="text-xs font-mono text-stone-500">
-                {formatJalaliDate(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd, 'en')}
-              </div>
-
-              <div className="mt-2 pt-3 border-t border-stone-200 dark:border-white/10 w-full flex items-center justify-center gap-4 text-xs">
-                <span>
-                  {isRtl ? `سال ${toPersianDigits(jalaliDate.jy)}:` : `Year ${jalaliDate.jy}:`}
+              <div className="flex items-center justify-between text-xs font-mono pt-4 border-t border-stone-200/80 dark:border-white/5">
+                <span className="text-stone-500">
+                  {t.playground.tools.calendar.leapLabel}
                 </span>
-                <span className={`font-semibold ${jalaliIsLeap ? 'text-emerald-600' : 'text-stone-500'}`}>
+                <span className={`px-2.5 py-1 rounded-full font-bold ${
+                  jalaliIsLeap
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                    : 'bg-stone-100 text-stone-600 dark:bg-white/5 dark:text-stone-400'
+                }`}>
                   {jalaliIsLeap
                     ? (isRtl ? 'سال کبیسه نجومی (۳۶۶ روز)' : 'Astronomical Leap Year (366 days)')
-                    : (isRtl ? 'سال عادی (۳۶۵ روز)' : 'Regular Year (365 days)')}
+                    : (isRtl ? 'سال عادی (۳۶۵ روز)' : 'Standard Year (365 days)')}
                 </span>
               </div>
             </div>
@@ -521,57 +499,43 @@ export function InteractivePlayground() {
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
             <div>
               <label htmlFor="mobile-number-input" className="block text-sm font-semibold text-stone-900 dark:text-white mb-2">
-                {isRtl ? 'شماره موبایل را وارد کنید:' : 'Enter Iranian Mobile Phone Number:'}
+                {t.playground.tools.mobile.inputLabel}
               </label>
               <input
                 id="mobile-number-input"
                 type="text"
+                maxLength={13}
                 value={mobileInput}
                 onChange={(e) => setMobileInput(e.target.value)}
+                dir="ltr"
                 className="w-full p-3.5 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514] text-stone-900 dark:text-stone-100 text-base font-mono tracking-wider focus:ring-2 focus:ring-[#126E68] outline-none min-h-[44px]"
                 placeholder="09121234567"
               />
 
-              <div className="mt-2 flex items-center gap-3 text-xs flex-wrap">
-                <span className="text-stone-400">{isRtl ? 'پیش‌شماره‌ها:' : 'Prefix samples:'}</span>
-                <button
-                  onClick={() => setMobileInput('09121234567')}
-                  className="text-[#126E68] dark:text-[#52C5BE] hover:underline cursor-pointer font-mono py-1"
-                >
-                  همراه اول (0912)
-                </button>
-                <button
-                  onClick={() => setMobileInput('09351234567')}
-                  className="text-[#D4A03D] hover:underline cursor-pointer font-mono py-1"
-                >
-                  ایرانسل (0935)
-                </button>
-                <button
-                  onClick={() => setMobileInput('09211234567')}
-                  className="text-fuchsia-600 hover:underline cursor-pointer font-mono py-1"
-                >
-                  رایتل (0921)
-                </button>
+              <div className="mt-2 flex items-center gap-2 text-xs flex-wrap">
+                <span className="text-stone-400">{isRtl ? 'شماره‌های تست:' : 'Test numbers:'}</span>
+                {['09121234567', '09351234567', '09211234567'].map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMobileInput(m)}
+                    className="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-[#126E68]/10 text-stone-700 dark:text-stone-300 font-mono transition-colors cursor-pointer min-h-[36px]"
+                  >
+                    {m}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514]">
-                <span className="text-xs text-stone-500 font-medium block mb-1">
-                  {isRtl ? 'اپراتور مخابراتی تشخیص‌داده‌شده:' : 'Detected Telecom Operator:'}
-                </span>
-                <span className="text-base font-bold text-stone-900 dark:text-white">
+            <div className="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0F1514] flex flex-col gap-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-stone-500">{t.playground.tools.mobile.operatorLabel}</span>
+                <span className="font-bold text-[#126E68] dark:text-[#52C5BE]">
                   {mobileOperator ? (isRtl ? mobileOperator.nameFa : mobileOperator.nameEn) : (isRtl ? 'نامشخص' : 'Unknown')}
                 </span>
               </div>
-
-              <div className="p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-[#0F1514]">
-                <span className="text-xs text-stone-500 font-medium block mb-1">
-                  {isRtl ? 'ماسک امنیتی PII برای لاگ‌ها:' : 'Masked PII Log Output:'}
-                </span>
-                <span className="text-base font-mono font-bold text-[#126E68] dark:text-[#52C5BE]" dir="ltr">
-                  {maskMobile(mobileInput)}
-                </span>
+              <div className="flex items-center justify-between text-sm pt-3 border-t border-stone-200/60 dark:border-white/5">
+                <span className="text-stone-500">{t.playground.tools.mobile.maskedLabel}</span>
+                <span className="font-mono font-semibold" dir="ltr">{maskMobile(mobileInput)}</span>
               </div>
             </div>
           </div>

@@ -1,9 +1,11 @@
 /**
  * Technical SEO, Dynamic Document Head Manager & Multi-Language Alternate Generator
+ * Supporting exactly four official languages: fa, en, prs-af, tg.
  */
 
 import { ALL_DOCS, type DocEntry } from '../data/docsManifest';
 import { type AppLang, type PageRoute, buildRoutePath } from './router';
+import { LOCALES } from '../i18n/config';
 
 export const BASE_SITE_URL = 'https://parsikit.dev';
 
@@ -13,7 +15,9 @@ export interface SeoMetadata {
   canonicalUrl: string;
   alternateEnUrl?: string;
   alternateFaUrl?: string;
-  alternateEsUrl?: string;
+  alternatePrsUrl?: string;
+  alternateTgUrl?: string;
+  alternateXDefaultUrl?: string;
   schemaType: 'SoftwareApplication' | 'TechArticle' | 'WebSite';
   headline?: string;
 }
@@ -33,15 +37,20 @@ export function computePageMetadata(
   // Base alternates for static non-doc routes
   let alternateEnUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('en', route)}`;
   let alternateFaUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('fa', route)}`;
-  let alternateEsUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('es', route)}`;
+  let alternatePrsUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('prs-af', route)}`;
+  let alternateTgUrl: string | undefined = `${BASE_SITE_URL}${buildRoutePath('tg', route)}`;
+  let alternateXDefaultUrl: string | undefined = alternateEnUrl;
 
   if (route === 'home') {
     if (lang === 'fa') {
       title = 'پارسی‌کیت — زیرساخت داده‌های فارسی برای پایتون';
       description = 'کتابخانه پایتونی بدون وابستگی برای پاکسازی متون فارسی، اعتبارسنجی کد ملی، کارت بانکی، تقویم نجومی جلالی، محاسبات مالی و حفظ امنیت داده‌های حساس.';
-    } else if (lang === 'es') {
-      title = 'ParsiKit — Infraestructura de Datos en Persa para Python';
-      description = 'Biblioteca pura de Python sin dependencias para normalización de texto persa, validación de códigos nacionales y tarjetas bancarias, calendario Jalalí y seguridad de datos.';
+    } else if (lang === 'prs-af') {
+      title = 'پارسی‌کیت — زیرساخت معیاری پایتون برای داده‌های فارسی دری';
+      description = 'کتابخانه بدون وابستگی‌های بیرونی برای تصفیه و اصلاح متون دری، نیم‌فاصله‌ها، تثبیت اعتبار نمبر تذکره الکترونیکی، کارت‌های بانکی و تقویم هجری شمسی.';
+    } else if (lang === 'tg') {
+      title = 'ParsiKit — Зерсохти додаҳои форсӣ ва тоҷикӣ барои Python';
+      description = 'Китобхонаи мустақил барои поксозии матн, танзими фосилаҳо, тафтиши дурустии рақамҳои миллӣ ва кортҳои бонкӣ, тақвими шамсӣ ва ҳисоботи молӣ.';
     } else {
       title = 'ParsiKit — Persian Data Infrastructure for Python';
       description = 'Production-grade, zero-dependency Python library for Persian text normalization, national checksums, astronomical Jalali calendar, financial calculations, and sensitive data masking.';
@@ -50,9 +59,12 @@ export function computePageMetadata(
     if (lang === 'fa') {
       title = 'محیط آزمایشی زنده — پارسی‌کیت';
       description = 'تست آنلاین الگوریتم‌های پارسی‌کیت در مرورگر: پاکسازی نیم‌فاصله، اعتبارسنجی کد ملی، کارت بانکی، تبدیل تاریخ و عدد به حروف.';
-    } else if (lang === 'es') {
-      title = 'Estudio de Diagnóstico y Pruebas — ParsiKit';
-      description = 'Prueba en vivo los algoritmos de ParsiKit en tu navegador: normalización de texto persa, verificación Luhn de tarjeta bancaria, calendario Jalalí y números a palabras.';
+    } else if (lang === 'prs-af') {
+      title = 'محیط آزمایشی و تشخیص آنلاین — پارسی‌کیت';
+      description = 'آزمایش مستقیم الگوریتم‌های تصفیه متن، تثبیت اعتبار نمبر تذکره و کارت بانکی، و تقویم هجری شمسی در براوزر.';
+    } else if (lang === 'tg') {
+      title = 'Озмоишгоҳи ташхиси интерактивӣ — ParsiKit';
+      description = 'Озмоиши мустақими алгоритмҳои ташхиси матн, тафтиши рақами миллӣ, корти бонкӣ ва тақвими шамсӣ дар браузер.';
     } else {
       title = 'Interactive Diagnostic Studio & Playground — ParsiKit';
       description = 'Test ParsiKit algorithms directly in the browser: text normalization, national code validation, bank card Luhn check, Jalali calendar, and number to words.';
@@ -75,18 +87,29 @@ export function computePageMetadata(
       ? `${BASE_SITE_URL}/fa/docs/${activeDoc.counterparts.fa}`
       : undefined;
 
-    alternateEsUrl = activeDoc.lang === 'es'
-      ? `${BASE_SITE_URL}/es/docs/${activeDoc.slug}`
-      : activeDoc.counterparts?.es
-      ? `${BASE_SITE_URL}/es/docs/${activeDoc.counterparts.es}`
+    alternatePrsUrl = activeDoc.lang === 'prs-af'
+      ? `${BASE_SITE_URL}/prs-af/docs/${activeDoc.slug}`
+      : activeDoc.counterparts?.['prs-af']
+      ? `${BASE_SITE_URL}/prs-af/docs/${activeDoc.counterparts['prs-af']}`
       : undefined;
+
+    alternateTgUrl = activeDoc.lang === 'tg'
+      ? `${BASE_SITE_URL}/tg/docs/${activeDoc.slug}`
+      : activeDoc.counterparts?.tg
+      ? `${BASE_SITE_URL}/tg/docs/${activeDoc.counterparts.tg}`
+      : undefined;
+
+    alternateXDefaultUrl = alternateEnUrl || alternateFaUrl;
   } else if (route === 'architecture') {
     if (lang === 'fa') {
       title = 'معماری فنی و طراحی لایه‌ای — پارسی‌کیت';
       description = 'بررسی معماری فنی پارسی‌کیت: صفر وابستگی، سیستم کش چندنخی (Thread-safe LRU Cache) و طراحی مدل‌های شیءگرا.';
-    } else if (lang === 'es') {
-      title = 'Arquitectura Técnica y Diseño de Capas — ParsiKit';
-      description = 'Análisis detallado de los principios de diseño de ParsiKit: cero dependencias externas, caché LRU seguro para hilos y modelos de dominio.';
+    } else if (lang === 'prs-af') {
+      title = 'معماری تخنیکی و لایه‌بندی سیستم — پارسی‌کیت';
+      description = 'اصول انجنیری نرم‌افزار، امنیت پایدار و استانداردهای طراحی درون کتابخانه پارسی‌کیت.';
+    } else if (lang === 'tg') {
+      title = 'Меъмории фаннӣ ва тарҳи қабатҳо — ParsiKit';
+      description = 'Принсипҳои муҳандисии барномасозӣ, амнияти пойдор ва тарроҳии дарунӣ дар ParsiKit.';
     } else {
       title = 'Technical Architecture & Layer Design — ParsiKit';
       description = 'Deep dive into ParsiKit architectural principles: zero dependencies, thread-safe in-memory caching, and domain-driven design.';
@@ -95,9 +118,12 @@ export function computePageMetadata(
     if (lang === 'fa') {
       title = 'تاریخچه تغییرات و نسخه‌ها — پارسی‌کیت';
       description = 'گزارش کامل تغییرات، اصلاحات امنیتی و قابلیت‌های جدید نسخه‌های مختلف کتابخانه پارسی‌کیت.';
-    } else if (lang === 'es') {
-      title = 'Historial de Cambios y Versiones — ParsiKit';
-      description = 'Historial completo de versiones, parches de seguridad y mejoras continuas de ParsiKit según Versionado Semántico.';
+    } else if (lang === 'prs-af') {
+      title = 'یادداشت‌های نسخه و تاریخچه تغییرات — پارسی‌کیت';
+      description = 'ثبت منظم تمام نوآوری‌ها، ترمیم خطاهای امنیتی و اصلاحات بر اساس اصول Semantic Versioning.';
+    } else if (lang === 'tg') {
+      title = 'Таърихи нусхаҳо ва тағйирот — ParsiKit';
+      description = 'Сабти мунтазами ҳамаи нусхаҳо ва беҳбудиҳои амниятӣ бар асоси стандарти Semantic Versioning.';
     } else {
       title = 'Changelog & Release Notes — ParsiKit';
       description = 'Full version history, security fixes, and feature additions across ParsiKit releases according to Semantic Versioning.';
@@ -110,7 +136,9 @@ export function computePageMetadata(
     canonicalUrl,
     alternateEnUrl,
     alternateFaUrl,
-    alternateEsUrl,
+    alternatePrsUrl,
+    alternateTgUrl,
+    alternateXDefaultUrl,
     schemaType,
     headline: activeDoc ? activeDoc.title : undefined,
   };
@@ -118,6 +146,8 @@ export function computePageMetadata(
 
 export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
   if (typeof document === 'undefined') return;
+
+  const loc = LOCALES[lang] || LOCALES.en;
 
   // Title
   document.title = meta.title;
@@ -150,49 +180,36 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
   }
   canonicalTag.setAttribute('href', meta.canonicalUrl);
 
-  // Hreflang alternates: En
-  let hreflangEn = document.querySelector('link[rel="alternate"][hreflang="en"]');
-  if (meta.alternateEnUrl) {
-    if (!hreflangEn) {
-      hreflangEn = document.createElement('link');
-      hreflangEn.setAttribute('rel', 'alternate');
-      hreflangEn.setAttribute('hreflang', 'en');
-      document.head.appendChild(hreflangEn);
+  // Helper for alternate link
+  const syncAlternateLink = (hreflang: string, url?: string) => {
+    let tag = document.querySelector(`link[rel="alternate"][hreflang="${hreflang}"]`);
+    if (url) {
+      if (!tag) {
+        tag = document.createElement('link');
+        tag.setAttribute('rel', 'alternate');
+        tag.setAttribute('hreflang', hreflang);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('href', url);
+    } else if (tag) {
+      tag.remove();
     }
-    hreflangEn.setAttribute('href', meta.alternateEnUrl);
-  } else if (hreflangEn) {
-    hreflangEn.remove();
-  }
+  };
 
-  // Hreflang alternates: Fa
-  let hreflangFa = document.querySelector('link[rel="alternate"][hreflang="fa"]');
-  if (meta.alternateFaUrl) {
-    if (!hreflangFa) {
-      hreflangFa = document.createElement('link');
-      hreflangFa.setAttribute('rel', 'alternate');
-      hreflangFa.setAttribute('hreflang', 'fa');
-      document.head.appendChild(hreflangFa);
-    }
-    hreflangFa.setAttribute('href', meta.alternateFaUrl);
-  } else if (hreflangFa) {
-    hreflangFa.remove();
-  }
+  syncAlternateLink('en', meta.alternateEnUrl);
+  syncAlternateLink('fa-IR', meta.alternateFaUrl);
+  syncAlternateLink('fa', meta.alternateFaUrl);
+  syncAlternateLink('prs-AF', meta.alternatePrsUrl);
+  syncAlternateLink('prs', meta.alternatePrsUrl);
+  syncAlternateLink('tg-TJ', meta.alternateTgUrl);
+  syncAlternateLink('tg', meta.alternateTgUrl);
+  syncAlternateLink('x-default', meta.alternateXDefaultUrl);
 
-  // Hreflang alternates: Es
-  let hreflangEs = document.querySelector('link[rel="alternate"][hreflang="es"]');
-  if (meta.alternateEsUrl) {
-    if (!hreflangEs) {
-      hreflangEs = document.createElement('link');
-      hreflangEs.setAttribute('rel', 'alternate');
-      hreflangEs.setAttribute('hreflang', 'es');
-      document.head.appendChild(hreflangEs);
-    }
-    hreflangEs.setAttribute('href', meta.alternateEsUrl);
-  } else if (hreflangEs) {
-    hreflangEs.remove();
-  }
+  // Remove deprecated Spanish alternate if lingering in DOM
+  const lingeringEs = document.querySelector('link[rel="alternate"][hreflang="es"]');
+  if (lingeringEs) lingeringEs.remove();
 
   // Update html lang & dir
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  document.documentElement.lang = loc.locale;
+  document.documentElement.dir = loc.direction;
 }

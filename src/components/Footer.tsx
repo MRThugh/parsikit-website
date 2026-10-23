@@ -1,11 +1,13 @@
 import React from 'react';
-import { Github, ArrowUp, Heart, BookOpen, Terminal, Layers, History, Code2 } from 'lucide-react';
+import { Github, ArrowUp, BookOpen, Terminal, Layers, History, Code2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { REPO_METADATA } from '../data/repoMetadata';
+import { getTranslations } from '../i18n/translations';
+import { LOCALES } from '../i18n/config';
 
 export function Footer() {
-  const { lang, setRoute, navigateToDoc, toggleLang } = useApp();
-  const isRtl = lang === 'fa';
+  const { lang, setRoute, navigateToDoc, toggleLang, isRtl } = useApp();
+  const t = getTranslations(lang);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -39,12 +41,10 @@ export function Footer() {
             </div>
 
             <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed max-w-sm">
-              {isRtl
-                ? 'زیرساخت خالص پایتونی، سبک و بدون وابستگی جانبی برای پردازش، اعتبارسنجی و محاسبات داده‌های زبان فارسی در محیط‌های توسعه نرم‌افزار.'
-                : 'A production-grade pure Python library for Persian data infrastructure, text cleansing, national validations, astronomical Jalali dates, and sensitive PII masking.'}
+              {t.footer.description}
             </p>
 
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-2 flex items-center gap-3 flex-wrap">
               <a
                 href={REPO_METADATA.repository}
                 target="_blank"
@@ -68,7 +68,7 @@ export function Footer() {
                 onClick={toggleLang}
                 className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-xs font-medium text-stone-700 dark:text-stone-200 transition-colors cursor-pointer"
               >
-                {isRtl ? 'English' : 'فارسی'}
+                {LOCALES[lang]?.nameNative} ⇄
               </button>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function Footer() {
           {/* Column 1: Core Navigation */}
           <div className="space-y-3">
             <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
-              {isRtl ? 'پیمایش سایت' : 'Navigation'}
+              {t.footer.navHeading}
             </span>
             <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
               <li>
@@ -84,7 +84,7 @@ export function Footer() {
                   onClick={() => setRoute('home')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'صفحه اصلی (معرفی)' : 'Overview'}
+                  {t.footer.overview}
                 </button>
               </li>
               <li>
@@ -92,7 +92,7 @@ export function Footer() {
                   onClick={() => setRoute('playground')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'محیط آزمایشی زنده' : 'Interactive Playground'}
+                  {t.footer.playground}
                 </button>
               </li>
               <li>
@@ -100,7 +100,7 @@ export function Footer() {
                   onClick={() => setRoute('docs')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'مرکز مستندات' : 'Documentation Hub'}
+                  {t.footer.docsHub}
                 </button>
               </li>
               <li>
@@ -108,7 +108,7 @@ export function Footer() {
                   onClick={() => setRoute('architecture')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'معماری فنی' : 'Architecture Design'}
+                  {t.footer.architecture}
                 </button>
               </li>
               <li>
@@ -116,7 +116,7 @@ export function Footer() {
                   onClick={() => setRoute('changelog')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'تاریخچه نسخه‌ها' : 'Changelog'}
+                  {t.footer.changelog}
                 </button>
               </li>
             </ul>
@@ -125,7 +125,7 @@ export function Footer() {
           {/* Column 2: Documentation Highlights */}
           <div className="space-y-3">
             <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
-              {isRtl ? 'مستندات و آموزش‌ها' : 'Documentation'}
+              {t.footer.docsHeading}
             </span>
             <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
               <li>
@@ -133,7 +133,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('installation')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'راهنمای نصب' : 'Installation'}
+                  {t.footer.installGuide}
                 </button>
               </li>
               <li>
@@ -141,7 +141,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('quickstart')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'شروع سریع در ۵ دقیقه' : 'Quickstart Guide'}
+                  {t.footer.quickstart}
                 </button>
               </li>
               <li>
@@ -149,7 +149,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('tutorials/text_processing')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'آموزش نیم‌فاصله‌ها و متن' : 'Text & ZWNJ Tutorial'}
+                  {t.footer.textTutorial}
                 </button>
               </li>
               <li>
@@ -157,7 +157,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('tutorials/validation')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'اعتبارسنجی کد ملی و کارت' : 'National ID & Card Check'}
+                  {t.footer.validationTutorial}
                 </button>
               </li>
               <li>
@@ -165,7 +165,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('tutorials/datetime')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'تقویم شمسی و سال کبیسه' : 'Astronomical Jalali Dates'}
+                  {t.footer.datetimeTutorial}
                 </button>
               </li>
               <li>
@@ -173,7 +173,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('api/index')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'فهرست کامل API' : 'Full API Reference'}
+                  {t.footer.apiReference}
                 </button>
               </li>
             </ul>
@@ -182,7 +182,7 @@ export function Footer() {
           {/* Column 3: Project & Developer */}
           <div className="space-y-3">
             <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
-              {isRtl ? 'پروژه و سازنده' : 'Project & Creator'}
+              {t.footer.projectHeading}
             </span>
             <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
               <li>
@@ -202,7 +202,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors"
                 >
-                  {isRtl ? 'گزارش باگ و ایشوها' : 'Issue Tracker'}
+                  {t.footer.issues}
                 </a>
               </li>
               <li>
@@ -210,7 +210,7 @@ export function Footer() {
                   onClick={() => navigateToDoc('development/contributing')}
                   className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
                 >
-                  {isRtl ? 'راهنمای مشارکت در پروژه' : 'Contribution Guidelines'}
+                  {t.footer.contributing}
                 </button>
               </li>
               <li>
@@ -240,7 +240,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-stone-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
           <div>
-            <span>© {new Date().getFullYear()} ParsiKit. {isRtl ? 'توسعه‌یافته با احترام به زبان فارسی توسط علی کامرانی.' : 'Crafted for the Persian language by Ali Kamrani.'}</span>
+            <span>© {new Date().getFullYear()} ParsiKit. {t.footer.copyright}</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -248,9 +248,9 @@ export function Footer() {
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-stone-600 dark:text-stone-300 hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
-              aria-label={isRtl ? 'بازگشت به ابتدای صفحه' : 'Back to top'}
+              aria-label={t.footer.backToTop}
             >
-              <span>{isRtl ? 'بازگشت به بالا' : 'Back to top'}</span>
+              <span>{t.footer.backToTop}</span>
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
           </div>

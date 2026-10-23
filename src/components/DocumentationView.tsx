@@ -15,16 +15,18 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ALL_DOCS } from '../data/docsManifest';
+import { LOCALES } from '../i18n/config';
+import { getTranslations } from '../i18n/translations';
 import { CodeBlock } from './CodeBlock';
 
 export function DocumentationView() {
-  const { lang, activeDocSlug, setActiveDocSlug, navigateToDoc, toggleLang } = useApp();
+  const { lang, activeDocSlug, setActiveDocSlug, navigateToDoc, toggleLang, isRtl } = useApp();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [activeHeadingId, setActiveHeadingId] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const isRtl = lang === 'fa';
+  const t = getTranslations(lang);
 
   // Find active document for current language
   const currentDoc =
@@ -58,41 +60,35 @@ export function DocumentationView() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const getCategoryTitle = (catId: string) => {
+    switch (catId) {
+      case 'getting-started':
+        return lang === 'fa' ? 'شروع کار و مبانی' : lang === 'prs-af' ? 'آغاز کار و رهنمودها' : lang === 'tg' ? 'Оғози кор ва роҳнамоҳо' : 'Getting Started';
+      case 'tutorials':
+        return lang === 'fa' ? 'آموزش‌های گام‌به‌گام' : lang === 'prs-af' ? 'آموزش‌های عملی' : lang === 'tg' ? 'Омӯзишҳои амалӣ' : 'Step-by-Step Tutorials';
+      case 'guides':
+        return lang === 'fa' ? 'راهنماهای کاربردی' : lang === 'prs-af' ? 'رهنمودهای تخنیکی' : lang === 'tg' ? 'Роҳнамоҳои фаннӣ' : 'Practical Guides';
+      case 'api':
+        return lang === 'fa' ? 'مرجع کامل توابع (API)' : lang === 'prs-af' ? 'مرجع توابع و ماژول‌ها (API)' : lang === 'tg' ? 'Феҳристи тавобеъ (API)' : 'API Reference';
+      case 'development':
+        return lang === 'fa' ? 'معماری و توسعه' : lang === 'prs-af' ? 'معماری و انجنیری' : lang === 'tg' ? 'Меъморӣ ва таҳия' : 'Architecture & Engineering';
+      default:
+        return catId;
+    }
+  };
+
   const categories = [
-    {
-      id: 'getting-started' as const,
-      nameEn: 'Getting Started',
-      nameFa: 'شروع کار و مبانی',
-      icon: FileText,
-    },
-    {
-      id: 'tutorials' as const,
-      nameEn: 'Step-by-Step Tutorials',
-      nameFa: 'آموزش‌های گام‌به‌گام',
-      icon: BookOpen,
-    },
-    {
-      id: 'guides' as const,
-      nameEn: 'Practical Guides',
-      nameFa: 'راهنماهای کاربردی',
-      icon: Compass,
-    },
-    {
-      id: 'api' as const,
-      nameEn: 'API Reference',
-      nameFa: 'مرجع کامل توابع (API)',
-      icon: Code2,
-    },
-    {
-      id: 'development' as const,
-      nameEn: 'Architecture & Engineering',
-      nameFa: 'معماری و توسعه',
-      icon: Layers,
-    },
+    { id: 'getting-started' as const, name: getCategoryTitle('getting-started'), icon: FileText },
+    { id: 'tutorials' as const, name: getCategoryTitle('tutorials'), icon: BookOpen },
+    { id: 'guides' as const, name: getCategoryTitle('guides'), icon: Compass },
+    { id: 'api' as const, name: getCategoryTitle('api'), icon: Code2 },
+    { id: 'development' as const, name: getCategoryTitle('development'), icon: Layers },
   ];
 
   // Group docs by category for current language
-  const docsForLang = ALL_DOCS.filter((d) => d.lang === lang || (d.category === 'development' && lang === 'fa'));
+  const docsForLang = ALL_DOCS.filter(
+    (d) => d.lang === lang || (d.category === 'development' && d.lang === 'en')
+  );
 
   // Calculate Previous and Next documents
   const allDocsInOrder = docsForLang;
@@ -147,11 +143,12 @@ export function DocumentationView() {
         flushList(i);
         if (inCodeBlock) {
           elements.push(
-            <CodeBlock
-              key={`code-${i}`}
-              code={codeBuffer.join('\n')}
-              language={codeLanguage}
-            />
+            <div key={`code-${i}`} dir="ltr" className="my-4">
+              <CodeBlock
+                code={codeBuffer.join('\n')}
+                language={codeLanguage}
+              />
+            </div>
           );
           codeBuffer = [];
           inCodeBlock = false;
@@ -178,9 +175,8 @@ export function DocumentationView() {
       if (line.startsWith('# ')) {
         flushList(i);
         const headingText = line.replace(/^#\s+/, '').trim();
-        const id = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-');
         elements.push(
-          <h1 key={`h1-${i}`} id={id} className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white mt-8 mb-4 tracking-tight">
+          <h1 key={`h1-${i}`} className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mt-8 mb-4">
             {headingText}
           </h1>
         );
@@ -190,9 +186,13 @@ export function DocumentationView() {
       if (line.startsWith('## ')) {
         flushList(i);
         const headingText = line.replace(/^##\s+/, '').trim();
-        const id = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-');
+        const headingId = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-').replace(/^-+|-+$/g, '');
         elements.push(
-          <h2 key={`h2-${i}`} id={id} className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white mt-8 mb-3 tracking-tight border-b border-stone-200/60 dark:border-white/10 pb-2">
+          <h2
+            key={`h2-${i}`}
+            id={headingId}
+            className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white mt-8 mb-3 pb-2 border-b border-stone-200 dark:border-white/10 scroll-mt-24"
+          >
             {headingText}
           </h2>
         );
@@ -202,27 +202,41 @@ export function DocumentationView() {
       if (line.startsWith('### ')) {
         flushList(i);
         const headingText = line.replace(/^###\s+/, '').trim();
-        const id = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-');
+        const headingId = headingText.toLowerCase().replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-').replace(/^-+|-+$/g, '');
         elements.push(
-          <h3 key={`h3-${i}`} id={id} className="text-lg font-semibold text-stone-900 dark:text-white mt-6 mb-2">
+          <h3
+            key={`h3-${i}`}
+            id={headingId}
+            className="text-lg font-bold text-stone-800 dark:text-stone-100 mt-6 mb-2 scroll-mt-24"
+          >
             {headingText}
           </h3>
         );
         continue;
       }
 
-      // Unordered list
+      // Lists
       if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-        const itemText = line.trim().replace(/^[-*]\s+/, '');
-        listBuffer.push(itemText);
+        listBuffer.push(line.trim().replace(/^[-*]\s+/, ''));
         continue;
       }
 
-      // Regular paragraph
-      flushList(i);
-      if (line.trim()) {
+      // Table formatting check
+      if (line.trim().startsWith('|')) {
+        flushList(i);
         elements.push(
-          <p key={`p-${i}`} className="my-3 text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">
+          <div key={`table-line-${i}`} className="font-mono text-xs overflow-x-auto py-1 text-stone-600 dark:text-stone-400">
+            {line}
+          </div>
+        );
+        continue;
+      }
+
+      // Standard paragraphs
+      if (line.trim()) {
+        flushList(i);
+        elements.push(
+          <p key={`p-${i}`} className="my-3 text-stone-700 dark:text-stone-300 text-sm sm:text-base leading-relaxed">
             {line}
           </p>
         );
@@ -230,73 +244,57 @@ export function DocumentationView() {
     }
 
     flushList(lines.length);
-
     return elements;
   };
 
   return (
     <div className="relative min-h-screen">
-      {/* Top Reading Progress Bar */}
-      <div
-        className="fixed top-16 left-0 right-0 h-1 bg-stone-200 dark:bg-stone-800 z-30"
-        aria-hidden="true"
-      >
+      {/* Reading Progress Indicator */}
+      <div className="fixed top-16 left-0 right-0 z-30 h-0.5 bg-stone-200 dark:bg-white/10">
         <div
           className="h-full bg-[#126E68] dark:bg-[#52C5BE] transition-all duration-150"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Mobile Sidebar Toggle Button */}
-        <div className="lg:hidden flex items-center justify-between mb-4 pb-3 border-b border-stone-200 dark:border-white/10">
+        <div className="lg:hidden mb-6 flex items-center justify-between p-3 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10">
+          <div className="flex items-center gap-2 text-xs font-medium text-stone-700 dark:text-stone-300">
+            <BookOpen className="w-4 h-4 text-[#126E68]" />
+            <span className="truncate max-w-[200px]">{currentDoc.title}</span>
+          </div>
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium bg-stone-100 dark:bg-white/5 text-stone-800 dark:text-stone-200 cursor-pointer min-h-[44px]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-black/30 border border-stone-200 dark:border-white/10 cursor-pointer min-h-[36px]"
           >
-            <Menu className="w-4 h-4 text-[#126E68]" />
-            <span>{isRtl ? 'فهرست بخش‌های مستندات' : 'Documentation Menu'}</span>
+            {mobileSidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            <span>{t.docs.tableOfContents}</span>
           </button>
-          <span className="text-xs text-stone-500 font-mono">
-            {currentDoc.category} / {currentDoc.slug}
-          </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Desktop Left Sidebar (Hierarchy Navigation) */}
+          {/* Desktop Left Sidebar: Doc Tree grouped by Category */}
           <aside
-            className={`lg:col-span-3 lg:sticky lg:top-24 lg:block overflow-y-auto max-h-[calc(100vh-7rem)] pr-2 ${
-              mobileSidebarOpen
-                ? 'fixed inset-x-4 top-24 bottom-6 z-40 bg-white dark:bg-[#141C1A] p-4 rounded-2xl border border-stone-200 dark:border-white/10 shadow-2xl block'
-                : 'hidden'
+            className={`lg:col-span-3 lg:sticky lg:top-24 max-h-[calc(100vh-8rem)] overflow-y-auto space-y-6 ${
+              mobileSidebarOpen ? 'block' : 'hidden lg:block'
             }`}
           >
-            {mobileSidebarOpen && (
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 dark:border-white/10 lg:hidden">
-                <span className="font-bold text-sm text-stone-900 dark:text-white">
-                  {isRtl ? 'مستندات پارسی‌کیت' : 'ParsiKit Docs'}
-                </span>
-                <button onClick={() => setMobileSidebarOpen(false)} className="p-2 text-stone-400 min-h-[44px] min-w-[44px] flex items-center justify-center">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-
-            <nav className="space-y-6" aria-label="Documentation Navigation">
+            <nav className="space-y-6 text-sm" aria-label="Documentation Navigation">
               {categories.map((cat) => {
                 const Icon = cat.icon;
-                const docsInCat = docsForLang.filter((d) => d.category === cat.id);
-                if (docsInCat.length === 0) return null;
+                const catDocs = docsForLang.filter((d) => d.category === cat.id);
+                if (catDocs.length === 0) return null;
 
                 return (
                   <div key={cat.id} className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-stone-900 dark:text-stone-200 uppercase tracking-wider px-2">
+                    <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-stone-200 px-2 py-1">
                       <Icon className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
-                      <span>{isRtl ? cat.nameFa : cat.nameEn}</span>
+                      <span>{cat.name}</span>
                     </div>
 
-                    <ul className="space-y-0.5 border-l-2 rtl:border-l-0 rtl:border-r-2 border-stone-200 dark:border-white/10 ml-2.5 rtl:ml-0 rtl:mr-2.5 pl-2 rtl:pl-0 rtl:pr-2">
-                      {docsInCat.map((doc) => {
+                    <ul className="space-y-1">
+                      {catDocs.map((doc) => {
                         const isActive = currentDoc.slug === doc.slug;
                         return (
                           <li key={doc.id}>
@@ -332,10 +330,10 @@ export function DocumentationView() {
                 onClick={() => setActiveDocSlug('index')}
                 className="hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
               >
-                {isRtl ? 'مستندات' : 'Docs'}
+                {t.nav.docs}
               </button>
               <ChevronRight className="w-3 h-3 rtl:rotate-180" />
-              <span className="capitalize">{currentDoc.category}</span>
+              <span className="capitalize">{getCategoryTitle(currentDoc.category)}</span>
               <ChevronRight className="w-3 h-3 rtl:rotate-180" />
               <span className="text-stone-700 dark:text-stone-300 font-medium">
                 {currentDoc.title}
@@ -352,7 +350,7 @@ export function DocumentationView() {
                   >
                     <Languages className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
                     <span>
-                      {isRtl ? 'مطالعه به زبان انگلیسی (Read in English)' : 'Read in Persian (فارسی)'}
+                      {isRtl ? 'Read in English / Тоҷикӣ' : 'مطالعه به فارسی و دری'}
                     </span>
                   </button>
                 )}
@@ -362,11 +360,11 @@ export function DocumentationView() {
                 <button
                   onClick={handleShare}
                   className="p-2 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-white/5 text-xs flex items-center gap-1.5 cursor-pointer min-h-[44px]"
-                  title={isRtl ? 'کپی لینک این صفحه' : 'Copy page link'}
-                  aria-label={isRtl ? 'اشتراک‌گذاری آدرس سند' : 'Share document URL'}
+                  title={t.docs.shareLink}
+                  aria-label={t.docs.shareLink}
                 >
                   {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-                  <span>{copiedLink ? (isRtl ? 'کپی شد' : 'Copied') : (isRtl ? 'اشتراک' : 'Share')}</span>
+                  <span>{copiedLink ? t.docs.linkCopied : t.docs.shareLink}</span>
                 </button>
               </div>
             </div>
@@ -388,7 +386,7 @@ export function DocumentationView() {
                 >
                   <span className="text-xs text-stone-400 mb-1 flex items-center gap-1">
                     {isRtl ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-                    <span>{isRtl ? 'سند قبلی' : 'Previous Document'}</span>
+                    <span>{t.docs.prevDoc}</span>
                   </span>
                   <span className="text-sm font-semibold text-stone-900 dark:text-white">
                     {prevDoc.title}
@@ -405,7 +403,7 @@ export function DocumentationView() {
                   className="p-4 rounded-xl border border-stone-200 dark:border-white/10 hover:border-[#126E68]/40 dark:hover:border-[#52C5BE]/40 text-right rtl:text-left transition-all hover:bg-stone-50 dark:hover:bg-white/5 cursor-pointer flex flex-col justify-between min-h-[72px]"
                 >
                   <span className="text-xs text-stone-400 mb-1 flex items-center justify-end rtl:justify-start gap-1">
-                    <span>{isRtl ? 'سند بعدی' : 'Next Document'}</span>
+                    <span>{t.docs.nextDoc}</span>
                     {isRtl ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </span>
                   <span className="text-sm font-semibold text-stone-900 dark:text-white">
@@ -419,7 +417,7 @@ export function DocumentationView() {
           {/* Desktop Right Sidebar (In-Page Table of Contents) */}
           <aside className="hidden lg:col-span-3 xl:col-span-2 lg:sticky lg:top-24 lg:block space-y-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-stone-900 dark:text-stone-300 block">
-              {isRtl ? 'در این صفحه' : 'On This Page'}
+              {t.docs.onThisPage}
             </span>
 
             {currentDoc.headings.length === 0 ? (

@@ -3,7 +3,7 @@ import { marked } from 'marked';
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\u0600-\u06FFáéíóúñÁÉÍÓÚÑ]+/g, '-')
+    .replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
 

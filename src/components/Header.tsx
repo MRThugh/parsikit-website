@@ -15,55 +15,45 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { type PageRoute, type AppLang } from '../lib/router';
+import { LOCALES } from '../i18n/config';
+import { getTranslations } from '../i18n/translations';
 import { MOTION_TRANSITIONS } from '../lib/motion';
 import { REPO_METADATA } from '../data/repoMetadata';
 
 export function Header() {
-  const { lang, setLang, toggleLang, theme, toggleTheme, route, setRoute, openSearch } = useApp();
+  const { lang, setLang, theme, toggleTheme, route, setRoute, openSearch, isRtl } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
-  const isRtl = lang === 'fa';
+  const t = getTranslations(lang);
 
   const navItems: {
     id: PageRoute;
-    labelEn: string;
-    labelFa: string;
-    labelEs: string;
+    label: string;
     icon?: React.ComponentType<{ className?: string }>;
   }[] = [
     {
       id: 'home',
-      labelEn: 'Overview',
-      labelFa: 'معرفی',
-      labelEs: 'Visión General',
+      label: t.nav.home,
     },
     {
       id: 'playground',
-      labelEn: 'Playground',
-      labelFa: 'محیط آزمایشی',
-      labelEs: 'Pruebas',
+      label: t.nav.playground,
       icon: Terminal,
     },
     {
       id: 'docs',
-      labelEn: 'Documentation',
-      labelFa: 'مستندات',
-      labelEs: 'Documentación',
+      label: t.nav.docs,
       icon: BookOpen,
     },
     {
       id: 'architecture',
-      labelEn: 'Architecture',
-      labelFa: 'معماری فنی',
-      labelEs: 'Arquitectura',
+      label: t.nav.architecture,
       icon: Layers,
     },
     {
       id: 'changelog',
-      labelEn: 'Changelog',
-      labelFa: 'تغییرات نسخه',
-      labelEs: 'Historial',
+      label: t.nav.changelog,
       icon: History,
     },
   ];
@@ -74,22 +64,11 @@ export function Header() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const getNavLabel = (item: typeof navItems[0]) => {
-    if (lang === 'fa') return item.labelFa;
-    if (lang === 'es') return item.labelEs;
-    return item.labelEn;
-  };
-
-  const getSubTitle = () => {
-    if (lang === 'fa') return 'زیرساخت داده‌های فارسی';
-    if (lang === 'es') return 'Infraestructura de Datos Persa';
-    return 'Persian Data Infrastructure';
-  };
-
-  const languagesList: { code: AppLang; label: string; short: string }[] = [
-    { code: 'en', label: 'English', short: 'EN' },
-    { code: 'fa', label: 'فارسی', short: 'فا' },
-    { code: 'es', label: 'Español', short: 'ES' },
+  const languagesList: { code: AppLang; label: string; short: string; scriptHint: string }[] = [
+    { code: 'fa', label: LOCALES.fa.nameNative, short: LOCALES.fa.shortCode, scriptHint: 'Perso-Arabic' },
+    { code: 'en', label: LOCALES.en.nameNative, short: LOCALES.en.shortCode, scriptHint: 'Latin' },
+    { code: 'prs-af', label: LOCALES['prs-af'].nameNative, short: LOCALES['prs-af'].shortCode, scriptHint: 'Perso-Arabic (Dari)' },
+    { code: 'tg', label: LOCALES.tg.nameNative, short: LOCALES.tg.shortCode, scriptHint: 'Cyrillic (Тоҷикӣ)' },
   ];
 
   return (
@@ -119,7 +98,7 @@ export function Header() {
                 </span>
               </div>
               <span className="hidden sm:inline-block text-[10px] text-stone-500 dark:text-stone-400 font-medium leading-none">
-                {getSubTitle()}
+                {t.nav.tagline}
               </span>
             </div>
           </button>
@@ -139,7 +118,7 @@ export function Header() {
                     : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
-                <span>{getNavLabel(item)}</span>
+                <span>{item.label}</span>
                 {isActive && (
                   <motion.div
                     layoutId="activeNavIndicator"
@@ -152,24 +131,24 @@ export function Header() {
           })}
         </nav>
 
-        {/* Actions Cluster: Search, GitHub, Lang, Theme, Mobile Hamburger */}
+        {/* Actions Cluster: Search, Language Switcher, Theme Toggle, GitHub, Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Search Trigger */}
           <button
             onClick={openSearch}
             className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-white/5 hover:bg-stone-200/70 dark:hover:bg-white/10 border border-stone-200 dark:border-white/5 transition-colors cursor-pointer min-h-[44px]"
-            aria-label={isRtl ? 'جستجو (کلیدهای میانبر: Cmd+K)' : 'Search documentation (Ctrl+K)'}
+            aria-label={t.nav.searchDocs}
           >
             <Search className="w-3.5 h-3.5" />
             <span className="hidden lg:inline-block">
-              {isRtl ? 'جستجو...' : lang === 'es' ? 'Buscar...' : 'Search docs...'}
+              {t.nav.searchDocs}
             </span>
             <kbd className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-black/30 border border-stone-200 dark:border-white/10 text-stone-400">
               ⌘K
             </kbd>
           </button>
 
-          {/* Trilingual Language Selector */}
+          {/* 4-Language Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setLangMenuOpen(!langMenuOpen)}
@@ -178,14 +157,17 @@ export function Header() {
               aria-expanded={langMenuOpen}
             >
               <Languages className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
-              <span className="font-semibold uppercase">{lang}</span>
+              <span className="font-semibold uppercase">{LOCALES[lang]?.shortCode || lang}</span>
             </button>
 
             {langMenuOpen && (
               <div
-                className="absolute top-full mt-2 end-0 w-32 rounded-xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#141B19] shadow-xl p-1 z-50 text-xs"
+                className="absolute top-full mt-2 end-0 w-48 rounded-xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#141B19] shadow-xl p-1.5 z-50 text-xs"
                 onMouseLeave={() => setLangMenuOpen(false)}
               >
+                <div className="px-2 py-1 text-[10px] font-mono text-stone-400 uppercase tracking-wider border-b border-stone-200/60 dark:border-white/5 mb-1">
+                  {t.nav.language}
+                </div>
                 {languagesList.map((l) => (
                   <button
                     key={l.code}
@@ -199,8 +181,13 @@ export function Header() {
                         : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5'
                     }`}
                   >
-                    <span>{l.label}</span>
-                    <span className="text-[10px] uppercase opacity-60">{l.code}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold">{l.label}</span>
+                      <span className="text-[10px] opacity-60 font-sans">{l.scriptHint}</span>
+                    </div>
+                    <span className="text-[10px] uppercase font-mono px-1 py-0.5 rounded bg-stone-200/60 dark:bg-white/10">
+                      {l.short}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -266,15 +253,15 @@ export function Header() {
                       : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5'
                   }`}
                 >
-                  <span>{getNavLabel(item)}</span>
+                  <span>{item.label}</span>
                 </button>
               );
             })}
 
-            {/* Mobile language options */}
-            <div className="pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
-              <span className="text-xs text-stone-500">Language / زبان</span>
-              <div className="flex gap-2">
+            {/* Mobile language options for all 4 languages */}
+            <div className="pt-3 border-t border-stone-200 dark:border-white/10">
+              <span className="text-xs text-stone-500 block mb-2">{t.nav.language}</span>
+              <div className="grid grid-cols-2 gap-2">
                 {languagesList.map((l) => (
                   <button
                     key={l.code}
@@ -282,13 +269,14 @@ export function Header() {
                       setLang(l.code);
                       setMobileMenuOpen(false);
                     }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between min-h-[44px] ${
                       lang === l.code
-                        ? 'bg-[#126E68] text-white'
-                        : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-stone-200'
+                        ? 'bg-[#126E68] text-white shadow-sm'
+                        : 'bg-stone-200/70 dark:bg-white/10 text-stone-700 dark:text-stone-200'
                     }`}
                   >
-                    {l.short}
+                    <span>{l.label}</span>
+                    <span className="text-[10px] opacity-75 font-mono">{l.short}</span>
                   </button>
                 ))}
               </div>
@@ -299,7 +287,7 @@ export function Header() {
                 href="https://github.com/MRThugh/ParsiKit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 py-1 text-stone-700 dark:text-stone-300"
+                className="flex items-center gap-1.5 py-1 text-stone-700 dark:text-stone-300 min-h-[44px]"
               >
                 <Github className="w-4 h-4" />
                 <span>MRThugh / ParsiKit</span>

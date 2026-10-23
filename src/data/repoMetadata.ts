@@ -28,5 +28,5 @@ export const REPO_METADATA: RepoMetadata = {
   repository: "https://github.com/MRThugh/ParsiKit",
   documentationUrl: 'https://github.com/MRThugh/ParsiKit#readme',
   pyPiUrl: 'https://pypi.org/project/parsikit/',
-  totalDocs: 55,
+  totalDocs: 84,
 };

@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FROM REPOSITORY DOCS
- * Count: 55 documents
+ * Count: 84 documents
  */
 
 export interface DocHeading {
@@ -12,1654 +12,18 @@ export interface DocHeading {
 export interface DocEntry {
   id: string;
   slug: string;
-  lang: 'en' | 'fa' | 'es';
+  lang: 'fa' | 'en' | 'prs-af' | 'tg';
   category: 'getting-started' | 'tutorials' | 'guides' | 'api' | 'development';
   title: string;
   summary: string;
   content: string;
   headings: DocHeading[];
   counterpartSlug?: string;
-  counterparts?: Partial<Record<'en' | 'fa' | 'es', string>>;
+  counterparts?: Partial<Record<'fa' | 'en' | 'prs-af' | 'tg', string>>;
   filePath: string;
 }
 
 export const ALL_DOCS: DocEntry[] = [
-  {
-    "id": "en-api-cache",
-    "slug": "api/cache",
-    "lang": "en",
-    "category": "api",
-    "title": "Cache API (`parsikit.cache`)",
-    "summary": "High-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.",
-    "content": "# Cache API (`parsikit.cache`)\n\nHigh-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.\n\n---\n\n## Overview\n\nThe `parsikit.cache` module provides in-memory thread-safe LRU-like caching mechanisms utilized internally by compute-intensive functions such as `parsikit.number.number_to_words`.\n\n> **Note on API Stability**: While `ThreadSafeLRUCache` and `@memoize` are fully functional and tested, `parsikit.cache` serves primarily as an internal infrastructure module for ParsiKit. Its public surface is stable for standard caching tasks, but future major versions may introduce specialized cache backends.\n\n---\n\n## Classes\n\n### `ThreadSafeLRUCache`\n\n```python\nclass ThreadSafeLRUCache:\n    def __init__(self, maxsize: int = 1024) -> None\n```\n\nA lightweight in-memory LRU cache guarded by `threading.RLock` to provide safe concurrent access and re-entrant recursion without deadlocks.\n\n#### Capacity Rules\n- `maxsize` must be an integer (`int`). Non-integer types raise `TypeError`.\n- `maxsize >= 0`. Negative integers raise `ValueError`.\n- `maxsize == 0`: Operates in **no-storage mode** where entries are not stored and lookups return the default value.\n\n#### Methods & Properties\n\n- **`get(key: Any, default: Any = None) -> Any`**:\n  Retrieves a value from the cache. If found, refreshes the key's position to mark it as most recently used (MRU) and increments hits. Returns `default` on cache miss.\n- **`set(key: Any, value: Any) -> None`**:\n  Inserts or updates a value. If the key exists, updates its value and marks it as MRU without eviction. When capacity is exceeded, evicts the least recently used (LRU) entry.\n- **`clear() -> None`**:\n  Evicts all entries and resets hit and miss counters.\n- **`pop(key: Any, default: Any = ...) -> Any`**:\n  Removes and returns an entry from the cache. Raises `KeyError` if key is not found and no default is provided.\n- **`keys_order`**:\n  Property returning a snapshot list of cached keys ordered from oldest (LRU) to newest (MRU).\n- **`__len__()` & `__contains__(key)`**:\n  Provides standard dictionary-like container inspection under lock.\n\n---\n\n## Decorators\n\n### `@memoize`\n\n```python\ndef memoize(maxsize: int = 1024) -> Callable[[Callable[..., _T]], Callable[..., _T]]\n```\n\nDecorator that caches function return values using a dedicated `ThreadSafeLRUCache` instance.\n\n#### Features\n- **Dynamic Configuration Toggle**: Respects `parsikit.config.enable_cache`. When set to `False`, the wrapper bypasses the cache entirely and calls the underlying function directly.\n- **Thread Safety & Reentrancy**: Protected by `threading.RLock`, ensuring safe multi-threaded operation and recursion without deadlocks.\n- **Sentinel-Based Cache Misses**: Uses an internal sentinel to distinguish missing entries from cached values of `None`, `False`, `0`, or empty containers.\n- **Unhashable Argument Graceful Fallback**: When unhashable arguments (such as `list`, `dict`, `set`, or nested unhashable structures) are supplied, caching is gracefully bypassed and the target function executes normally without raising `TypeError`.\n- **Object Identity**: Returns cached objects by reference (`res1 is res2`). Callers requiring isolated mutable results should copy them explicitly.\n- **Inspection & Control**: The wrapped function exposes:\n  - `func.cache`: Direct reference to the underlying `ThreadSafeLRUCache`.\n  - `func.cache_clear()`: Clears cached entries and resets statistics.\n  - `func.cache_info()`: Returns a `CacheInfo(hits, misses, maxsize, currsize)` tuple.\n\n#### Usage Example\n\n```python\nimport parsikit\nfrom parsikit.cache import memoize\n\n@memoize(maxsize=512)\ndef compute_complex_tax(base_amount: int, tier: str = \"standard\") -> int:\n    # Expensive financial calculation\n    return base_amount * 2\n\n# First call calculates and stores in cache\nres1 = compute_complex_tax(1000000, tier=\"A\")\n\n# Subsequent calls with identical arguments hit the cache immediately\nres2 = compute_complex_tax(1000000, tier=\"A\")\nassert res1 == res2\n\n# Introspect cache statistics\ninfo = compute_complex_tax.cache_info()\nprint(f\"Hits: {info.hits}, Misses: {info.misses}, Size: {info.currsize}\")\n\n# Clear cache when needed\ncompute_complex_tax.cache_clear()\n\n# Disable cache dynamically if needed\nparsikit.config.enable_cache = False\nres3 = compute_complex_tax(1000000, tier=\"A\")  # executes underlying function\nparsikit.config.reset_defaults()\n```\n\n---\n\n## Edge Cases & Limitations\n\n1. **Unhashable Arguments**: Functions called with unhashable arguments will execute normally without raising `TypeError`, bypassing the cache for that specific invocation.\n2. **Mutable Return Values**: Because objects are cached by reference, mutating a returned mutable object (e.g. `list.append()`) alters the cached instance.\n3. **Process Isolation**: The cache is purely in-memory within the Python process. Multi-process architectures (e.g. `gunicorn -w 4`) maintain independent caches per worker process.\n",
-    "headings": [
-      {
-        "id": "cache-api-parsikit-cache",
-        "text": "Cache API (`parsikit.cache`)",
-        "level": 1
-      },
-      {
-        "id": "overview",
-        "text": "Overview",
-        "level": 2
-      },
-      {
-        "id": "classes",
-        "text": "Classes",
-        "level": 2
-      },
-      {
-        "id": "threadsafelrucache",
-        "text": "`ThreadSafeLRUCache`",
-        "level": 3
-      },
-      {
-        "id": "decorators",
-        "text": "Decorators",
-        "level": 2
-      },
-      {
-        "id": "memoize",
-        "text": "`@memoize`",
-        "level": 3
-      },
-      {
-        "id": "expensive-financial-calculation",
-        "text": "Expensive financial calculation",
-        "level": 1
-      },
-      {
-        "id": "first-call-calculates-and-stores-in-cache",
-        "text": "First call calculates and stores in cache",
-        "level": 1
-      },
-      {
-        "id": "subsequent-calls-with-identical-arguments-hit-the-cache-immediately",
-        "text": "Subsequent calls with identical arguments hit the cache immediately",
-        "level": 1
-      },
-      {
-        "id": "introspect-cache-statistics",
-        "text": "Introspect cache statistics",
-        "level": 1
-      },
-      {
-        "id": "clear-cache-when-needed",
-        "text": "Clear cache when needed",
-        "level": 1
-      },
-      {
-        "id": "disable-cache-dynamically-if-needed",
-        "text": "Disable cache dynamically if needed",
-        "level": 1
-      },
-      {
-        "id": "edge-cases-limitations",
-        "text": "Edge Cases & Limitations",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/cache.md",
-    "counterparts": {
-      "fa": "api/cache"
-    },
-    "counterpartSlug": "api/cache"
-  },
-  {
-    "id": "en-api-datetime",
-    "slug": "api/datetime",
-    "lang": "en",
-    "category": "api",
-    "title": "Datetime API (`parsikit.datetime`)",
-    "summary": "Converts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.",
-    "content": "# Datetime API (`parsikit.datetime`)\n\n## Functions\n\n### `gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]`\nConverts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.\n\n### `jalali_to_gregorian(jy: int, jm: int, jd: int) -> tuple[int, int, int]`\nConverts a Jalali date (year, month, day) to the corresponding Gregorian date.\n\n### `is_jalali_leap(jy: int) -> bool`\nDetermines whether a Jalali year is a 366-day leap year using the astronomical solar cycle.\n\n### `get_jalali_month_name(month: int) -> str`\nReturns the Persian name of the month (1 = فروردین, ..., 12 = اسفند).\n\n### `format_jalali(jy: int, jm: int, jd: int, pattern: str = \"YYYY/MM/DD\") -> str`\nFormats a Jalali date using the given pattern.\n\n### `humanize_relative_time(dt_or_seconds, reference=None) -> str`\nTranslates a `datetime` object or time difference into natural Persian words with Persian digits (e.g. `'هم‌اکنون'`, `'۱۵ دقیقه پیش'`, `'دیروز'`, `'در ۲ ساعت آینده'`).\n",
-    "headings": [
-      {
-        "id": "datetime-api-parsikit-datetime",
-        "text": "Datetime API (`parsikit.datetime`)",
-        "level": 1
-      },
-      {
-        "id": "functions",
-        "text": "Functions",
-        "level": 2
-      },
-      {
-        "id": "gregorian_to_jalali-gy-int-gm-int-gd-int-tuple-int-int-int",
-        "text": "`gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]`",
-        "level": 3
-      },
-      {
-        "id": "jalali_to_gregorian-jy-int-jm-int-jd-int-tuple-int-int-int",
-        "text": "`jalali_to_gregorian(jy: int, jm: int, jd: int) -> tuple[int, int, int]`",
-        "level": 3
-      },
-      {
-        "id": "is_jalali_leap-jy-int-bool",
-        "text": "`is_jalali_leap(jy: int) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "get_jalali_month_name-month-int-str",
-        "text": "`get_jalali_month_name(month: int) -> str`",
-        "level": 3
-      },
-      {
-        "id": "format_jalali-jy-int-jm-int-jd-int-pattern-str-yyyy-mm-dd-str",
-        "text": "`format_jalali(jy: int, jm: int, jd: int, pattern: str = \"YYYY/MM/DD\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "humanize_relative_time-dt_or_seconds-reference-none-str",
-        "text": "`humanize_relative_time(dt_or_seconds, reference=None) -> str`",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/datetime.md",
-    "counterparts": {
-      "fa": "api/datetime"
-    },
-    "counterpartSlug": "api/datetime"
-  },
-  {
-    "id": "en-api-dev_and_gui",
-    "slug": "api/dev_and_gui",
-    "lang": "en",
-    "category": "api",
-    "title": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
-    "summary": "Persian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports :fa / :p format specifiers.",
-    "content": "# Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)\n\n## Visual Alignment & Diagnostics (`parsikit.dev`)\n\n### `pformat(template: str, *args, **kwargs) -> str`\nPersian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports `:fa` / `:p` format specifiers.\n\n### `persian_fstring(template: str, **kwargs) -> str`\nFormatted string evaluation with automatic visual alignment and Persian digit conversion.\n\n### `inspect_text(text: str) -> dict`\nAnalyzes string structure and reports character counts, ZWNJ count, Arabic characters, and digit scripts.\n\n### `debug_text(text: str) -> None`\nPrints a formatted diagnostic report to stdout.\n\n### `validate_batch(items: list, model_class, silent: bool = False) -> dict`\nValidates a list of raw inputs against a ParsiKit model class and returns valid/invalid summaries.\n\n---\n\n## Graphical Reshaping & Input Binding (`parsikit.reshaper`, `parsikit.gui`)\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\nReshapes cursive Persian text and reverses character order for 2D graphics renderers without HarfBuzz support (PIL, OpenCV, Pygame).\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> str`\nSplits and reshapes multi-line text blocks.\n\n### `bind_persian_input(widget, input_type: str = \"text\") -> None`\nAttaches live keystroke normalization to Tkinter and CustomTkinter input entries.\n",
-    "headings": [
-      {
-        "id": "developer-diagnostics-gui-api-parsikit-dev-parsikit-gui-parsikit-reshaper",
-        "text": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
-        "level": 1
-      },
-      {
-        "id": "visual-alignment-diagnostics-parsikit-dev",
-        "text": "Visual Alignment & Diagnostics (`parsikit.dev`)",
-        "level": 2
-      },
-      {
-        "id": "pformat-template-str-args-kwargs-str",
-        "text": "`pformat(template: str, *args, **kwargs) -> str`",
-        "level": 3
-      },
-      {
-        "id": "persian_fstring-template-str-kwargs-str",
-        "text": "`persian_fstring(template: str, **kwargs) -> str`",
-        "level": 3
-      },
-      {
-        "id": "inspect_text-text-str-dict",
-        "text": "`inspect_text(text: str) -> dict`",
-        "level": 3
-      },
-      {
-        "id": "debug_text-text-str-none",
-        "text": "`debug_text(text: str) -> None`",
-        "level": 3
-      },
-      {
-        "id": "validate_batch-items-list-model_class-silent-bool-false-dict",
-        "text": "`validate_batch(items: list, model_class, silent: bool = False) -> dict`",
-        "level": 3
-      },
-      {
-        "id": "graphical-reshaping-input-binding-parsikit-reshaper-parsikit-gui",
-        "text": "Graphical Reshaping & Input Binding (`parsikit.reshaper`, `parsikit.gui`)",
-        "level": 2
-      },
-      {
-        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
-        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
-        "level": 3
-      },
-      {
-        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-str",
-        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> str`",
-        "level": 3
-      },
-      {
-        "id": "bind_persian_input-widget-input_type-str-text-none",
-        "text": "`bind_persian_input(widget, input_type: str = \"text\") -> None`",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/dev_and_gui.md",
-    "counterparts": {
-      "fa": "api/dev_and_gui"
-    },
-    "counterpartSlug": "api/dev_and_gui"
-  },
-  {
-    "id": "en-api-index",
-    "slug": "api/index",
-    "lang": "en",
-    "category": "api",
-    "title": "ParsiKit API Reference (English)",
-    "summary": "Complete reference for all public modules and functions in ParsiKit:",
-    "content": "# ParsiKit API Reference (English)\n\nComplete reference for all public modules and functions in **ParsiKit**:\n\n| Module | Description | Documentation |\n|---|---|---|\n| `parsikit.text` | Character standardization, ZWNJ, diacritics stripping, entity extraction, and masking | [Text Reference](text.md) |\n| `parsikit.validators` | National Code, mobile, landline, card, Sheba, bill, and plate validators | [Validators Reference](validators.md) |\n| `parsikit.models` | Rich domain models for identity and financial types (with Pydantic support) | [Models Reference](models.md) |\n| `parsikit.datetime` | Jalali-Gregorian conversions, leap years, month names, and relative time | [Datetime Reference](datetime.md) |\n| `parsikit.number` & `parsikit.currency` | Numeral script conversions, words-to-numbers, Rial/Toman, VAT, installments | [Numbers & Currency](number_and_currency.md) |\n| `parsikit.dev` & `parsikit.gui` | Visual width alignment, terminal diagnostics, and live typing helpers | [Dev & GUI Reference](dev_and_gui.md) |\n| `parsikit.reshaper` | Persian cursive letter reshaping and Bidirectional reordering for graphics | [Reshaper Reference](reshaper.md) |\n| `parsikit.cache` | High-performance thread-safe LRU-like caching infrastructure | [Cache Reference](cache.md) |\n| `parsikit.config` & `parsikit.exceptions` | Global configuration and structured exception classes | [Config & Exceptions](#configuration--exceptions) |\n\n---\n\n## Configuration & Exceptions\n\n### Configuration (`parsikit.config`)\n- `default_tax_rate: float`: Default VAT rate (default: `0.10`).\n- `default_currency: str`: System currency default, `\"toman\"` or `\"rial\"` (default: `\"toman\"`).\n- `enable_cache: bool`: Thread-safe LRU caching toggle for number-to-words conversions (default: `True`).\n\n### Exceptions (`parsikit.exceptions`)\nAll custom exceptions inherit from `ParsiKitError` and `ValidationError` (subclass of `ValueError`):\n- `InvalidNationalCodeError`\n- `InvalidMobileError`\n- `InvalidCardNumberError`\n- `InvalidShebaError`\n- `InvalidPostalCodeError`\n- `InvalidPlateError`\n- `InvalidBillError`\n",
-    "headings": [
-      {
-        "id": "parsikit-api-reference-english",
-        "text": "ParsiKit API Reference (English)",
-        "level": 1
-      },
-      {
-        "id": "configuration-exceptions",
-        "text": "Configuration & Exceptions",
-        "level": 2
-      },
-      {
-        "id": "configuration-parsikit-config",
-        "text": "Configuration (`parsikit.config`)",
-        "level": 3
-      },
-      {
-        "id": "exceptions-parsikit-exceptions",
-        "text": "Exceptions (`parsikit.exceptions`)",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/index.md",
-    "counterparts": {
-      "fa": "api/index",
-      "es": "api/index"
-    },
-    "counterpartSlug": "api/index"
-  },
-  {
-    "id": "en-api-models",
-    "slug": "api/models",
-    "lang": "en",
-    "category": "api",
-    "title": "Domain Models API (`parsikit.models`)",
-    "summary": "Object-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.",
-    "content": "# Domain Models API (`parsikit.models`)\n\nObject-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.\n\n---\n\n## 1. `NationalCode(code: str, strict: bool = True)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'001-012345-8'`)\n- `.masked: str` (e.g. `'001-****45-8'`)\n- `.location: dict | None` (`{\"province\": ..., \"city\": ...}`)\n- Raises: `InvalidNationalCodeError`\n\n---\n\n## 2. `MobileNumber(phone: str)`\n- `.is_valid: bool`\n- `.national: str` (e.g. `'09123456789'`)\n- `.international: str` (e.g. `'+989123456789'`)\n- `.masked: str` (e.g. `'0912***6789'`)\n- `.operator: str | None` (e.g. `'MCI'`)\n- Raises: `InvalidMobileError`\n\n---\n\n## 3. `BankCard(card_number: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'6037-9911-2233-4455'`)\n- `.masked: str` (e.g. `'6037-99**-****-4455'`)\n- `.bank_name: str | None` (e.g. `'بانک ملی ایران'`)\n- Raises: `InvalidCardNumberError`\n\n---\n\n## 4. `Sheba(sheba_code: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'IR12 0170 0000 0012 3456 7890 12'`)\n- `.bank_name: str | None`\n- `.account_number: str`\n- Raises: `InvalidShebaError`\n\n---\n\n## 5. `VehiclePlate(plate_text: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'12-B-345-68'`)\n- `.category: str` (e.g. `'شخصی'`, `'تاکسی'`)\n- `.details: dict`\n- Raises: `InvalidPlateError`\n\n---\n\n## 6. `FixedLine(phone: str)`\n- `.is_valid: bool`\n- `.formatted: str`\n- `.province: str | None`\n- Raises: `ValidationError`\n\n---\n\n## 7. `PersianText(text: str)`\n- `.standardized: str`\n- `.stripped: str`\n- `.word_count: int`\n- `.has_persian: bool`\n- `.slug: str`\n",
-    "headings": [
-      {
-        "id": "domain-models-api-parsikit-models",
-        "text": "Domain Models API (`parsikit.models`)",
-        "level": 1
-      },
-      {
-        "id": "1-nationalcode-code-str-strict-bool-true",
-        "text": "1. `NationalCode(code: str, strict: bool = True)`",
-        "level": 2
-      },
-      {
-        "id": "2-mobilenumber-phone-str",
-        "text": "2. `MobileNumber(phone: str)`",
-        "level": 2
-      },
-      {
-        "id": "3-bankcard-card_number-str",
-        "text": "3. `BankCard(card_number: str)`",
-        "level": 2
-      },
-      {
-        "id": "4-sheba-sheba_code-str",
-        "text": "4. `Sheba(sheba_code: str)`",
-        "level": 2
-      },
-      {
-        "id": "5-vehicleplate-plate_text-str",
-        "text": "5. `VehiclePlate(plate_text: str)`",
-        "level": 2
-      },
-      {
-        "id": "6-fixedline-phone-str",
-        "text": "6. `FixedLine(phone: str)`",
-        "level": 2
-      },
-      {
-        "id": "7-persiantext-text-str",
-        "text": "7. `PersianText(text: str)`",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/models.md",
-    "counterparts": {
-      "fa": "api/models"
-    },
-    "counterpartSlug": "api/models"
-  },
-  {
-    "id": "en-api-number_and_currency",
-    "slug": "api/number_and_currency",
-    "lang": "en",
-    "category": "api",
-    "title": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
-    "summary": "Replaces English digits (0-9) with Persian digits (۰-۹).",
-    "content": "# Numbers & Currency API (`parsikit.number`, `parsikit.currency`)\n\n## Numbers (`parsikit.number`)\n\n### `english_to_persian(text: str) -> str`\nReplaces English digits (`0-9`) with Persian digits (`۰-۹`).\n\n### `persian_to_english(text: str) -> str`\nReplaces Persian and Arabic digits with English ASCII digits.\n\n### `number_to_words(number: int | float) -> str`\nTranslates integers up to 999 septillion into written Persian words.\n\n---\n\n## Currency (`parsikit.currency`)\n\n### `rial_to_toman(amount: int | float) -> int | float`\nConverts Rial to Toman by dividing by 10.\n\n### `toman_to_rial(amount: int | float) -> int | float`\nConverts Toman to Rial by multiplying by 10.\n\n### `format_currency(amount, currency=\"toman\", *, persian_digits=False) -> str`\nFormats a numeric amount with thousand separators and currency symbol.\n\n### `format_currency_to_words(amount, currency=\"toman\") -> str`\nExpresses an amount in written Persian words with the currency label.\n\n### `add_tax_and_toll(amount, tax_rate=None) -> dict`\nCalculates Value-Added Tax (VAT) and the total price.\n\n### `calculate_installments(principal, annual_interest_rate, months) -> dict`\nCalculates loan amortization schedule according to the Central Bank of Iran formula.\n",
-    "headings": [
-      {
-        "id": "numbers-currency-api-parsikit-number-parsikit-currency",
-        "text": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
-        "level": 1
-      },
-      {
-        "id": "numbers-parsikit-number",
-        "text": "Numbers (`parsikit.number`)",
-        "level": 2
-      },
-      {
-        "id": "english_to_persian-text-str-str",
-        "text": "`english_to_persian(text: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "persian_to_english-text-str-str",
-        "text": "`persian_to_english(text: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "number_to_words-number-int-float-str",
-        "text": "`number_to_words(number: int | float) -> str`",
-        "level": 3
-      },
-      {
-        "id": "currency-parsikit-currency",
-        "text": "Currency (`parsikit.currency`)",
-        "level": 2
-      },
-      {
-        "id": "rial_to_toman-amount-int-float-int-float",
-        "text": "`rial_to_toman(amount: int | float) -> int | float`",
-        "level": 3
-      },
-      {
-        "id": "toman_to_rial-amount-int-float-int-float",
-        "text": "`toman_to_rial(amount: int | float) -> int | float`",
-        "level": 3
-      },
-      {
-        "id": "format_currency-amount-currency-toman-persian_digits-false-str",
-        "text": "`format_currency(amount, currency=\"toman\", *, persian_digits=False) -> str`",
-        "level": 3
-      },
-      {
-        "id": "format_currency_to_words-amount-currency-toman-str",
-        "text": "`format_currency_to_words(amount, currency=\"toman\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "add_tax_and_toll-amount-tax_rate-none-dict",
-        "text": "`add_tax_and_toll(amount, tax_rate=None) -> dict`",
-        "level": 3
-      },
-      {
-        "id": "calculate_installments-principal-annual_interest_rate-months-dict",
-        "text": "`calculate_installments(principal, annual_interest_rate, months) -> dict`",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/number_and_currency.md",
-    "counterparts": {
-      "fa": "api/number_and_currency"
-    },
-    "counterpartSlug": "api/number_and_currency"
-  },
-  {
-    "id": "en-api-reshaper",
-    "slug": "api/reshaper",
-    "lang": "en",
-    "category": "api",
-    "title": "Reshaper API (`parsikit.reshaper`)",
-    "summary": "Lightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.",
-    "content": "# Reshaper API (`parsikit.reshaper`)\n\nLightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.\n\n---\n\n## Overview\n\nMost graphic engines (such as Pygame, OpenCV, Pillow without `raqm`, Matplotlib, OpenGL, and PDF generators) assume left-to-right Latin typography. When rendering Persian text without a shaping engine, letters appear disconnected, disjointed, and backwards (e.g. `س ل ا م` instead of `سلام`).\n\n`parsikit.reshaper` converts standard Persian Unicode characters into their contextual contextual presentation forms (Isolated, Initial, Medial, Final) and reorders glyphs for naive LTR renderers.\n\n---\n\n## Public Functions\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\n\nConnects cursive Persian characters into appropriate presentation glyphs and manages bidirectional text blocks.\n\n#### Parameters:\n- **`text`** (`str`): The Persian or mixed Persian-Latin string to reshape.\n- **`reverse`** (`bool`, default `True`): If `True`, reverses RTL character order for graphics engines that draw from left to right. Embedded Latin words and digits are preserved in correct left-to-right order.\n\n#### Returns:\n- `str`: Shaped Unicode presentation string ready for graphic blitting.\n\n#### Direction & Reversal Semantics:\n- **`reverse=True` (Default)**: Intended for naive graphic rendering environments (such as basic Pygame, OpenCV, Matplotlib, or simple Canvas) that draw characters strictly from left to right. RTL character runs are inverted so they draw correctly from right to left, while embedded LTR runs (Latin words, URLs, emails, dates, and numbers) remain in forward left-to-right reading order.\n- **`reverse=False`**: Intended for engines that already handle BiDi cursor positioning or text flow, but lack font cursive shaping support. Only glyph shaping (Initial, Medial, Final, Isolated) and Lam-Alef ligatures are performed, preserving original logical character order.\n\n#### Supported Features:\n- Complete Persian and Arabic alphabet presentation mapping (including `ۀ`, `ك`, `ي`, and Kurdish `ە`).\n- Standard **Lam-Alef ligatures** (`لا`, `لآ`, `لأ`, `لإ`) in isolated and final positions.\n- **Diacritics & Combining Graphemes**: Ignores short vowels during connectivity checks and preserves combining diacritics attached to base letters upon reversal.\n- **BiDi Block & Numeral Preservation**: Preserves Latin words, URLs, emails, dates, and numbers (both ASCII and Persian/Arabic digits) in standard LTR order without inversion.\n\n#### Limitations & Boundary Scope:\n`parsikit.reshaper` is a lightweight, zero-dependency layout helper. It is **not** a complete implementation of the Unicode Bidirectional Algorithm (UAX #9). While it correctly segments sequential RTL and LTR blocks (including embedded Latin phrases, numbers, and URLs), deeply nested bidirectional text (e.g., an Arabic clause embedded within an English phrase inside a Persian sentence with complex punctuation neutrals) requires a specialized full-layout engine such as HarfBuzz with Raqm/FriBidi.\n\n#### Usage Example:\n\n```python\nimport parsikit\n\nraw_text = \"سلام دنیا (نسخه 3.3.1)\"\n# Shaped and reversed for Pygame or Pillow:\nready_text = parsikit.reshape_for_graphics(raw_text)\n\n# Shaped without reversing (for engines with native BiDi but lacking font shaping):\nshaped_only = parsikit.reshape_for_graphics(raw_text, reverse=False)\n```\n\n---\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\n\nAutomatically word-wraps a long paragraph of Persian text and reshapes each line for graphical drawing.\n\n#### Parameters:\n- **`text`** (`str`): Paragraph text to wrap and shape.\n- **`max_chars_per_line`** (`int`): Maximum character width per line.\n- **`reverse`** (`bool`, default `True`): Whether to reverse RTL blocks for LTR canvas drawing.\n\n#### Returns:\n- `list[str]`: A list of shaped line strings.\n\n#### Usage Example:\n\n```python\nimport parsikit\n\nparagraph = \"پارسی‌کیت یک کتابخانه استاندارد پایتونی برای پردازش اطلاعات فارسی، تقویم شمسی و اعتبارسنجی است.\"\nlines = parsikit.reshape_paragraph_for_graphics(paragraph, max_chars_per_line=30)\nfor line in lines:\n    print(line)\n```\n\n---\n\n## Relationship to Other Modules\n\n- **`parsikit.text.standardize_persian`**: Recommended before shaping to unify Arabic characters and fix zero-width non-joiners.\n- **`parsikit.gui.bind_persian_input`**: Integrates live typing assistance for GUI frameworks (Tkinter, CustomTkinter, Qt).\n\n",
-    "headings": [
-      {
-        "id": "reshaper-api-parsikit-reshaper",
-        "text": "Reshaper API (`parsikit.reshaper`)",
-        "level": 1
-      },
-      {
-        "id": "overview",
-        "text": "Overview",
-        "level": 2
-      },
-      {
-        "id": "public-functions",
-        "text": "Public Functions",
-        "level": 2
-      },
-      {
-        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
-        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
-        "level": 3
-      },
-      {
-        "id": "shaped-and-reversed-for-pygame-or-pillow",
-        "text": "Shaped and reversed for Pygame or Pillow:",
-        "level": 1
-      },
-      {
-        "id": "shaped-without-reversing-for-engines-with-native-bidi-but-lacking-font-shaping",
-        "text": "Shaped without reversing (for engines with native BiDi but lacking font shaping):",
-        "level": 1
-      },
-      {
-        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
-        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
-        "level": 3
-      },
-      {
-        "id": "relationship-to-other-modules",
-        "text": "Relationship to Other Modules",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/reshaper.md",
-    "counterparts": {
-      "fa": "api/reshaper"
-    },
-    "counterpartSlug": "api/reshaper"
-  },
-  {
-    "id": "en-api-text",
-    "slug": "api/text",
-    "lang": "en",
-    "category": "api",
-    "title": "Text Processing API (`parsikit.text`)",
-    "summary": "High-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.",
-    "content": "# Text Processing API (`parsikit.text`)\n\nHigh-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.\n\n---\n\n## Standardization & Normalization\n\n### `standardize_persian(text: str, *, strip_diacritics_opt: bool = False, preserve_arabic: bool = False) -> str`\nNormalizes raw Persian and mixed-language text according to standard orthographic rules:\n- **Scope & Multilingual Support**:\n  - By default (`preserve_arabic=False`), standardizes text within a Persian orthographic context, mapping Arabic loanword variants to standard Persian letters:\n    - Arabic Yeh (`ي` / `\\u064A` and `ى` / `\\u0649`) → Persian Yeh (`ی` / `\\u06CC`)\n    - Arabic Kaf (`ك` / `\\u0643`) → Persian Keheh (`ک` / `\\u06A9`)\n    - Arabic Ta Marbuta (`ة` / `\\u0629`) → Persian Heh (`ه` / `\\u0647`) in loanwords (e.g. `دایرة المعارف` → `دایره المعارف`)\n    - Arabic digits (`٠١٢٣٤٥٦٧٨٩`) → Persian digits (`۰۱۲۳۴۵۶۷۸۹`)\n    - Heh with Yeh Above (`ۀ` / `\\u06C0`) → `هٔ` (`\\u0647\\u0654`)\n  - When `preserve_arabic=True`, Arabic-specific characters (`ة`, `ي`, `ى`) are strictly preserved, preventing unwanted alteration of Arabic text (e.g. `\"هذه لغة عربية جميلة\"`).\n  - Kurdish characters such as Kurdish Ae (`ە` / `\\u06D5`) are **never** converted to `ه` and remain completely preserved.\n  - English and other Latin-script words remain unmodified.\n- **Unicode Canonical Normalization**: Applies standard Unicode canonical composition (`NFC`), ensuring decomposed sequences (such as decomposed `آ`) match precomposed Persian characters.\n- **Zero-Width Non-Joiner (ZWNJ) Engine**:\n  - Automatically adjusts half-spaces for standard prefixes (`می‌`, `نمی‌`, `بی‌`) and suffixes (`‌ها`, `‌های`, `‌ترین`, `‌تر`, `‌ای`, etc.).\n  - Preserves word boundaries: spaces surrounding ZWNJ between independent words (e.g. `\"الف \\u200c ب\"`) collapse into a standard space (`\"الف ب\"`), ensuring separate words are not unintentionally conjoined.\n  - Cleans up single-sided space-adjacent ZWNJ (e.g. `\"دانش \\u200cآموز\"` → `\"دانش\\u200cآموز\"`), preserving meaningful Persian half-spaces.\n  - Removes redundant ZWNJs adjacent to punctuation marks (`.`, `،`, `؛`, `؟`, `!`, `:`, `()`, `[]`, `{}`, `«»`).\n  - Collapses duplicate consecutive ZWNJs (`\\u200C{2,}`) into a single `\\u200C`.\n  - Trims leading and trailing ZWNJs from text boundaries.\n- **Idempotence**: Strictly satisfies `standardize_persian(standardize_persian(x)) == standardize_persian(x)`.\n- **Whitespace & Line Breaks**: Collapses redundant spaces into a single space and trims edge margins while preserving line breaks and paragraph structure.\n- **Optional Diacritics Removal**: When `strip_diacritics_opt=True`, strips vowel diacritics via `strip_diacritics`.\n\n### `strip_diacritics(text: str) -> str`\nRemoves Persian and Arabic vowel diacritic marks (Fatha, Damma, Kasra, Tanwin, Tashdid, Sukun) via precompiled regular expressions.\n\n### `is_persian(text: str) -> bool`\nReturns `True` if the string contains at least one character in the Persian/Arabic Unicode blocks (including Presentation Forms).\n\n### `clean_text(text: str, *, preserve_arabic: bool = False) -> str`\nSanitizes raw or multi-line strings through a comprehensive pipeline:\n1. **Token Protection**: Shields URLs, email addresses, key-value configurations, semantic versions, and technical IDs from digit conversions and spacing modifications.\n2. **Standardization**: Normalizes characters and ZWNJ layout via `standardize_persian(..., preserve_arabic=preserve_arabic)`.\n3. **Digit Conversion**: Converts prose ASCII and Arabic numbers to Persian numerals via `english_to_persian`, while strictly keeping technical identifiers and URLs in ASCII.\n4. **Spacing Beautification**: Optimizes punctuation spacing via `beautify_persian_spacing`.\n5. **Control Character Stripping**: Strips invisible zero-width and bidirectional control characters (`\\u200B`, `\\uFEFF`, `\\u200E-\\u200F`, `\\u202A-\\u202E`), strictly preserving intentional ZWNJ (`\\u200C`).\n6. **Paragraph Clean-up**: Collapses redundant blank lines (allowing at most 1 empty line between paragraphs) and trims margins per line.\n7. **Token Restoration**: Restores protected URLs, emails, and technical strings to their exact original forms.\n\n### `normalize_whitespace(text: str, keep_paragraphs: bool = True) -> str`\nNormalizes non-standard Unicode spaces (tabs, non-breaking spaces `\\u00A0`, thin spaces, narrow spaces) to standard spaces.\n- If `keep_paragraphs=True` (default), preserves paragraph separations while clipping redundant blank lines.\n- If `keep_paragraphs=False`, flattens all text into a single continuous line.\n\n### `beautify_persian_spacing(text: str) -> str`\nOptimizes spacing around Persian and Latin punctuation marks with strict content protection:\n- Standardizes Persian commas (`،`) and semicolons (`؛`).\n- Removes redundant spaces before punctuation marks (`.`, `،`, `؛`, `؟`, `!`, `:`, `)`).\n- Inserts a single space after Persian punctuation (`،`, `؛`, `؟`, `!`).\n- Adjusts spacing around parentheses, brackets, and Persian quotation marks (`«»`), ensuring closing brackets followed by sentence punctuation (`.`, `،`) do not gain unwanted spaces.\n- Does NOT alter digits.\n- **Safety Protection**:\n  - **URLs**: Preserves web addresses, query strings (`?x=1&y=2`), paths, ports (`:8080`), fragments (`#section`), and percent-encoding (`%20`) without inserting spaces after question marks, colons, or slashes.\n  - **Trailing Sentence Punctuation**: Punctuation following a URL or closing parenthesis is formatted cleanly without being absorbed into the URL or separated by redundant spaces.\n  - **Emails**: Preserves email addresses (e.g. `user.name+tag@example.co.uk`) without corrupting usernames or domains.\n  - **Decimal Numbers**: Preserves floating-point numbers in ASCII and Persian scripts (e.g. `3.14`, `۱۲.۵`).\n  - **Timestamps**: Preserves clock times (e.g. `12:30`, `۱۴:۴۵`).\n  - **Technical Tokens**: Preserves version strings (e.g. `version=v2.0.1`, `Python 3.13.3`) and technical IDs (e.g. `ID-2026-0042`).\n  - **Code & Filenames**: Preserves technical file extensions (e.g. `test.py`, `script.min.js`).\n  - **Ellipses**: Preserves consecutive dots (`...`).\n\n---\n\n## Keyboard Layout & Collation\n\n### `correct_keyboard_layout(text: str) -> str`\nTranslates Persian text accidentally typed while the system keyboard was set to English QWERTY into proper Persian characters (e.g. `\"sghl\"` → `\"سلام\"`).\n\n### `persian_sort_key(s: str) -> tuple[int, ...]`\nGenerates a precomputed sorting key tuple respecting the official Persian alphabet collation order (`آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی`), normalizing Arabic variants (`أ`, `إ`, `ٱ`, `ؤ`, `ئ`) into base Persian letters, placing ZWNJ before space, and ordering numbers before letters.\n\n### `persian_sorted(iterable: Iterable[T], *, reverse: bool = False) -> list[T]`\nSorts an iterable of strings using the optimized Persian collation key.\n\n---\n\n## Extraction & Conversion\n\n### `words_to_number(text: str) -> int`\nHigh-performance parser converting Persian textual number expressions (e.g. `\"سی و دو هزار و پانصد\"`) into exact integers (`32500`). Supports negative numbers (`\"منفی پنجاه\"` → `-50`), compound scale multipliers (e.g. `\"هزار میلیارد\"` → `1000000000000`), and large magnitudes up to septillions.\n\n### `convert_numbers(text: str, to: Literal[\"persian\", \"english\"] = \"persian\") -> str`\nConverts numeric digits within arbitrary text between Persian (`۰-۹`) and English (`0-9`) numeral representations.\n\n### `slugify(text: str, separator: str = \"-\") -> str`\nGenerates clean, SEO-optimized URL slugs from Persian text with dictionary-backed transliteration:\n- Transliterates common words, prepositions, and technical terms (`پایتون` → `python`, `وردپرس` → `wordpress`, `در` → `dar`, `کتاب` → `ketab`).\n- Converts digits to ASCII.\n- Filters out special characters and collapses repeated separators.\n\n### `extract_mobiles(text: str) -> list[str]`\nExtracts and validates all unique Iranian mobile phone numbers found in unformatted text.\n\n### `extract_national_codes(text: str) -> list[str]`\nExtracts and validates all 10-digit Iranian National Codes satisfying the official civil registration checksum.\n\n---\n\n## Sensitive Data Masking\n\n### `mask_mobile(phone: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of an Iranian mobile number (e.g. `\"09123456789\"` → `\"0912***6789\"`).\n\n### `mask_card(card: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of a 16-digit debit/credit card number (e.g. `\"6037991122334455\"` → `\"6037-99**-****-4455\"`).\n\n### `mask_national_code(code: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of a 10-digit National Code (e.g. `\"7730123452\"` → `\"773-****45-2\"`).\n\n### `mask_email(email: str, mask_char: str = \"*\") -> str`\nMasks username characters in an email address (e.g. `\"kamrani.exe@gmail.com\"` → `\"ka********e@gmail.com\"`).\n\n",
-    "headings": [
-      {
-        "id": "text-processing-api-parsikit-text",
-        "text": "Text Processing API (`parsikit.text`)",
-        "level": 1
-      },
-      {
-        "id": "standardization-normalization",
-        "text": "Standardization & Normalization",
-        "level": 2
-      },
-      {
-        "id": "standardize_persian-text-str-strip_diacritics_opt-bool-false-preserve_arabic-bool-false-str",
-        "text": "`standardize_persian(text: str, *, strip_diacritics_opt: bool = False, preserve_arabic: bool = False) -> str`",
-        "level": 3
-      },
-      {
-        "id": "strip_diacritics-text-str-str",
-        "text": "`strip_diacritics(text: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "is_persian-text-str-bool",
-        "text": "`is_persian(text: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "clean_text-text-str-preserve_arabic-bool-false-str",
-        "text": "`clean_text(text: str, *, preserve_arabic: bool = False) -> str`",
-        "level": 3
-      },
-      {
-        "id": "normalize_whitespace-text-str-keep_paragraphs-bool-true-str",
-        "text": "`normalize_whitespace(text: str, keep_paragraphs: bool = True) -> str`",
-        "level": 3
-      },
-      {
-        "id": "beautify_persian_spacing-text-str-str",
-        "text": "`beautify_persian_spacing(text: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "keyboard-layout-collation",
-        "text": "Keyboard Layout & Collation",
-        "level": 2
-      },
-      {
-        "id": "correct_keyboard_layout-text-str-str",
-        "text": "`correct_keyboard_layout(text: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "persian_sort_key-s-str-tuple-int",
-        "text": "`persian_sort_key(s: str) -> tuple[int, ...]`",
-        "level": 3
-      },
-      {
-        "id": "persian_sorted-iterable-iterable-t-reverse-bool-false-list-t",
-        "text": "`persian_sorted(iterable: Iterable[T], *, reverse: bool = False) -> list[T]`",
-        "level": 3
-      },
-      {
-        "id": "extraction-conversion",
-        "text": "Extraction & Conversion",
-        "level": 2
-      },
-      {
-        "id": "words_to_number-text-str-int",
-        "text": "`words_to_number(text: str) -> int`",
-        "level": 3
-      },
-      {
-        "id": "convert_numbers-text-str-to-literal-persian-english-persian-str",
-        "text": "`convert_numbers(text: str, to: Literal[\"persian\", \"english\"] = \"persian\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "slugify-text-str-separator-str-str",
-        "text": "`slugify(text: str, separator: str = \"-\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "extract_mobiles-text-str-list-str",
-        "text": "`extract_mobiles(text: str) -> list[str]`",
-        "level": 3
-      },
-      {
-        "id": "extract_national_codes-text-str-list-str",
-        "text": "`extract_national_codes(text: str) -> list[str]`",
-        "level": 3
-      },
-      {
-        "id": "sensitive-data-masking",
-        "text": "Sensitive Data Masking",
-        "level": 2
-      },
-      {
-        "id": "mask_mobile-phone-str-mask_char-str-str",
-        "text": "`mask_mobile(phone: str, mask_char: str = \"*\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "mask_card-card-str-mask_char-str-str",
-        "text": "`mask_card(card: str, mask_char: str = \"*\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "mask_national_code-code-str-mask_char-str-str",
-        "text": "`mask_national_code(code: str, mask_char: str = \"*\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "mask_email-email-str-mask_char-str-str",
-        "text": "`mask_email(email: str, mask_char: str = \"*\") -> str`",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/text.md",
-    "counterparts": {
-      "fa": "api/text"
-    },
-    "counterpartSlug": "api/text"
-  },
-  {
-    "id": "en-api-validators",
-    "slug": "api/validators",
-    "lang": "en",
-    "category": "api",
-    "title": "Validators API (`parsikit.validators`)",
-    "summary": "Validates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when strict=True.",
-    "content": "# Validators API (`parsikit.validators`)\n\n## Functions\n\n### `is_valid_national_code(code: str, strict: bool = True) -> bool`\nValidates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when `strict=True`.\n\n### `format_national_code(code: str) -> str`\nFormats a national code in the standard 3-6-1 format (`XXX-XXXXXX-X`).\n\n### `detect_national_code_location(code: str) -> dict | None`\nDetects the issuing province and city based on the first three digits of the national code.\n\n### `is_valid_mobile(phone: str) -> bool`\nValidates an Iranian mobile phone number across all licensed operators.\n\n### `normalize_mobile(phone: str, prefix: str = \"0\") -> str`\nNormalizes mobile numbers into standard national format (`09...`) or international format (`+989...`).\n\n### `detect_mobile_operator(phone: str) -> str | None`\nIdentifies the carrier operator name (`MCI`, `MTN`, `Rightel`, etc.).\n\n### `is_valid_landline(phone: str) -> bool`\nValidates Iranian landline numbers against official provincial area codes.\n\n### `detect_landline_province(phone: str) -> str | None`\nIdentifies the province of an Iranian landline phone number.\n\n### `is_valid_card_number(card: str) -> bool`\nValidates 16-digit bank card numbers using the Luhn algorithm.\n\n### `format_card_number(card: str, separator: str = \"-\") -> str`\nFormats a 16-digit card into four 4-digit groups.\n\n### `detect_bank_from_card(card: str) -> str | None`\nIdentifies the issuing bank based on the first 6 digits (IIN / BIN).\n\n### `is_valid_sheba(sheba: str) -> bool`\nValidates an Iranian IBAN (Sheba) using the ISO 7064 Mod 97-10 checksum algorithm.\n\n### `format_sheba(sheba: str, chunk_size: int = 4) -> str`\nFormats a Sheba string into readable 4-character blocks.\n\n### `detect_bank_from_sheba(sheba: str) -> str | None`\nDetects the bank name from the bank identifier code in the Sheba string.\n\n### `is_valid_postal_code(code: str) -> bool`\nValidates 10-digit Iranian postal codes.\n\n### `format_postal_code(code: str) -> str`\nFormats a postal code into the standard 5-5 layout (`XXXXX-XXXXX`).\n\n### `is_valid_corporate_id(corp_id: str) -> bool`\nValidates 11-digit legal entity corporate registration numbers.\n\n### `is_valid_bill_and_payment(bill_id: str, pay_id: str) -> bool`\nValidates utility bill IDs and payment IDs.\n\n### `extract_bill_details(bill_id: str, pay_id: str) -> dict`\nExtracts bill type, amount in Rials, and billing period.\n\n### `is_valid_plate(plate: str) -> bool`\nValidates Iranian vehicle license plate formats.\n\n### `parse_plate(plate: str) -> dict`\nParses license plate digits, middle letter, and provincial Iran code.\n\n### `detect(text: str) -> str | None`\nAutomatically detects the data type of the input string (`national_code`, `mobile`, `card`, `sheba`, `email`, `url`, `ip`).\n",
-    "headings": [
-      {
-        "id": "validators-api-parsikit-validators",
-        "text": "Validators API (`parsikit.validators`)",
-        "level": 1
-      },
-      {
-        "id": "functions",
-        "text": "Functions",
-        "level": 2
-      },
-      {
-        "id": "is_valid_national_code-code-str-strict-bool-true-bool",
-        "text": "`is_valid_national_code(code: str, strict: bool = True) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "format_national_code-code-str-str",
-        "text": "`format_national_code(code: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "detect_national_code_location-code-str-dict-none",
-        "text": "`detect_national_code_location(code: str) -> dict | None`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_mobile-phone-str-bool",
-        "text": "`is_valid_mobile(phone: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "normalize_mobile-phone-str-prefix-str-0-str",
-        "text": "`normalize_mobile(phone: str, prefix: str = \"0\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "detect_mobile_operator-phone-str-str-none",
-        "text": "`detect_mobile_operator(phone: str) -> str | None`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_landline-phone-str-bool",
-        "text": "`is_valid_landline(phone: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "detect_landline_province-phone-str-str-none",
-        "text": "`detect_landline_province(phone: str) -> str | None`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_card_number-card-str-bool",
-        "text": "`is_valid_card_number(card: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "format_card_number-card-str-separator-str-str",
-        "text": "`format_card_number(card: str, separator: str = \"-\") -> str`",
-        "level": 3
-      },
-      {
-        "id": "detect_bank_from_card-card-str-str-none",
-        "text": "`detect_bank_from_card(card: str) -> str | None`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_sheba-sheba-str-bool",
-        "text": "`is_valid_sheba(sheba: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "format_sheba-sheba-str-chunk_size-int-4-str",
-        "text": "`format_sheba(sheba: str, chunk_size: int = 4) -> str`",
-        "level": 3
-      },
-      {
-        "id": "detect_bank_from_sheba-sheba-str-str-none",
-        "text": "`detect_bank_from_sheba(sheba: str) -> str | None`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_postal_code-code-str-bool",
-        "text": "`is_valid_postal_code(code: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "format_postal_code-code-str-str",
-        "text": "`format_postal_code(code: str) -> str`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_corporate_id-corp_id-str-bool",
-        "text": "`is_valid_corporate_id(corp_id: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_bill_and_payment-bill_id-str-pay_id-str-bool",
-        "text": "`is_valid_bill_and_payment(bill_id: str, pay_id: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "extract_bill_details-bill_id-str-pay_id-str-dict",
-        "text": "`extract_bill_details(bill_id: str, pay_id: str) -> dict`",
-        "level": 3
-      },
-      {
-        "id": "is_valid_plate-plate-str-bool",
-        "text": "`is_valid_plate(plate: str) -> bool`",
-        "level": 3
-      },
-      {
-        "id": "parse_plate-plate-str-dict",
-        "text": "`parse_plate(plate: str) -> dict`",
-        "level": 3
-      },
-      {
-        "id": "detect-text-str-str-none",
-        "text": "`detect(text: str) -> str | None`",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/api/validators.md",
-    "counterparts": {
-      "fa": "api/validators"
-    },
-    "counterpartSlug": "api/validators"
-  },
-  {
-    "id": "en-faq",
-    "slug": "faq",
-    "lang": "en",
-    "category": "getting-started",
-    "title": "Frequently Asked Questions (FAQ)",
-    "summary": "ParsiKit supports Python 3.10 and newer (including 3.10, 3.11, 3.12, and 3.13).",
-    "content": "# Frequently Asked Questions (FAQ)\n\n### 1. Which Python versions does ParsiKit support?\nParsiKit supports Python **3.10 and newer** (including 3.10, 3.11, 3.12, and 3.13).\n\n---\n\n### 2. Does ParsiKit have external dependencies?\nNo. ParsiKit is 100% pure Python with zero external runtime dependencies. It installs instantly and has minimal overhead.\n\n---\n\n### 3. How does ParsiKit differ from Hazm or PersianJS?\n- **Hazm** is focused on Natural Language Processing (NLP), part-of-speech tagging, and morphological analysis.\n- **ParsiKit** is a full software infrastructure library for real-world web applications, financial software, database normalization, national ID validation, and secure PII handling.\n\n---\n\n### 4. Is ParsiKit thread-safe?\nYes. Global configurations and the internal cache use Python's re-entrant locks (`threading.RLock`) to guarantee thread safety in multi-threaded application servers like Gunicorn and Uvicorn.\n\n---\n\n### 5. Does ParsiKit expose sensitive customer data in logs?\nNo. In v3.3.1, exceptions like `InvalidCardNumberError` sanitize messages, and all domain models provide a `.masked` property for safe logging and administration dashboards.\n\n---\n\n### 6. What is the software license?\nParsiKit is licensed under the permissive **MIT License**. You are free to use it in commercial, open-source, and private projects.\n",
-    "headings": [
-      {
-        "id": "frequently-asked-questions-faq",
-        "text": "Frequently Asked Questions (FAQ)",
-        "level": 1
-      },
-      {
-        "id": "1-which-python-versions-does-parsikit-support",
-        "text": "1. Which Python versions does ParsiKit support?",
-        "level": 3
-      },
-      {
-        "id": "2-does-parsikit-have-external-dependencies",
-        "text": "2. Does ParsiKit have external dependencies?",
-        "level": 3
-      },
-      {
-        "id": "3-how-does-parsikit-differ-from-hazm-or-persianjs",
-        "text": "3. How does ParsiKit differ from Hazm or PersianJS?",
-        "level": 3
-      },
-      {
-        "id": "4-is-parsikit-thread-safe",
-        "text": "4. Is ParsiKit thread-safe?",
-        "level": 3
-      },
-      {
-        "id": "5-does-parsikit-expose-sensitive-customer-data-in-logs",
-        "text": "5. Does ParsiKit expose sensitive customer data in logs?",
-        "level": 3
-      },
-      {
-        "id": "6-what-is-the-software-license",
-        "text": "6. What is the software license?",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/faq.md",
-    "counterparts": {
-      "fa": "faq"
-    },
-    "counterpartSlug": "faq"
-  },
-  {
-    "id": "en-guides-forms_and_security",
-    "slug": "guides/forms_and_security",
-    "lang": "en",
-    "category": "guides",
-    "title": "Guide: Form Validation & Sensitive Data Security",
-    "summary": "Handling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application ",
-    "content": "# Guide: Form Validation & Sensitive Data Security\n\nHandling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application logs, APM systems, and customer service dashboards.\n\n---\n\n## 1. Input Sanitization Before Storage\n\nAlways sanitize text input from web forms before storing it in databases:\n\n```python\nimport parsikit\n\ndef sanitize_user_input(raw_full_name: str, raw_address: str):\n    return {\n        \"full_name\": parsikit.clean_text(raw_full_name),\n        \"address\": parsikit.beautify_persian_spacing(parsikit.clean_text(raw_address)),\n    }\n```\n\n---\n\n## 2. Preventing PII Leakage in Logs\n\nWhen logging user transactions, NEVER log raw card numbers or national codes. Use the `.masked` property or `mask_*` functions:\n\n```python\nimport logging\nimport parsikit\n\nlogger = logging.getLogger(\"payment\")\n\ndef process_payment(card_number_raw: str, national_code_raw: str):\n    card = parsikit.BankCard(card_number_raw)\n    nc = parsikit.NationalCode(national_code_raw)\n\n    # SECURE: Log only masked representations\n    logger.info(\n        \"Initiating payment for user (National Code: %s) using Card: %s (%s)\",\n        nc.masked,\n        card.masked,\n        card.bank_name,\n    )\n```\n\n---\n\n## 3. Safe Exception Handling\n\nIn ParsiKit v3.3.1, exceptions like `InvalidCardNumberError` and `InvalidNationalCodeError` are sanitized by default so they do not print the raw secret card number into stack traces or Sentry events.\n\n```python\nimport parsikit\n\ntry:\n    card = parsikit.BankCard(\"6037991122339999\")  # Invalid Luhn\nexcept parsikit.InvalidCardNumberError as exc:\n    # exc message is safe and contains no sensitive PII\n    logger.warning(\"Payment validation failed: %s\", exc)\n```\n",
-    "headings": [
-      {
-        "id": "guide-form-validation-sensitive-data-security",
-        "text": "Guide: Form Validation & Sensitive Data Security",
-        "level": 1
-      },
-      {
-        "id": "1-input-sanitization-before-storage",
-        "text": "1. Input Sanitization Before Storage",
-        "level": 2
-      },
-      {
-        "id": "2-preventing-pii-leakage-in-logs",
-        "text": "2. Preventing PII Leakage in Logs",
-        "level": 2
-      },
-      {
-        "id": "secure-log-only-masked-representations",
-        "text": "SECURE: Log only masked representations",
-        "level": 1
-      },
-      {
-        "id": "3-safe-exception-handling",
-        "text": "3. Safe Exception Handling",
-        "level": 2
-      },
-      {
-        "id": "exc-message-is-safe-and-contains-no-sensitive-pii",
-        "text": "exc message is safe and contains no sensitive PII",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/guides/forms_and_security.md",
-    "counterparts": {
-      "fa": "guides/forms_and_security"
-    },
-    "counterpartSlug": "guides/forms_and_security"
-  },
-  {
-    "id": "en-guides-gui_integration",
-    "slug": "guides/gui_integration",
-    "lang": "en",
-    "category": "guides",
-    "title": "Guide: Desktop GUI & Graphics Integration",
-    "summary": "Rendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and righ",
-    "content": "# Guide: Desktop GUI & Graphics Integration\n\nRendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and right-to-left bidirectional (BiDi) display.\n\n---\n\n## 1. Graphics Engines & Image Generation (Pillow / OpenCV)\n\nWithout shaping, Persian letters render disconnected from left-to-right. Use `reshape_for_graphics`:\n\n```python\nfrom PIL import Image, ImageDraw, ImageFont\nimport parsikit\n\n# Create a blank image\nimage = Image.new(\"RGB\", (600, 200), color=(255, 255, 255))\ndraw = ImageDraw.Draw(image)\n\n# Reshape Persian text (BiDi and cursive glyph joining)\ntext = \"سامانه هوشمند مدیریت اسناد پارسی\"\nreshaped = parsikit.reshape_for_graphics(text)\n\n# Render to canvas\n# font = ImageFont.truetype(\"Vazirmatn-Bold.ttf\", 32)\n# draw.text((50, 80), reshaped, font=font, fill=(0, 0, 0))\n```\n\n---\n\n## 2. Multi-Line Paragraphs (`reshape_paragraph_for_graphics`)\n\nFor multi-line text boxes in graphics rendering, wrap each line with consistent width:\n\n```python\nimport parsikit\n\nparagraph = (\n    \"کتابخانه پارسی‌کیت مجموعه‌ای از ابزارهای استانداردسازی و \"\n    \"اعتبارسنجی داده‌های فارسی برای توسعه‌دهندگان پایتون است.\"\n)\n\nwrapped = parsikit.reshape_paragraph_for_graphics(paragraph, max_chars_per_line=30)\n# Returns formatted lines ready for drawing\n```\n\n---\n\n## 3. Real-Time Typing Helper in Tkinter / CustomTkinter\n\nAutomatically normalize Persian text as the user types:\n\n```python\nimport tkinter as tk\nimport parsikit\n\nroot = tk.Tk()\nentry = tk.Entry(root, font=(\"Vazirmatn\", 14))\nentry.pack(padx=20, pady=20)\n\n# Bind automated Persian keyboard conversion & character fixing\nparsikit.bind_persian_input(entry)\n\nroot.mainloop()\n```\n",
-    "headings": [
-      {
-        "id": "guide-desktop-gui-graphics-integration",
-        "text": "Guide: Desktop GUI & Graphics Integration",
-        "level": 1
-      },
-      {
-        "id": "1-graphics-engines-image-generation-pillow-opencv",
-        "text": "1. Graphics Engines & Image Generation (Pillow / OpenCV)",
-        "level": 2
-      },
-      {
-        "id": "create-a-blank-image",
-        "text": "Create a blank image",
-        "level": 1
-      },
-      {
-        "id": "reshape-persian-text-bidi-and-cursive-glyph-joining",
-        "text": "Reshape Persian text (BiDi and cursive glyph joining)",
-        "level": 1
-      },
-      {
-        "id": "render-to-canvas",
-        "text": "Render to canvas",
-        "level": 1
-      },
-      {
-        "id": "font-imagefont-truetype-vazirmatn-bold-ttf-32",
-        "text": "font = ImageFont.truetype(\"Vazirmatn-Bold.ttf\", 32)",
-        "level": 1
-      },
-      {
-        "id": "draw-text-50-80-reshaped-font-font-fill-0-0-0",
-        "text": "draw.text((50, 80), reshaped, font=font, fill=(0, 0, 0))",
-        "level": 1
-      },
-      {
-        "id": "2-multi-line-paragraphs-reshape_paragraph_for_graphics",
-        "text": "2. Multi-Line Paragraphs (`reshape_paragraph_for_graphics`)",
-        "level": 2
-      },
-      {
-        "id": "returns-formatted-lines-ready-for-drawing",
-        "text": "Returns formatted lines ready for drawing",
-        "level": 1
-      },
-      {
-        "id": "3-real-time-typing-helper-in-tkinter-customtkinter",
-        "text": "3. Real-Time Typing Helper in Tkinter / CustomTkinter",
-        "level": 2
-      },
-      {
-        "id": "bind-automated-persian-keyboard-conversion-character-fixing",
-        "text": "Bind automated Persian keyboard conversion & character fixing",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/guides/gui_integration.md",
-    "counterparts": {
-      "fa": "guides/gui_integration"
-    },
-    "counterpartSlug": "guides/gui_integration"
-  },
-  {
-    "id": "en-guides-web_backends",
-    "slug": "guides/web_backends",
-    "lang": "en",
-    "category": "guides",
-    "title": "Guide: Web Backends (FastAPI & Django Integration)",
-    "summary": "This guide shows how to integrate ParsiKit into production web backends.",
-    "content": "# Guide: Web Backends (FastAPI & Django Integration)\n\nThis guide shows how to integrate ParsiKit into production web backends.\n\n---\n\n## 1. FastAPI Integration\n\nBecause ParsiKit domain models natively support Pydantic v2 core schemas, you can declare them directly as request body or query parameter types.\n\n```python\nfrom fastapi import FastAPI, HTTPException\nimport parsikit\n\napp = FastAPI(title=\"Iranian E-Commerce API\")\n\nfrom pydantic import BaseModel\n\nclass CheckoutRequest(BaseModel):\n    customer_name: str\n    national_code: parsikit.NationalCode\n    mobile: parsikit.MobileNumber\n    sheba: parsikit.Sheba\n\n@app.post(\"/api/checkout\")\ndef checkout(payload: CheckoutRequest):\n    # Data is already guaranteed valid when execution reaches here!\n    return {\n        \"status\": \"success\",\n        \"customer\": parsikit.standardize_persian(payload.customer_name),\n        \"national_code_masked\": payload.national_code.masked,\n        \"mobile\": payload.mobile.national,\n        \"bank\": payload.sheba.bank_name,\n    }\n```\n\n---\n\n## 2. Django Model & Form Validation\n\nIn Django, use ParsiKit validators inside clean methods or custom model fields:\n\n```python\nfrom django.core.exceptions import ValidationError\nfrom django.db import models\nimport parsikit\n\nclass IranianNationalCodeField(models.CharField):\n    description = \"Iranian 10-digit National Code\"\n\n    def __init__(self, *args, **kwargs):\n        kwargs['max_length'] = 10\n        super().__init__(*args, **kwargs)\n\n    def validate(self, value, model_instance):\n        super().validate(value, model_instance)\n        if not parsikit.is_valid_national_code(value):\n            raise ValidationError(\n                f\"کد ملی وارد شده معتبر نمی‌باشد.\",\n                code=\"invalid_national_code\"\n            )\n```\n\n---\n\n## 3. Database Query Normalization Middleware\n\nTo ensure search queries match records in PostgreSQL or MySQL regardless of whether the user typed Arabic Yeh (`ي`) or Persian Yeh (`ی`):\n\n```python\ndef normalize_search_query(user_query: str) -> str:\n    clean = parsikit.standardize_persian(user_query, strip_diacritics_opt=True)\n    return clean\n```\n",
-    "headings": [
-      {
-        "id": "guide-web-backends-fastapi-django-integration",
-        "text": "Guide: Web Backends (FastAPI & Django Integration)",
-        "level": 1
-      },
-      {
-        "id": "1-fastapi-integration",
-        "text": "1. FastAPI Integration",
-        "level": 2
-      },
-      {
-        "id": "data-is-already-guaranteed-valid-when-execution-reaches-here",
-        "text": "Data is already guaranteed valid when execution reaches here!",
-        "level": 1
-      },
-      {
-        "id": "2-django-model-form-validation",
-        "text": "2. Django Model & Form Validation",
-        "level": 2
-      },
-      {
-        "id": "3-database-query-normalization-middleware",
-        "text": "3. Database Query Normalization Middleware",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/guides/web_backends.md",
-    "counterparts": {
-      "fa": "guides/web_backends"
-    },
-    "counterpartSlug": "guides/web_backends"
-  },
-  {
-    "id": "en-index",
-    "slug": "index",
-    "lang": "en",
-    "category": "getting-started",
-    "title": "ParsiKit Official Documentation (v3.3.1)",
-    "summary": "Welcome to the official documentation for ParsiKit!",
-    "content": "# ParsiKit Official Documentation (v3.3.1)\n\nWelcome to the official documentation for **ParsiKit**!  \nCreated and maintained by **Ali Kamrani (MRThugh)**, ParsiKit is a pure Python software infrastructure library designed for Persian data standardization, validation algorithms, financial computations, astronomical Jalali calendar transformations, graphical font reshaping, developer diagnostics, and sensitive data protection.\n\n---\n\n## What is ParsiKit?\n\nParsiKit solves standard challenges encountered when handling Persian text and Iranian data in Python:\n- **Text & Typography Standardization**: Converts Arabic letters (ي/ك/ة) to standard Persian glyphs, correctly positions Zero-Width Non-Joiners (ZWNJ) for prefixes (`می‌`) and suffixes (`‌ها`), eliminates redundant whitespace, and strips diacritics.\n- **Official National Validations**: Checks mathematical checksum algorithms for Iranian National Codes (modulo 11), 16-digit debit/credit card numbers (Luhn check), Sheba IBANs (ISO 7064 Mod 97-10), mobile phones, fixed landlines, corporate IDs, postal codes, bills, and vehicle plates.\n- **Numbers & Currencies**: Translates numerals between Persian, Arabic, and Latin scripts, converts huge numbers into Persian words, performs Rial and Toman conversions, computes VAT, and calculates loan installments.\n- **Astronomical Jalali Dates**: Bidirectional date conversions between Gregorian and Jalali calendars with leap year validation and relative-time humanization.\n- **Object-Oriented Domain Models**: Rich value objects (`PersianText`, `NationalCode`, `MobileNumber`, `BankCard`, `Sheba`, `VehiclePlate`) with instant validation, masked views, and native Pydantic v2 support.\n- **Security & Privacy**: Masking helpers (`mask_card`, `mask_mobile`, `mask_national_code`, `mask_email`) and sanitized exceptions to prevent PII exposure in logs and metrics.\n- **Zero External Dependencies**: Pure Python, zero compile steps, minimal memory footprint.\n\n---\n\n## What ParsiKit Does NOT Do\n\n1. **Identity Inquiries (Registration Office / Civil Registry)**:  \n   `is_valid_national_code` mathematically verifies length and checksum against the official algorithm. It does not call an online governmental web service to verify the person's identity or living status.\n2. **Bank Balance or Live Account Status**:  \n   `BankCard` and `Sheba` verify format, check digits, and issuer bank identity. They do not connect to banking APIs to check available balance or card blocking status.\n\n---\n\n## Documentation Navigation\n\n- 🚀 **[Installation](installation.md)** — Install via pip or from source.\n- ⚡ **[Quickstart](quickstart.md)** — Practical examples in 5 minutes.\n- 📚 **Step-by-Step Tutorials:**\n  - [Text Processing & ZWNJ](tutorials/text_processing.md)\n  - [Validation & Checksums](tutorials/validation.md)\n  - [Numbers & Financial Operations](tutorials/numbers_and_currency.md)\n  - [Jalali Calendar & Humanized Time](tutorials/datetime.md)\n  - [Object-Oriented Models & Pydantic](tutorials/models.md)\n- 🛠 **Guides:**\n  - [Web Backends (FastAPI & Django)](guides/web_backends.md)\n  - [Forms & Security Best Practices](guides/forms_and_security.md)\n  - [GUI Integration (Tkinter, CustomTkinter, Graphics)](guides/gui_integration.md)\n- 📖 **[API Reference](api/index.md)** — Complete module and function reference.\n- 🔧 **[Troubleshooting](troubleshooting.md)** — Solutions to common issues.\n- ❓ **[FAQ](faq.md)** — Frequently Asked Questions.\n",
-    "headings": [
-      {
-        "id": "parsikit-official-documentation-v3-3-1",
-        "text": "ParsiKit Official Documentation (v3.3.1)",
-        "level": 1
-      },
-      {
-        "id": "what-is-parsikit",
-        "text": "What is ParsiKit?",
-        "level": 2
-      },
-      {
-        "id": "what-parsikit-does-not-do",
-        "text": "What ParsiKit Does NOT Do",
-        "level": 2
-      },
-      {
-        "id": "documentation-navigation",
-        "text": "Documentation Navigation",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/index.md",
-    "counterparts": {
-      "fa": "index",
-      "es": "index"
-    },
-    "counterpartSlug": "index"
-  },
-  {
-    "id": "en-installation",
-    "slug": "installation",
-    "lang": "en",
-    "category": "getting-started",
-    "title": "Installation Guide",
-    "summary": "ParsiKit requires Python 3.10 or higher. It has no external dependencies.",
-    "content": "# Installation Guide\n\nParsiKit requires Python **3.10** or higher. It has no external dependencies.\n\n---\n\n## 1. Install via PyPI\n\n```bash\npip install parsikit\n```\n\nTo upgrade to the latest stable release:\n```bash\npip install --upgrade parsikit\n```\n\n---\n\n## 2. Install in Virtual Environments\n\n### Using `venv`\n```bash\npython3 -m venv .venv\nsource .venv/bin/activate  # On Windows: .venv\\Scripts\\activate\npip install parsikit\n```\n\n### Using Poetry\n```bash\npoetry add parsikit\n```\n\n### Using uv\n```bash\nuv pip install parsikit\n```\n\n---\n\n## 3. Install from Source\n\n```bash\ngit clone https://github.com/MRThugh/ParsiKit.git\ncd ParsiKit\npip install -e .\n```\n\n---\n\n## 4. Verification\n\nRun the following command to verify installation:\n\n```bash\npython3 -c \"import parsikit; print('ParsiKit version:', parsikit.__version__)\"\n```\n",
-    "headings": [
-      {
-        "id": "installation-guide",
-        "text": "Installation Guide",
-        "level": 1
-      },
-      {
-        "id": "1-install-via-pypi",
-        "text": "1. Install via PyPI",
-        "level": 2
-      },
-      {
-        "id": "2-install-in-virtual-environments",
-        "text": "2. Install in Virtual Environments",
-        "level": 2
-      },
-      {
-        "id": "using-venv",
-        "text": "Using `venv`",
-        "level": 3
-      },
-      {
-        "id": "using-poetry",
-        "text": "Using Poetry",
-        "level": 3
-      },
-      {
-        "id": "using-uv",
-        "text": "Using uv",
-        "level": 3
-      },
-      {
-        "id": "3-install-from-source",
-        "text": "3. Install from Source",
-        "level": 2
-      },
-      {
-        "id": "4-verification",
-        "text": "4. Verification",
-        "level": 2
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/installation.md",
-    "counterparts": {
-      "fa": "installation",
-      "es": "installation"
-    },
-    "counterpartSlug": "installation"
-  },
-  {
-    "id": "en-quickstart",
-    "slug": "quickstart",
-    "lang": "en",
-    "category": "getting-started",
-    "title": "ParsiKit Quickstart Guide",
-    "summary": "Get up and running with ParsiKit in less than 5 minutes.",
-    "content": "# ParsiKit Quickstart Guide\n\nGet up and running with ParsiKit in less than 5 minutes.\n\n---\n\n## 1. Text Normalization & Standardization\n\n```python\nimport parsikit\n\n# Fix Arabic letters and irregular spacing\nraw_text = \"ي كافيه كتاب ها رو برداري و بري\"\nclean_text = parsikit.standardize_persian(raw_text)\n\nprint(clean_text)\n# Output: ی کافیه کتاب‌ها رو برداری و بری\n```\n\n---\n\n## 2. Iranian National Code (کد ملی)\n\n```python\nimport parsikit\n\ncode = \"0010123458\"\nnc = parsikit.NationalCode(code)\n\nprint(nc.is_valid)   # True\nprint(nc.formatted)  # '001-012345-8'\nprint(nc.masked)     # '001-****45-8'\nprint(nc.location)   # {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 3. Numbers & Currency\n\n```python\nimport parsikit\n\namount = 1500000\n\n# Format with Persian digits and separator\nformatted = parsikit.format_currency(amount, \"toman\", persian_digits=True)\nprint(formatted)\n# Output: ۱،۵۰۰،۰۰۰ تومان\n\n# Convert to written words\nwords = parsikit.number_to_words(amount)\nprint(f\"{words} تومان\")\n# Output: یک میلیون و پانصد هزار تومان\n```\n\n---\n\n## 4. Jalali Astronomical Dates\n\n```python\nimport parsikit\n\n# Convert Gregorian to Jalali\njy, jm, jd = parsikit.gregorian_to_jalali(2026, 7, 6)\nmonth_name = parsikit.get_jalali_month_name(jm)\nprint(f\"{jd} {month_name} {jy}\")\n# Output: 15 تیر 1405\n\n# Humanize relative time\nprint(parsikit.humanize_relative_time(-300))\n# Output: ۵ دقیقه پیش\n```\n\n---\n\n## 5. Mobile Numbers & Bank Cards\n\n```python\nimport parsikit\n\n# Mobile number\nmobile = parsikit.MobileNumber(\"09123456789\")\nprint(mobile.international)  # '+989123456789'\nprint(mobile.operator)       # 'MCI'\nprint(mobile.masked)         # '0912***6789'\n\n# Bank card\ncard = parsikit.BankCard(\"6037991122334455\")\nprint(card.bank_name)        # 'بانک ملی ایران'\nprint(card.formatted)        # '6037-9911-2233-4455'\nprint(card.masked)           # '6037-99**-****-4455'\n```\n",
-    "headings": [
-      {
-        "id": "parsikit-quickstart-guide",
-        "text": "ParsiKit Quickstart Guide",
-        "level": 1
-      },
-      {
-        "id": "1-text-normalization-standardization",
-        "text": "1. Text Normalization & Standardization",
-        "level": 2
-      },
-      {
-        "id": "fix-arabic-letters-and-irregular-spacing",
-        "text": "Fix Arabic letters and irregular spacing",
-        "level": 1
-      },
-      {
-        "id": "output-ی-کافیه-کتاب-ها-رو-برداری-و-بری",
-        "text": "Output: ی کافیه کتاب‌ها رو برداری و بری",
-        "level": 1
-      },
-      {
-        "id": "2-iranian-national-code-کد-ملی",
-        "text": "2. Iranian National Code (کد ملی)",
-        "level": 2
-      },
-      {
-        "id": "3-numbers-currency",
-        "text": "3. Numbers & Currency",
-        "level": 2
-      },
-      {
-        "id": "format-with-persian-digits-and-separator",
-        "text": "Format with Persian digits and separator",
-        "level": 1
-      },
-      {
-        "id": "output-۱،۵۰۰،۰۰۰-تومان",
-        "text": "Output: ۱،۵۰۰،۰۰۰ تومان",
-        "level": 1
-      },
-      {
-        "id": "convert-to-written-words",
-        "text": "Convert to written words",
-        "level": 1
-      },
-      {
-        "id": "output-یک-میلیون-و-پانصد-هزار-تومان",
-        "text": "Output: یک میلیون و پانصد هزار تومان",
-        "level": 1
-      },
-      {
-        "id": "4-jalali-astronomical-dates",
-        "text": "4. Jalali Astronomical Dates",
-        "level": 2
-      },
-      {
-        "id": "convert-gregorian-to-jalali",
-        "text": "Convert Gregorian to Jalali",
-        "level": 1
-      },
-      {
-        "id": "output-15-تیر-1405",
-        "text": "Output: 15 تیر 1405",
-        "level": 1
-      },
-      {
-        "id": "humanize-relative-time",
-        "text": "Humanize relative time",
-        "level": 1
-      },
-      {
-        "id": "output-۵-دقیقه-پیش",
-        "text": "Output: ۵ دقیقه پیش",
-        "level": 1
-      },
-      {
-        "id": "5-mobile-numbers-bank-cards",
-        "text": "5. Mobile Numbers & Bank Cards",
-        "level": 2
-      },
-      {
-        "id": "mobile-number",
-        "text": "Mobile number",
-        "level": 1
-      },
-      {
-        "id": "bank-card",
-        "text": "Bank card",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/quickstart.md",
-    "counterparts": {
-      "fa": "quickstart",
-      "es": "quickstart"
-    },
-    "counterpartSlug": "quickstart"
-  },
-  {
-    "id": "en-troubleshooting",
-    "slug": "troubleshooting",
-    "lang": "en",
-    "category": "getting-started",
-    "title": "Troubleshooting Guide (English)",
-    "summary": "Solutions to common issues encountered when using ParsiKit.",
-    "content": "# Troubleshooting Guide (English)\n\nSolutions to common issues encountered when using ParsiKit.\n\n---\n\n## 1. SyntaxError in Python 3.10 / 3.11\n\n### Problem\nPrior to Python 3.12, backslashes inside f-string expressions were prohibited by the Python grammar (PEP 701). In ParsiKit v3.3.0, a line in `parsikit.dev.debug_text` triggered this syntax error on Python 3.10 and 3.11.\n\n### Solution\nThis issue is fixed in ParsiKit v3.3.1. Upgrade to v3.3.1:\n```bash\npip install --upgrade parsikit\n```\n\n---\n\n## 2. Garbled Characters in Console or Terminal\n\n### Problem\nTerminal does not default to UTF-8 output encoding, causing Persian characters to render as question marks or mojibake.\n\n### Solution\nEnsure UTF-8 encoding is enabled in your environment:\n\nLinux/macOS:\n```bash\nexport PYTHONIOENCODING=utf-8\n```\n\nWindows PowerShell:\n```powershell\n$env:PYTHONIOENCODING=\"utf-8\"\n[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n```\n\n---\n\n## 3. Disconnected or Reversed Persian in Pillow / OpenCV\n\n### Problem\n2D rendering engines render Persian characters disconnected from left-to-right because they lack cursive Arabic text shaping and Unicode Bidirectional (BiDi) algorithm support.\n\n### Solution\nUse `parsikit.reshape_for_graphics`:\n```python\nimport parsikit\n\nraw = \"پردازش تصویر\"\nreshaped = parsikit.reshape_for_graphics(raw)\n# Pass reshaped to draw.text(...)\n```\n\n---\n\n## 4. `InvalidNationalCodeError` on 10-Digit Inputs\n\n### Problem\nA 10-digit number may still be rejected if:\n1. It consists of 10 identical digits (e.g. `1111111111`).\n2. Its 10th digit does not match the modulo-11 checksum calculated from the first 9 digits.\n\n### Solution\nEnsure test fixtures use mathematically valid check digits (e.g. for prefix `001012345`, the valid check digit is `8`: `0010123458`).\n",
-    "headings": [
-      {
-        "id": "troubleshooting-guide-english",
-        "text": "Troubleshooting Guide (English)",
-        "level": 1
-      },
-      {
-        "id": "1-syntaxerror-in-python-3-10-3-11",
-        "text": "1. SyntaxError in Python 3.10 / 3.11",
-        "level": 2
-      },
-      {
-        "id": "problem",
-        "text": "Problem",
-        "level": 3
-      },
-      {
-        "id": "solution",
-        "text": "Solution",
-        "level": 3
-      },
-      {
-        "id": "2-garbled-characters-in-console-or-terminal",
-        "text": "2. Garbled Characters in Console or Terminal",
-        "level": 2
-      },
-      {
-        "id": "problem",
-        "text": "Problem",
-        "level": 3
-      },
-      {
-        "id": "solution",
-        "text": "Solution",
-        "level": 3
-      },
-      {
-        "id": "3-disconnected-or-reversed-persian-in-pillow-opencv",
-        "text": "3. Disconnected or Reversed Persian in Pillow / OpenCV",
-        "level": 2
-      },
-      {
-        "id": "problem",
-        "text": "Problem",
-        "level": 3
-      },
-      {
-        "id": "solution",
-        "text": "Solution",
-        "level": 3
-      },
-      {
-        "id": "pass-reshaped-to-draw-text",
-        "text": "Pass reshaped to draw.text(...)",
-        "level": 1
-      },
-      {
-        "id": "4-invalidnationalcodeerror-on-10-digit-inputs",
-        "text": "4. `InvalidNationalCodeError` on 10-Digit Inputs",
-        "level": 2
-      },
-      {
-        "id": "problem",
-        "text": "Problem",
-        "level": 3
-      },
-      {
-        "id": "solution",
-        "text": "Solution",
-        "level": 3
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/troubleshooting.md",
-    "counterparts": {
-      "fa": "troubleshooting"
-    },
-    "counterpartSlug": "troubleshooting"
-  },
-  {
-    "id": "en-tutorials-datetime",
-    "slug": "tutorials/datetime",
-    "lang": "en",
-    "category": "tutorials",
-    "title": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
-    "summary": "The Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.",
-    "content": "# Tutorial: Jalali (Solar Hijri) Dates & Relative Time\n\nThe Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.\n\n---\n\n## 1. Gregorian to Jalali Conversion\n\n```python\nimport parsikit\n\n# Convert Gregorian date (Year, Month, Day)\njy, jm, jd = parsikit.gregorian_to_jalali(2026, 7, 6)\nprint(f\"Jalali date: {jy}/{jm:02d}/{jd:02d}\")\n# Output: Jalali date: 1405/04/15\n\n# Persian month name\nmonth_name = parsikit.get_jalali_month_name(jm)\nprint(f\"{jd} {month_name} {jy}\")\n# Output: 15 تیر 1405\n```\n\n---\n\n## 2. Jalali to Gregorian Conversion\n\n```python\nimport parsikit\n\n# Convert Jalali date back to Gregorian\ngy, gm, gd = parsikit.jalali_to_gregorian(1405, 4, 15)\nprint(f\"Gregorian date: {gy}-{gm:02d}-{gd:02d}\")\n# Output: Gregorian date: 2026-07-06\n```\n\n---\n\n## 3. Jalali Leap Years (سال کبیسه)\n\nIn the Jalali calendar, a normal year has 365 days (months 1-6 have 31 days, 7-11 have 30 days, and month 12 has 29 days). A leap year has 366 days, with month 12 (Esfand) having 30 days.\n\n```python\nimport parsikit\n\n# Check astronomical leap years\nprint(parsikit.is_jalali_leap(1399))  # True\nprint(parsikit.is_jalali_leap(1400))  # False\nprint(parsikit.is_jalali_leap(1403))  # True\nprint(parsikit.is_jalali_leap(1404))  # False\n```\n\n---\n\n## 4. Humanized Relative Time\n\nTurn timestamps or second offsets into natural Persian strings:\n\n```python\nimport datetime\nimport parsikit\n\nnow = datetime.datetime.now()\n\n# 5 minutes ago\nprint(parsikit.humanize_relative_time(-300))\n# Output: ۵ دقیقه پیش\n\n# 3 hours ago\nprint(parsikit.humanize_relative_time(-10800))\n# Output: ۴ ساعت پیش\n\n# In 2 days\nprint(parsikit.humanize_relative_time(2 * 86400))\n# Output: پس‌فردا\n```\n",
-    "headings": [
-      {
-        "id": "tutorial-jalali-solar-hijri-dates-relative-time",
-        "text": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
-        "level": 1
-      },
-      {
-        "id": "1-gregorian-to-jalali-conversion",
-        "text": "1. Gregorian to Jalali Conversion",
-        "level": 2
-      },
-      {
-        "id": "convert-gregorian-date-year-month-day",
-        "text": "Convert Gregorian date (Year, Month, Day)",
-        "level": 1
-      },
-      {
-        "id": "output-jalali-date-1405-04-15",
-        "text": "Output: Jalali date: 1405/04/15",
-        "level": 1
-      },
-      {
-        "id": "persian-month-name",
-        "text": "Persian month name",
-        "level": 1
-      },
-      {
-        "id": "output-15-تیر-1405",
-        "text": "Output: 15 تیر 1405",
-        "level": 1
-      },
-      {
-        "id": "2-jalali-to-gregorian-conversion",
-        "text": "2. Jalali to Gregorian Conversion",
-        "level": 2
-      },
-      {
-        "id": "convert-jalali-date-back-to-gregorian",
-        "text": "Convert Jalali date back to Gregorian",
-        "level": 1
-      },
-      {
-        "id": "output-gregorian-date-2026-07-06",
-        "text": "Output: Gregorian date: 2026-07-06",
-        "level": 1
-      },
-      {
-        "id": "3-jalali-leap-years-سال-کبیسه",
-        "text": "3. Jalali Leap Years (سال کبیسه)",
-        "level": 2
-      },
-      {
-        "id": "check-astronomical-leap-years",
-        "text": "Check astronomical leap years",
-        "level": 1
-      },
-      {
-        "id": "4-humanized-relative-time",
-        "text": "4. Humanized Relative Time",
-        "level": 2
-      },
-      {
-        "id": "5-minutes-ago",
-        "text": "5 minutes ago",
-        "level": 1
-      },
-      {
-        "id": "output-۵-دقیقه-پیش",
-        "text": "Output: ۵ دقیقه پیش",
-        "level": 1
-      },
-      {
-        "id": "3-hours-ago",
-        "text": "3 hours ago",
-        "level": 1
-      },
-      {
-        "id": "output-۴-ساعت-پیش",
-        "text": "Output: ۴ ساعت پیش",
-        "level": 1
-      },
-      {
-        "id": "in-2-days",
-        "text": "In 2 days",
-        "level": 1
-      },
-      {
-        "id": "output-پس-فردا",
-        "text": "Output: پس‌فردا",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/tutorials/datetime.md",
-    "counterparts": {
-      "fa": "tutorials/datetime"
-    },
-    "counterpartSlug": "tutorials/datetime"
-  },
-  {
-    "id": "en-tutorials-models",
-    "slug": "tutorials/models",
-    "lang": "en",
-    "category": "tutorials",
-    "title": "Tutorial: Object-Oriented Domain Models",
-    "summary": "ParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.",
-    "content": "# Tutorial: Object-Oriented Domain Models\n\nParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.\n\n---\n\n## 1. Domain Models Overview\n\nEach model validates input on initialization and raises a structured exception if invalid:\n\n| Model | Target Data | Exception on Invalid Input |\n|---|---|---|\n| `NationalCode` | Iranian National Code (10 digits) | `InvalidNationalCodeError` |\n| `MobileNumber` | Iranian mobile phone numbers | `InvalidMobileError` |\n| `FixedLine` | Landline phones with province detection | `ValidationError` |\n| `BankCard` | 16-digit debit/credit card numbers | `InvalidCardNumberError` |\n| `Sheba` | Iranian IBAN numbers (24 digits + IR) | `InvalidShebaError` |\n| `VehiclePlate` | Automobile license plates | `InvalidPlateError` |\n| `PersianText` | Rich text with fluent transformations | `ValidationError` |\n\n---\n\n## 2. Using NationalCode\n\n```python\nimport parsikit\n\nnc = parsikit.NationalCode(\"0010123458\")\n\n# String representation and duck typing\nprint(str(nc))        # '0010123458'\nprint(nc.formatted)   # '001-012345-8'\nprint(nc.masked)      # '001-****45-8' (safe for logs)\nprint(nc.location)    # {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 3. Using MobileNumber\n\n```python\nimport parsikit\n\nm = parsikit.MobileNumber(\"+989123456789\")\n\nprint(m.national)       # '09123456789'\nprint(m.international)  # '+989123456789'\nprint(m.operator)       # 'MCI'\nprint(m.masked)         # '0912***6789'\n```\n\n---\n\n## 4. Using BankCard\n\n```python\nimport parsikit\n\ncard = parsikit.BankCard(\"6037991122334455\")\n\nprint(card.bank_name)  # 'بانک ملی ایران'\nprint(card.formatted)  # '6037-9911-2233-4455'\nprint(card.masked)     # '6037-99**-****-4455'\n```\n\n---\n\n## 5. Native Integration with Pydantic v2 & FastAPI\n\nParsiKit models implement `__get_pydantic_core_schema__`, allowing them to be used directly as field types in Pydantic schemas:\n\n```python\nfrom pydantic import BaseModel\nimport parsikit\n\nclass UserProfileSchema(BaseModel):\n    name: str\n    national_code: parsikit.NationalCode\n    phone: parsikit.MobileNumber\n    card: parsikit.BankCard\n\n# Automatic parsing and validation\nprofile = UserProfileSchema(\n    name=\"Ali Kamrani\",\n    national_code=\"0010123458\",\n    phone=\"09123456789\",\n    card=\"6037991122334455\",\n)\n\nprint(profile.model_dump())\n# All fields serialize cleanly to standard validated strings!\n```\n",
-    "headings": [
-      {
-        "id": "tutorial-object-oriented-domain-models",
-        "text": "Tutorial: Object-Oriented Domain Models",
-        "level": 1
-      },
-      {
-        "id": "1-domain-models-overview",
-        "text": "1. Domain Models Overview",
-        "level": 2
-      },
-      {
-        "id": "2-using-nationalcode",
-        "text": "2. Using NationalCode",
-        "level": 2
-      },
-      {
-        "id": "string-representation-and-duck-typing",
-        "text": "String representation and duck typing",
-        "level": 1
-      },
-      {
-        "id": "3-using-mobilenumber",
-        "text": "3. Using MobileNumber",
-        "level": 2
-      },
-      {
-        "id": "4-using-bankcard",
-        "text": "4. Using BankCard",
-        "level": 2
-      },
-      {
-        "id": "5-native-integration-with-pydantic-v2-fastapi",
-        "text": "5. Native Integration with Pydantic v2 & FastAPI",
-        "level": 2
-      },
-      {
-        "id": "automatic-parsing-and-validation",
-        "text": "Automatic parsing and validation",
-        "level": 1
-      },
-      {
-        "id": "all-fields-serialize-cleanly-to-standard-validated-strings",
-        "text": "All fields serialize cleanly to standard validated strings!",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/tutorials/models.md",
-    "counterparts": {
-      "fa": "tutorials/models"
-    },
-    "counterpartSlug": "tutorials/models"
-  },
-  {
-    "id": "en-tutorials-numbers_and_currency",
-    "slug": "tutorials/numbers_and_currency",
-    "lang": "en",
-    "category": "tutorials",
-    "title": "Tutorial: Persian Numbers & Financial Calculations",
-    "summary": "This tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.",
-    "content": "# Tutorial: Persian Numbers & Financial Calculations\n\nThis tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.\n\n---\n\n## 1. Digit Script Conversions\n\nConvert numbers between Persian (`۰-۹`), Arabic (`٠-٩`), and English/Latin (`0-9`):\n\n```python\nimport parsikit\n\n# English to Persian\nprint(parsikit.english_to_persian(\"User ID: 1042\"))\n# 'User ID: ۱۰۴۲'\n\n# Persian/Arabic to English\nprint(parsikit.persian_to_english(\"مبلغ: ۲۵۰۰۰ ریال\"))\n# 'مبلغ: 25000 ریال'\n```\n\n---\n\n## 2. Converting Numbers to Written Words\n\nTurn numbers into natural Persian words with high performance (cached):\n\n```python\nimport parsikit\n\nprint(parsikit.number_to_words(0))\n# 'صفر'\n\nprint(parsikit.number_to_words(1250000))\n# 'یک میلیون و دویست و پنجاه هزار'\n\nprint(parsikit.number_to_words(-42))\n# 'منفی چهل و دو'\n```\n\n---\n\n## 3. Currency Transformations (Rial & Toman)\n\n```python\nimport parsikit\n\n# Rial to Toman (divide by 10)\nprint(parsikit.rial_to_toman(500000))  # 50000\n\n# Toman to Rial (multiply by 10)\nprint(parsikit.toman_to_rial(50000))   # 500000\n\n# Formatted currency string\nprint(parsikit.format_currency(12500000, \"toman\", persian_digits=True))\n# '۱۲،۵۰۰،۰۰۰ تومان'\n\n# Full written currency\nprint(parsikit.format_currency_to_words(12500000, \"toman\"))\n# 'دوازده میلیون و پانصد هزار تومان'\n```\n\n---\n\n## 4. Invoicing & VAT (ارزش افزوده)\n\nCalculate VAT according to the configured tax rate (default: 10%):\n\n```python\nimport parsikit\n\ninvoice = parsikit.add_tax_and_toll(10000000)\nprint(f\"Base: {invoice['original_amount']:,}\")\nprint(f\"VAT ({invoice['tax_rate']*100}%): {invoice['tax_amount']:,}\")\nprint(f\"Total: {invoice['total_amount']:,}\")\n```\n\n---\n\n## 5. Loan Installments (محاسبه اقساط)\n\nCalculate monthly installment payments and total interest using the official Central Bank formula:\n\n```python\nimport parsikit\n\n# 100,000,000 Toman loan at 23% interest for 24 months\nloan = parsikit.calculate_installments(100_000_000, 23.0, 24)\n\nprint(\"Monthly installment:\", loan['monthly_installment'])\nprint(\"Total payment:\", loan['total_payment'])\nprint(\"Total interest:\", loan['total_interest'])\n```\n",
-    "headings": [
-      {
-        "id": "tutorial-persian-numbers-financial-calculations",
-        "text": "Tutorial: Persian Numbers & Financial Calculations",
-        "level": 1
-      },
-      {
-        "id": "1-digit-script-conversions",
-        "text": "1. Digit Script Conversions",
-        "level": 2
-      },
-      {
-        "id": "english-to-persian",
-        "text": "English to Persian",
-        "level": 1
-      },
-      {
-        "id": "user-id-۱۰۴۲",
-        "text": "'User ID: ۱۰۴۲'",
-        "level": 1
-      },
-      {
-        "id": "persian-arabic-to-english",
-        "text": "Persian/Arabic to English",
-        "level": 1
-      },
-      {
-        "id": "مبلغ-25000-ریال",
-        "text": "'مبلغ: 25000 ریال'",
-        "level": 1
-      },
-      {
-        "id": "2-converting-numbers-to-written-words",
-        "text": "2. Converting Numbers to Written Words",
-        "level": 2
-      },
-      {
-        "id": "صفر",
-        "text": "'صفر'",
-        "level": 1
-      },
-      {
-        "id": "یک-میلیون-و-دویست-و-پنجاه-هزار",
-        "text": "'یک میلیون و دویست و پنجاه هزار'",
-        "level": 1
-      },
-      {
-        "id": "منفی-چهل-و-دو",
-        "text": "'منفی چهل و دو'",
-        "level": 1
-      },
-      {
-        "id": "3-currency-transformations-rial-toman",
-        "text": "3. Currency Transformations (Rial & Toman)",
-        "level": 2
-      },
-      {
-        "id": "rial-to-toman-divide-by-10",
-        "text": "Rial to Toman (divide by 10)",
-        "level": 1
-      },
-      {
-        "id": "toman-to-rial-multiply-by-10",
-        "text": "Toman to Rial (multiply by 10)",
-        "level": 1
-      },
-      {
-        "id": "formatted-currency-string",
-        "text": "Formatted currency string",
-        "level": 1
-      },
-      {
-        "id": "۱۲،۵۰۰،۰۰۰-تومان",
-        "text": "'۱۲،۵۰۰،۰۰۰ تومان'",
-        "level": 1
-      },
-      {
-        "id": "full-written-currency",
-        "text": "Full written currency",
-        "level": 1
-      },
-      {
-        "id": "دوازده-میلیون-و-پانصد-هزار-تومان",
-        "text": "'دوازده میلیون و پانصد هزار تومان'",
-        "level": 1
-      },
-      {
-        "id": "4-invoicing-vat-ارزش-افزوده",
-        "text": "4. Invoicing & VAT (ارزش افزوده)",
-        "level": 2
-      },
-      {
-        "id": "5-loan-installments-محاسبه-اقساط",
-        "text": "5. Loan Installments (محاسبه اقساط)",
-        "level": 2
-      },
-      {
-        "id": "100-000-000-toman-loan-at-23-interest-for-24-months",
-        "text": "100,000,000 Toman loan at 23% interest for 24 months",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/tutorials/numbers_and_currency.md",
-    "counterparts": {
-      "fa": "tutorials/numbers_and_currency"
-    },
-    "counterpartSlug": "tutorials/numbers_and_currency"
-  },
-  {
-    "id": "en-tutorials-text_processing",
-    "slug": "tutorials/text_processing",
-    "lang": "en",
-    "category": "tutorials",
-    "title": "Tutorial: Persian Text Processing & Standardization",
-    "summary": "Handling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.",
-    "content": "# Tutorial: Persian Text Processing & Standardization\n\nHandling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.\n\n---\n\n## 1. Character Standardization\n\nUsers frequently enter Arabic letterforms from mismatched keyboard layouts:\n- Arabic Yeh (`ي` / `\\u064A`) instead of Persian Yeh (`ی` / `\\u06CC`)\n- Arabic Kaf (`ك` / `\\u0643`) instead of Persian Keheh (`ک` / `\\u06A9`)\n- Arabic Teh Marbuta (`ة` / `\\u0629`)\n\n`standardize_persian` unifies these into canonical Persian characters:\n\n```python\nimport parsikit\n\ndirty = \"اين يك متن پيچيده با كدملي است.\"\nclean = parsikit.standardize_persian(dirty)\nprint(clean)\n# 'این یک متن پیچیده با کدملي است.'\n```\n\n---\n\n## 2. Zero-Width Non-Joiner (ZWNJ / نیم‌فاصله)\n\nIn Persian grammar, verbal prefixes (`می‌`, `نمی‌`) and grammatical suffixes (`‌ها`, `‌ترین`, `‌مند`) require a half-space (ZWNJ, `\\u200C`) rather than a full ASCII space.\n\n```python\nimport parsikit\n\nraw = \"کتاب ها می روند و بر می گردند\"\nclean = parsikit.standardize_persian(raw)\nprint(clean)\n# 'کتاب‌ها می‌روند و برمی‌گردند'\n```\n\n---\n\n## 3. Stripping Diacritics (اعراب‌زدایی)\n\nDiacritics (َ ِ ُ ً ٍ ٌ ّ ْ) can interfere with database searching and full-text index lookups:\n\n```python\nimport parsikit\n\nvowelized = \"سَلامٌ عَلَیکُم وَ رَحمَةُ الله\"\nclean = parsikit.strip_diacritics(vowelized)\nprint(clean)\n# 'سلام علیکم و رحمة الله'\n```\n\n---\n\n## 4. Converting Mistyped English Keyboards\n\nWhen a user types on an English keyboard layout while intending to type Persian:\n\n```python\nimport parsikit\n\nmistyped = \"sghl phgaj,k ],ji?\"\npersian = parsikit.correct_keyboard_layout(mistyped)\nprint(persian)\n# 'سلام حالتون چطوره؟'\n```\n\n---\n\n## 5. SEO URL Slug Generation (`slugify`)\n\nParsiKit includes an intelligent Persian transliteration dictionary to turn Persian article titles into readable Finglish slugs:\n\n```python\nimport parsikit\n\ntitle = \"معرفی نسخه جدید پارسی کیت\"\nslug = parsikit.slugify(title)\nprint(slug)\n# 'moarefi-neskheh-jadid-parsi-kit'\n```\n",
-    "headings": [
-      {
-        "id": "tutorial-persian-text-processing-standardization",
-        "text": "Tutorial: Persian Text Processing & Standardization",
-        "level": 1
-      },
-      {
-        "id": "1-character-standardization",
-        "text": "1. Character Standardization",
-        "level": 2
-      },
-      {
-        "id": "این-یک-متن-پیچیده-با-کدملي-است",
-        "text": "'این یک متن پیچیده با کدملي است.'",
-        "level": 1
-      },
-      {
-        "id": "2-zero-width-non-joiner-zwnj-نیم-فاصله",
-        "text": "2. Zero-Width Non-Joiner (ZWNJ / نیم‌فاصله)",
-        "level": 2
-      },
-      {
-        "id": "کتاب-ها-می-روند-و-برمی-گردند",
-        "text": "'کتاب‌ها می‌روند و برمی‌گردند'",
-        "level": 1
-      },
-      {
-        "id": "3-stripping-diacritics-اعراب-زدایی",
-        "text": "3. Stripping Diacritics (اعراب‌زدایی)",
-        "level": 2
-      },
-      {
-        "id": "سلام-علیکم-و-رحمة-الله",
-        "text": "'سلام علیکم و رحمة الله'",
-        "level": 1
-      },
-      {
-        "id": "4-converting-mistyped-english-keyboards",
-        "text": "4. Converting Mistyped English Keyboards",
-        "level": 2
-      },
-      {
-        "id": "سلام-حالتون-چطوره؟",
-        "text": "'سلام حالتون چطوره؟'",
-        "level": 1
-      },
-      {
-        "id": "5-seo-url-slug-generation-slugify",
-        "text": "5. SEO URL Slug Generation (`slugify`)",
-        "level": 2
-      },
-      {
-        "id": "moarefi-neskheh-jadid-parsi-kit",
-        "text": "'moarefi-neskheh-jadid-parsi-kit'",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/tutorials/text_processing.md",
-    "counterparts": {
-      "fa": "tutorials/text_processing"
-    },
-    "counterpartSlug": "tutorials/text_processing"
-  },
-  {
-    "id": "en-tutorials-validation",
-    "slug": "tutorials/validation",
-    "lang": "en",
-    "category": "tutorials",
-    "title": "Tutorial: National Identifiers & Format Validation",
-    "summary": "ParsiKit provides validation engines for all major Iranian public identification standards.",
-    "content": "# Tutorial: National Identifiers & Format Validation\n\nParsiKit provides validation engines for all major Iranian public identification standards.\n\n---\n\n## 1. Iranian National Code (کد ملی)\n\nThe Iranian National Code is a 10-digit number where the 10th digit is a checksum computed modulo 11 with weights from 10 down to 2.\n\n```python\nimport parsikit\n\n# Verification\nprint(parsikit.is_valid_national_code(\"0010123458\"))  # True\nprint(parsikit.is_valid_national_code(\"1111111111\"))  # False (repeated digits)\nprint(parsikit.is_valid_national_code(\"0010123451\"))  # False (invalid checksum)\n\n# Formatting\nprint(parsikit.format_national_code(\"0010123458\"))    # '001-012345-8'\n\n# Origin detection\nprint(parsikit.detect_national_code_location(\"0010123458\"))\n# {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 2. Iranian Mobile Numbers (شماره موبایل)\n\nSupports standard 11-digit Iranian mobile numbers across MCI (Hamrah-e Aval), Irancell (MTN), Rightel, Shatel Mobile, and enterprise virtual operators:\n\n```python\nimport parsikit\n\nphone = \"+989123456789\"\nprint(parsikit.is_valid_mobile(phone))           # True\nprint(parsikit.normalize_mobile(phone, \"0\"))     # '09123456789'\nprint(parsikit.detect_mobile_operator(phone))    # 'MCI'\n```\n\n---\n\n## 3. Bank Cards & Sheba IBANs\n\n### 16-Digit Debit Cards (کارت بانکی شتاب)\nUses the Luhn algorithm (mod-10 double-add-double) and matches issuer bank codes:\n\n```python\nimport parsikit\n\ncard = \"6037991122334455\"\nprint(parsikit.is_valid_card_number(card))       # True\nprint(parsikit.format_card_number(card))         # '6037-9911-2233-4455'\nprint(parsikit.detect_bank_from_card(card))      # 'بانک ملی ایران'\n```\n\n### Sheba (شناسه بانکی ایران - IBAN)\nEvaluates 24-digit Iranian IBAN numbers according to ISO 7064 Mod 97-10:\n\n```python\nimport parsikit\n\nsheba = \"IR120170000000123456789012\"\nprint(parsikit.is_valid_sheba(sheba))             # True\nprint(parsikit.detect_bank_from_sheba(sheba))     # 'بانک ملی ایران'\n```\n\n---\n\n## 4. Postal Codes & Utility Bills\n\n### Postal Code (کد پستی)\nValidates 10-digit codes against postal layout rules (no 0 or 2 in certain positions) and formats as 5-5:\n\n```python\nimport parsikit\n\nprint(parsikit.is_valid_postal_code(\"1417466191\"))  # True\nprint(parsikit.format_postal_code(\"1417466191\"))    # '14174-66191'\n```\n\n### Utility Bills (شناسه قبض و پرداخت)\nChecks electricity, water, gas, and telephone bills and calculates payable amounts:\n\n```python\nimport parsikit\n\nbill_id = \"982765410123\"\npay_id = \"12500345\"\n# Verifies check digits and parses bill metadata\n```\n",
-    "headings": [
-      {
-        "id": "tutorial-national-identifiers-format-validation",
-        "text": "Tutorial: National Identifiers & Format Validation",
-        "level": 1
-      },
-      {
-        "id": "1-iranian-national-code-کد-ملی",
-        "text": "1. Iranian National Code (کد ملی)",
-        "level": 2
-      },
-      {
-        "id": "verification",
-        "text": "Verification",
-        "level": 1
-      },
-      {
-        "id": "formatting",
-        "text": "Formatting",
-        "level": 1
-      },
-      {
-        "id": "origin-detection",
-        "text": "Origin detection",
-        "level": 1
-      },
-      {
-        "id": "province-تهران-city-تهران-مرکزی",
-        "text": "{'province': 'تهران', 'city': 'تهران مرکزی'}",
-        "level": 1
-      },
-      {
-        "id": "2-iranian-mobile-numbers-شماره-موبایل",
-        "text": "2. Iranian Mobile Numbers (شماره موبایل)",
-        "level": 2
-      },
-      {
-        "id": "3-bank-cards-sheba-ibans",
-        "text": "3. Bank Cards & Sheba IBANs",
-        "level": 2
-      },
-      {
-        "id": "16-digit-debit-cards-کارت-بانکی-شتاب",
-        "text": "16-Digit Debit Cards (کارت بانکی شتاب)",
-        "level": 3
-      },
-      {
-        "id": "sheba-شناسه-بانکی-ایران-iban",
-        "text": "Sheba (شناسه بانکی ایران - IBAN)",
-        "level": 3
-      },
-      {
-        "id": "4-postal-codes-utility-bills",
-        "text": "4. Postal Codes & Utility Bills",
-        "level": 2
-      },
-      {
-        "id": "postal-code-کد-پستی",
-        "text": "Postal Code (کد پستی)",
-        "level": 3
-      },
-      {
-        "id": "utility-bills-شناسه-قبض-و-پرداخت",
-        "text": "Utility Bills (شناسه قبض و پرداخت)",
-        "level": 3
-      },
-      {
-        "id": "verifies-check-digits-and-parses-bill-metadata",
-        "text": "Verifies check digits and parses bill metadata",
-        "level": 1
-      }
-    ],
-    "filePath": "/app/applet/repo_data/docs/en/tutorials/validation.md",
-    "counterparts": {
-      "fa": "tutorials/validation"
-    },
-    "counterpartSlug": "tutorials/validation"
-  },
   {
     "id": "fa-api-cache",
     "slug": "api/cache",
@@ -1737,7 +101,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/cache.md",
     "counterparts": {
-      "en": "api/cache"
+      "en": "api/cache",
+      "prs-af": "api/cache",
+      "tg": "api/cache"
     },
     "counterpartSlug": "api/cache"
   },
@@ -1803,7 +169,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/datetime.md",
     "counterparts": {
-      "en": "api/datetime"
+      "en": "api/datetime",
+      "prs-af": "api/datetime",
+      "tg": "api/datetime"
     },
     "counterpartSlug": "api/datetime"
   },
@@ -1921,7 +289,8 @@ export const ALL_DOCS: DocEntry[] = [
     "filePath": "/app/applet/repo_data/docs/fa/api/index.md",
     "counterparts": {
       "en": "api/index",
-      "es": "api/index"
+      "prs-af": "api/index",
+      "tg": "api/index"
     },
     "counterpartSlug": "api/index"
   },
@@ -1972,7 +341,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/models.md",
     "counterparts": {
-      "en": "api/models"
+      "en": "api/models",
+      "prs-af": "api/models",
+      "tg": "api/models"
     },
     "counterpartSlug": "api/models"
   },
@@ -2063,7 +434,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/number_and_currency.md",
     "counterparts": {
-      "en": "api/number_and_currency"
+      "en": "api/number_and_currency",
+      "prs-af": "api/number_and_currency",
+      "tg": "api/number_and_currency"
     },
     "counterpartSlug": "api/number_and_currency"
   },
@@ -2250,7 +623,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/text.md",
     "counterparts": {
-      "en": "api/text"
+      "en": "api/text",
+      "prs-af": "api/text",
+      "tg": "api/text"
     },
     "counterpartSlug": "api/text"
   },
@@ -2401,7 +776,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/api/validators.md",
     "counterparts": {
-      "en": "api/validators"
+      "en": "api/validators",
+      "prs-af": "api/validators",
+      "tg": "api/validators"
     },
     "counterpartSlug": "api/validators"
   },
@@ -2457,7 +834,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/faq.md",
     "counterparts": {
-      "en": "faq"
+      "en": "faq",
+      "prs-af": "faq",
+      "tg": "faq"
     },
     "counterpartSlug": "faq"
   },
@@ -2503,7 +882,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/guides/forms_and_security.md",
     "counterparts": {
-      "en": "guides/forms_and_security"
+      "en": "guides/forms_and_security",
+      "prs-af": "guides/forms_and_security",
+      "tg": "guides/forms_and_security"
     },
     "counterpartSlug": "guides/forms_and_security"
   },
@@ -2627,7 +1008,8 @@ export const ALL_DOCS: DocEntry[] = [
     "filePath": "/app/applet/repo_data/docs/fa/index.md",
     "counterparts": {
       "en": "index",
-      "es": "index"
+      "prs-af": "index",
+      "tg": "index"
     },
     "counterpartSlug": "index"
   },
@@ -2684,7 +1066,8 @@ export const ALL_DOCS: DocEntry[] = [
     "filePath": "/app/applet/repo_data/docs/fa/installation.md",
     "counterparts": {
       "en": "installation",
-      "es": "installation"
+      "prs-af": "installation",
+      "tg": "installation"
     },
     "counterpartSlug": "installation"
   },
@@ -2776,7 +1159,8 @@ export const ALL_DOCS: DocEntry[] = [
     "filePath": "/app/applet/repo_data/docs/fa/quickstart.md",
     "counterparts": {
       "en": "quickstart",
-      "es": "quickstart"
+      "prs-af": "quickstart",
+      "tg": "quickstart"
     },
     "counterpartSlug": "quickstart"
   },
@@ -2907,7 +1291,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/troubleshooting.md",
     "counterparts": {
-      "en": "troubleshooting"
+      "en": "troubleshooting",
+      "prs-af": "troubleshooting",
+      "tg": "troubleshooting"
     },
     "counterpartSlug": "troubleshooting"
   },
@@ -3023,7 +1409,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/tutorials/datetime.md",
     "counterparts": {
-      "en": "tutorials/datetime"
+      "en": "tutorials/datetime",
+      "prs-af": "tutorials/datetime",
+      "tg": "tutorials/datetime"
     },
     "counterpartSlug": "tutorials/datetime"
   },
@@ -3240,7 +1628,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/tutorials/numbers_and_currency.md",
     "counterparts": {
-      "en": "tutorials/numbers_and_currency"
+      "en": "tutorials/numbers_and_currency",
+      "prs-af": "tutorials/numbers_and_currency",
+      "tg": "tutorials/numbers_and_currency"
     },
     "counterpartSlug": "tutorials/numbers_and_currency"
   },
@@ -3356,7 +1746,9 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/tutorials/text_processing.md",
     "counterparts": {
-      "en": "tutorials/text_processing"
+      "en": "tutorials/text_processing",
+      "prs-af": "tutorials/text_processing",
+      "tg": "tutorials/text_processing"
     },
     "counterpartSlug": "tutorials/text_processing"
   },
@@ -3512,305 +1904,3139 @@ export const ALL_DOCS: DocEntry[] = [
     ],
     "filePath": "/app/applet/repo_data/docs/fa/tutorials/validation.md",
     "counterparts": {
-      "en": "tutorials/validation"
+      "en": "tutorials/validation",
+      "prs-af": "tutorials/validation",
+      "tg": "tutorials/validation"
     },
     "counterpartSlug": "tutorials/validation"
   },
   {
-    "id": "es-api-index",
-    "slug": "api/index",
-    "lang": "es",
+    "id": "en-api-cache",
+    "slug": "api/cache",
+    "lang": "en",
     "category": "api",
-    "title": "Referencia de la API de ParsiKit",
-    "summary": "Resumen de los módulos de nivel superior disponibles en ParsiKit.",
-    "content": "# Referencia de la API de ParsiKit\n\nResumen de los módulos de nivel superior disponibles en ParsiKit.\n\n---\n\n## Módulos Principales\n\n### `parsikit.text`\n- `clean_text(text: str) -> str`: Normaliza caracteres persas, unifica espacios y corrige ZWNJ.\n- `to_persian_digits(text: str) -> str`: Convierte dígitos latinos y arábigos a dígitos persas estándar (۰۱۲۳۴۵۶۷۸۹).\n- `to_latin_digits(text: str) -> str`: Convierte dígitos persas y arábigos a números estándar ASCII (0123456789).\n- `remove_diacritics(text: str) -> str`: Elimina marcas de vocalización y اعراب.\n\n### `parsikit.validators`\n- `is_valid_national_code(code: str) -> bool`: Valida el código nacional de 10 dígitos usando el algoritmo de Módulo 11.\n- `is_valid_card(card_number: str) -> bool`: Valida tarjetas de 16 dígitos con el algoritmo de Luhn.\n- `is_valid_sheba(sheba_number: str) -> bool`: Valida el código IBAN de Irán (IR...) según la norma ISO 7064.\n- `is_valid_postal_code(postal_code: str) -> bool`: Valida el código postal iraní de 10 dígitos.\n- `is_valid_mobile(phone_number: str) -> bool`: Valida números móviles según los prefijos autorizados de operadores iraníes.\n\n### `parsikit.datetime`\n- `JalaliDate`: Clase que representa una fecha en el calendario Jalalí (Hégira Solar).\n- `gregorian_to_jalali(year: int, month: int, day: int) -> tuple[int, int, int]`: Conversión a fecha solar.\n- `jalali_to_gregorian(year: int, month: int, day: int) -> tuple[int, int, int]`: Conversión a fecha gregoriana.\n- `is_jalali_leap(year: int) -> bool`: Determina si un año solar persa es bisiesto según el ciclo astronómico de 33 años.\n\n### `parsikit.number_and_currency`\n- `number_to_words(number: int | float) -> str`: Convierte cantidades numéricas a palabras en persa.\n- `rial_to_toman(amount: int | float) -> int | float`: Convierte Riales a Tomanes dividiendo por 10.\n- `toman_to_rial(amount: int | float) -> int | float`: Convierte Tomanes a Riales multiplicando por 10.\n- `calculate_vat(amount: int | float, rate: float = 0.10) -> tuple[int | float, int | float]`: Calcula el importe del IVA y el total.\n\n### `parsikit.security`\n- `mask_card(card: str) -> str`: Enmascara dígitos centrales de una tarjeta bancaria.\n- `mask_mobile(phone: str) -> str`: Enmascara dígitos intermedios de un número telefónico.\n- `mask_national_code(code: str) -> str`: Enmascara los dígitos iniciales de un código nacional.\n",
+    "title": "Cache API (`parsikit.cache`)",
+    "summary": "High-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.",
+    "content": "# Cache API (`parsikit.cache`)\n\nHigh-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.\n\n---\n\n## Overview\n\nThe `parsikit.cache` module provides in-memory thread-safe LRU-like caching mechanisms utilized internally by compute-intensive functions such as `parsikit.number.number_to_words`.\n\n> **Note on API Stability**: While `ThreadSafeLRUCache` and `@memoize` are fully functional and tested, `parsikit.cache` serves primarily as an internal infrastructure module for ParsiKit. Its public surface is stable for standard caching tasks, but future major versions may introduce specialized cache backends.\n\n---\n\n## Classes\n\n### `ThreadSafeLRUCache`\n\n```python\nclass ThreadSafeLRUCache:\n    def __init__(self, maxsize: int = 1024) -> None\n```\n\nA lightweight in-memory LRU cache guarded by `threading.RLock` to provide safe concurrent access and re-entrant recursion without deadlocks.\n\n#### Capacity Rules\n- `maxsize` must be an integer (`int`). Non-integer types raise `TypeError`.\n- `maxsize >= 0`. Negative integers raise `ValueError`.\n- `maxsize == 0`: Operates in **no-storage mode** where entries are not stored and lookups return the default value.\n\n#### Methods & Properties\n\n- **`get(key: Any, default: Any = None) -> Any`**:\n  Retrieves a value from the cache. If found, refreshes the key's position to mark it as most recently used (MRU) and increments hits. Returns `default` on cache miss.\n- **`set(key: Any, value: Any) -> None`**:\n  Inserts or updates a value. If the key exists, updates its value and marks it as MRU without eviction. When capacity is exceeded, evicts the least recently used (LRU) entry.\n- **`clear() -> None`**:\n  Evicts all entries and resets hit and miss counters.\n- **`pop(key: Any, default: Any = ...) -> Any`**:\n  Removes and returns an entry from the cache. Raises `KeyError` if key is not found and no default is provided.\n- **`keys_order`**:\n  Property returning a snapshot list of cached keys ordered from oldest (LRU) to newest (MRU).\n- **`__len__()` & `__contains__(key)`**:\n  Provides standard dictionary-like container inspection under lock.\n\n---\n\n## Decorators\n\n### `@memoize`\n\n```python\ndef memoize(maxsize: int = 1024) -> Callable[[Callable[..., _T]], Callable[..., _T]]\n```\n\nDecorator that caches function return values using a dedicated `ThreadSafeLRUCache` instance.\n\n#### Features\n- **Dynamic Configuration Toggle**: Respects `parsikit.config.enable_cache`. When set to `False`, the wrapper bypasses the cache entirely and calls the underlying function directly.\n- **Thread Safety & Reentrancy**: Protected by `threading.RLock`, ensuring safe multi-threaded operation and recursion without deadlocks.\n- **Sentinel-Based Cache Misses**: Uses an internal sentinel to distinguish missing entries from cached values of `None`, `False`, `0`, or empty containers.\n- **Unhashable Argument Graceful Fallback**: When unhashable arguments (such as `list`, `dict`, `set`, or nested unhashable structures) are supplied, caching is gracefully bypassed and the target function executes normally without raising `TypeError`.\n- **Object Identity**: Returns cached objects by reference (`res1 is res2`). Callers requiring isolated mutable results should copy them explicitly.\n- **Inspection & Control**: The wrapped function exposes:\n  - `func.cache`: Direct reference to the underlying `ThreadSafeLRUCache`.\n  - `func.cache_clear()`: Clears cached entries and resets statistics.\n  - `func.cache_info()`: Returns a `CacheInfo(hits, misses, maxsize, currsize)` tuple.\n\n#### Usage Example\n\n```python\nimport parsikit\nfrom parsikit.cache import memoize\n\n@memoize(maxsize=512)\ndef compute_complex_tax(base_amount: int, tier: str = \"standard\") -> int:\n    # Expensive financial calculation\n    return base_amount * 2\n\n# First call calculates and stores in cache\nres1 = compute_complex_tax(1000000, tier=\"A\")\n\n# Subsequent calls with identical arguments hit the cache immediately\nres2 = compute_complex_tax(1000000, tier=\"A\")\nassert res1 == res2\n\n# Introspect cache statistics\ninfo = compute_complex_tax.cache_info()\nprint(f\"Hits: {info.hits}, Misses: {info.misses}, Size: {info.currsize}\")\n\n# Clear cache when needed\ncompute_complex_tax.cache_clear()\n\n# Disable cache dynamically if needed\nparsikit.config.enable_cache = False\nres3 = compute_complex_tax(1000000, tier=\"A\")  # executes underlying function\nparsikit.config.reset_defaults()\n```\n\n---\n\n## Edge Cases & Limitations\n\n1. **Unhashable Arguments**: Functions called with unhashable arguments will execute normally without raising `TypeError`, bypassing the cache for that specific invocation.\n2. **Mutable Return Values**: Because objects are cached by reference, mutating a returned mutable object (e.g. `list.append()`) alters the cached instance.\n3. **Process Isolation**: The cache is purely in-memory within the Python process. Multi-process architectures (e.g. `gunicorn -w 4`) maintain independent caches per worker process.\n",
     "headings": [
       {
-        "id": "referencia-de-la-api-de-parsikit",
-        "text": "Referencia de la API de ParsiKit",
+        "id": "cache-api-parsikit-cache",
+        "text": "Cache API (`parsikit.cache`)",
         "level": 1
       },
       {
-        "id": "módulos-principales",
-        "text": "Módulos Principales",
+        "id": "overview",
+        "text": "Overview",
         "level": 2
       },
       {
-        "id": "parsikit-text",
-        "text": "`parsikit.text`",
+        "id": "classes",
+        "text": "Classes",
+        "level": 2
+      },
+      {
+        "id": "threadsafelrucache",
+        "text": "`ThreadSafeLRUCache`",
         "level": 3
       },
       {
-        "id": "parsikit-validators",
-        "text": "`parsikit.validators`",
+        "id": "decorators",
+        "text": "Decorators",
+        "level": 2
+      },
+      {
+        "id": "memoize",
+        "text": "`@memoize`",
         "level": 3
       },
       {
-        "id": "parsikit-datetime",
-        "text": "`parsikit.datetime`",
+        "id": "expensive-financial-calculation",
+        "text": "Expensive financial calculation",
+        "level": 1
+      },
+      {
+        "id": "first-call-calculates-and-stores-in-cache",
+        "text": "First call calculates and stores in cache",
+        "level": 1
+      },
+      {
+        "id": "subsequent-calls-with-identical-arguments-hit-the-cache-immediately",
+        "text": "Subsequent calls with identical arguments hit the cache immediately",
+        "level": 1
+      },
+      {
+        "id": "introspect-cache-statistics",
+        "text": "Introspect cache statistics",
+        "level": 1
+      },
+      {
+        "id": "clear-cache-when-needed",
+        "text": "Clear cache when needed",
+        "level": 1
+      },
+      {
+        "id": "disable-cache-dynamically-if-needed",
+        "text": "Disable cache dynamically if needed",
+        "level": 1
+      },
+      {
+        "id": "edge-cases-limitations",
+        "text": "Edge Cases & Limitations",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/cache.md",
+    "counterparts": {
+      "fa": "api/cache",
+      "prs-af": "api/cache",
+      "tg": "api/cache"
+    },
+    "counterpartSlug": "api/cache"
+  },
+  {
+    "id": "en-api-datetime",
+    "slug": "api/datetime",
+    "lang": "en",
+    "category": "api",
+    "title": "Datetime API (`parsikit.datetime`)",
+    "summary": "Converts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.",
+    "content": "# Datetime API (`parsikit.datetime`)\n\n## Functions\n\n### `gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]`\nConverts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.\n\n### `jalali_to_gregorian(jy: int, jm: int, jd: int) -> tuple[int, int, int]`\nConverts a Jalali date (year, month, day) to the corresponding Gregorian date.\n\n### `is_jalali_leap(jy: int) -> bool`\nDetermines whether a Jalali year is a 366-day leap year using the astronomical solar cycle.\n\n### `get_jalali_month_name(month: int) -> str`\nReturns the Persian name of the month (1 = فروردین, ..., 12 = اسفند).\n\n### `format_jalali(jy: int, jm: int, jd: int, pattern: str = \"YYYY/MM/DD\") -> str`\nFormats a Jalali date using the given pattern.\n\n### `humanize_relative_time(dt_or_seconds, reference=None) -> str`\nTranslates a `datetime` object or time difference into natural Persian words with Persian digits (e.g. `'هم‌اکنون'`, `'۱۵ دقیقه پیش'`, `'دیروز'`, `'در ۲ ساعت آینده'`).\n",
+    "headings": [
+      {
+        "id": "datetime-api-parsikit-datetime",
+        "text": "Datetime API (`parsikit.datetime`)",
+        "level": 1
+      },
+      {
+        "id": "functions",
+        "text": "Functions",
+        "level": 2
+      },
+      {
+        "id": "gregorian_to_jalali-gy-int-gm-int-gd-int-tuple-int-int-int",
+        "text": "`gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]`",
         "level": 3
       },
       {
-        "id": "parsikit-number_and_currency",
-        "text": "`parsikit.number_and_currency`",
+        "id": "jalali_to_gregorian-jy-int-jm-int-jd-int-tuple-int-int-int",
+        "text": "`jalali_to_gregorian(jy: int, jm: int, jd: int) -> tuple[int, int, int]`",
         "level": 3
       },
       {
-        "id": "parsikit-security",
-        "text": "`parsikit.security`",
+        "id": "is_jalali_leap-jy-int-bool",
+        "text": "`is_jalali_leap(jy: int) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "get_jalali_month_name-month-int-str",
+        "text": "`get_jalali_month_name(month: int) -> str`",
+        "level": 3
+      },
+      {
+        "id": "format_jalali-jy-int-jm-int-jd-int-pattern-str-yyyy-mm-dd-str",
+        "text": "`format_jalali(jy: int, jm: int, jd: int, pattern: str = \"YYYY/MM/DD\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "humanize_relative_time-dt_or_seconds-reference-none-str",
+        "text": "`humanize_relative_time(dt_or_seconds, reference=None) -> str`",
         "level": 3
       }
     ],
-    "filePath": "/app/applet/repo_data/docs/es/api/index.md",
+    "filePath": "/app/applet/repo_data/docs/en/api/datetime.md",
     "counterparts": {
-      "en": "api/index",
-      "fa": "api/index"
+      "fa": "api/datetime",
+      "prs-af": "api/datetime",
+      "tg": "api/datetime"
+    },
+    "counterpartSlug": "api/datetime"
+  },
+  {
+    "id": "en-api-dev_and_gui",
+    "slug": "api/dev_and_gui",
+    "lang": "en",
+    "category": "api",
+    "title": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "Persian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports :fa / :p format specifiers.",
+    "content": "# Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)\n\n## Visual Alignment & Diagnostics (`parsikit.dev`)\n\n### `pformat(template: str, *args, **kwargs) -> str`\nPersian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports `:fa` / `:p` format specifiers.\n\n### `persian_fstring(template: str, **kwargs) -> str`\nFormatted string evaluation with automatic visual alignment and Persian digit conversion.\n\n### `inspect_text(text: str) -> dict`\nAnalyzes string structure and reports character counts, ZWNJ count, Arabic characters, and digit scripts.\n\n### `debug_text(text: str) -> None`\nPrints a formatted diagnostic report to stdout.\n\n### `validate_batch(items: list, model_class, silent: bool = False) -> dict`\nValidates a list of raw inputs against a ParsiKit model class and returns valid/invalid summaries.\n\n---\n\n## Graphical Reshaping & Input Binding (`parsikit.reshaper`, `parsikit.gui`)\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\nReshapes cursive Persian text and reverses character order for 2D graphics renderers without HarfBuzz support (PIL, OpenCV, Pygame).\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> str`\nSplits and reshapes multi-line text blocks.\n\n### `bind_persian_input(widget, input_type: str = \"text\") -> None`\nAttaches live keystroke normalization to Tkinter and CustomTkinter input entries.\n",
+    "headings": [
+      {
+        "id": "developer-diagnostics-gui-api-parsikit-dev-parsikit-gui-parsikit-reshaper",
+        "text": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "visual-alignment-diagnostics-parsikit-dev",
+        "text": "Visual Alignment & Diagnostics (`parsikit.dev`)",
+        "level": 2
+      },
+      {
+        "id": "pformat-template-str-args-kwargs-str",
+        "text": "`pformat(template: str, *args, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "persian_fstring-template-str-kwargs-str",
+        "text": "`persian_fstring(template: str, **kwargs) -> str`",
+        "level": 3
+      },
+      {
+        "id": "inspect_text-text-str-dict",
+        "text": "`inspect_text(text: str) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "debug_text-text-str-none",
+        "text": "`debug_text(text: str) -> None`",
+        "level": 3
+      },
+      {
+        "id": "validate_batch-items-list-model_class-silent-bool-false-dict",
+        "text": "`validate_batch(items: list, model_class, silent: bool = False) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "graphical-reshaping-input-binding-parsikit-reshaper-parsikit-gui",
+        "text": "Graphical Reshaping & Input Binding (`parsikit.reshaper`, `parsikit.gui`)",
+        "level": 2
+      },
+      {
+        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-str",
+        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "bind_persian_input-widget-input_type-str-text-none",
+        "text": "`bind_persian_input(widget, input_type: str = \"text\") -> None`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/dev_and_gui.md",
+    "counterparts": {
+      "fa": "api/dev_and_gui"
+    },
+    "counterpartSlug": "api/dev_and_gui"
+  },
+  {
+    "id": "en-api-index",
+    "slug": "api/index",
+    "lang": "en",
+    "category": "api",
+    "title": "ParsiKit API Reference (English)",
+    "summary": "Complete reference for all public modules and functions in ParsiKit:",
+    "content": "# ParsiKit API Reference (English)\n\nComplete reference for all public modules and functions in **ParsiKit**:\n\n| Module | Description | Documentation |\n|---|---|---|\n| `parsikit.text` | Character standardization, ZWNJ, diacritics stripping, entity extraction, and masking | [Text Reference](text.md) |\n| `parsikit.validators` | National Code, mobile, landline, card, Sheba, bill, and plate validators | [Validators Reference](validators.md) |\n| `parsikit.models` | Rich domain models for identity and financial types (with Pydantic support) | [Models Reference](models.md) |\n| `parsikit.datetime` | Jalali-Gregorian conversions, leap years, month names, and relative time | [Datetime Reference](datetime.md) |\n| `parsikit.number` & `parsikit.currency` | Numeral script conversions, words-to-numbers, Rial/Toman, VAT, installments | [Numbers & Currency](number_and_currency.md) |\n| `parsikit.dev` & `parsikit.gui` | Visual width alignment, terminal diagnostics, and live typing helpers | [Dev & GUI Reference](dev_and_gui.md) |\n| `parsikit.reshaper` | Persian cursive letter reshaping and Bidirectional reordering for graphics | [Reshaper Reference](reshaper.md) |\n| `parsikit.cache` | High-performance thread-safe LRU-like caching infrastructure | [Cache Reference](cache.md) |\n| `parsikit.config` & `parsikit.exceptions` | Global configuration and structured exception classes | [Config & Exceptions](#configuration--exceptions) |\n\n---\n\n## Configuration & Exceptions\n\n### Configuration (`parsikit.config`)\n- `default_tax_rate: float`: Default VAT rate (default: `0.10`).\n- `default_currency: str`: System currency default, `\"toman\"` or `\"rial\"` (default: `\"toman\"`).\n- `enable_cache: bool`: Thread-safe LRU caching toggle for number-to-words conversions (default: `True`).\n\n### Exceptions (`parsikit.exceptions`)\nAll custom exceptions inherit from `ParsiKitError` and `ValidationError` (subclass of `ValueError`):\n- `InvalidNationalCodeError`\n- `InvalidMobileError`\n- `InvalidCardNumberError`\n- `InvalidShebaError`\n- `InvalidPostalCodeError`\n- `InvalidPlateError`\n- `InvalidBillError`\n",
+    "headings": [
+      {
+        "id": "parsikit-api-reference-english",
+        "text": "ParsiKit API Reference (English)",
+        "level": 1
+      },
+      {
+        "id": "configuration-exceptions",
+        "text": "Configuration & Exceptions",
+        "level": 2
+      },
+      {
+        "id": "configuration-parsikit-config",
+        "text": "Configuration (`parsikit.config`)",
+        "level": 3
+      },
+      {
+        "id": "exceptions-parsikit-exceptions",
+        "text": "Exceptions (`parsikit.exceptions`)",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/index.md",
+    "counterparts": {
+      "fa": "api/index",
+      "prs-af": "api/index",
+      "tg": "api/index"
     },
     "counterpartSlug": "api/index"
   },
   {
-    "id": "es-features",
-    "slug": "features",
-    "lang": "es",
-    "category": "getting-started",
-    "title": "Características de ParsiKit",
-    "summary": "ParsiKit fue diseñado para resolver problemas endémicos del procesamiento computacional del idioma persa en entornos de producción.",
-    "content": "# Características de ParsiKit\n\nParsiKit fue diseñado para resolver problemas endémicos del procesamiento computacional del idioma persa en entornos de producción.\n\n---\n\n## 1. Arquitectura en Python Puro\n\nMuchas herramientas anteriores de procesamiento de texto persa dependen de extensiones compiladas en C++, paquetes desactualizados o llamadas a binarios externos. ParsiKit es 100% Python puro sin ninguna dependencia externa, lo que garantiza portabilidad total en Linux, macOS, Windows, WebAssembly (Pyodide), AWS Lambda y contenedores Docker mínimos.\n\n---\n\n## 2. Sistema de Caché Seguro para Hilos (`parsikit.cache`)\n\nLas conversiones frecuentes de números a palabras y los cálculos de fechas astronómicas pueden generar sobrecarga en aplicaciones con alta concurrencia. ParsiKit incluye un sistema de caché LRU optimizado y seguro para hilos (`thread-safe`), configurable a través de `parsikit.config`.\n\n---\n\n## 3. Modelo de Dominio Orientado a Objetos (`parsikit.models`)\n\nAdemás de las funciones procedimentales directas, ParsiKit proporciona clases de dominio enriquecidas:\n- `NationalCode`: Valida, formatea e inspecciona la localidad de emisión del código nacional.\n- `BankCard`: Valida mediante el algoritmo de Luhn y extrae la información del banco emisor a partir del BIN/IIN.\n- `MobileNumber`: Valida la estructura del operador móvil iraní (MCI, MTN Irancell, RighTel, Shatel).\n- `Sheba`: Valida el código IBAN estándar de Irán mediante ISO 7064 Mod 97-10.\n\n---\n\n## 4. Tipografía y Reshaping Gráfico (`parsikit.reshaper`)\n\nEn entornos de renderizado gráfico sin soporte nativo de texto bidireccional (Bidi), como bibliotecas de gráficos en consola o generación de imágenes, el persa suele mostrarse desconectado o invertido. ParsiKit incluye un conformador de glifos que une correctamente las letras persas y aplica las formas inicial, medial, final y aislada correspondientes.\n",
+    "id": "en-api-models",
+    "slug": "api/models",
+    "lang": "en",
+    "category": "api",
+    "title": "Domain Models API (`parsikit.models`)",
+    "summary": "Object-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.",
+    "content": "# Domain Models API (`parsikit.models`)\n\nObject-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.\n\n---\n\n## 1. `NationalCode(code: str, strict: bool = True)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'001-012345-8'`)\n- `.masked: str` (e.g. `'001-****45-8'`)\n- `.location: dict | None` (`{\"province\": ..., \"city\": ...}`)\n- Raises: `InvalidNationalCodeError`\n\n---\n\n## 2. `MobileNumber(phone: str)`\n- `.is_valid: bool`\n- `.national: str` (e.g. `'09123456789'`)\n- `.international: str` (e.g. `'+989123456789'`)\n- `.masked: str` (e.g. `'0912***6789'`)\n- `.operator: str | None` (e.g. `'MCI'`)\n- Raises: `InvalidMobileError`\n\n---\n\n## 3. `BankCard(card_number: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'6037-9911-2233-4455'`)\n- `.masked: str` (e.g. `'6037-99**-****-4455'`)\n- `.bank_name: str | None` (e.g. `'بانک ملی ایران'`)\n- Raises: `InvalidCardNumberError`\n\n---\n\n## 4. `Sheba(sheba_code: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'IR12 0170 0000 0012 3456 7890 12'`)\n- `.bank_name: str | None`\n- `.account_number: str`\n- Raises: `InvalidShebaError`\n\n---\n\n## 5. `VehiclePlate(plate_text: str)`\n- `.is_valid: bool`\n- `.formatted: str` (e.g. `'12-B-345-68'`)\n- `.category: str` (e.g. `'شخصی'`, `'تاکسی'`)\n- `.details: dict`\n- Raises: `InvalidPlateError`\n\n---\n\n## 6. `FixedLine(phone: str)`\n- `.is_valid: bool`\n- `.formatted: str`\n- `.province: str | None`\n- Raises: `ValidationError`\n\n---\n\n## 7. `PersianText(text: str)`\n- `.standardized: str`\n- `.stripped: str`\n- `.word_count: int`\n- `.has_persian: bool`\n- `.slug: str`\n",
     "headings": [
       {
-        "id": "características-de-parsikit",
-        "text": "Características de ParsiKit",
+        "id": "domain-models-api-parsikit-models",
+        "text": "Domain Models API (`parsikit.models`)",
         "level": 1
       },
       {
-        "id": "1-arquitectura-en-python-puro",
-        "text": "1. Arquitectura en Python Puro",
+        "id": "1-nationalcode-code-str-strict-bool-true",
+        "text": "1. `NationalCode(code: str, strict: bool = True)`",
         "level": 2
       },
       {
-        "id": "2-sistema-de-caché-seguro-para-hilos-parsikit-cache",
-        "text": "2. Sistema de Caché Seguro para Hilos (`parsikit.cache`)",
+        "id": "2-mobilenumber-phone-str",
+        "text": "2. `MobileNumber(phone: str)`",
         "level": 2
       },
       {
-        "id": "3-modelo-de-dominio-orientado-a-objetos-parsikit-models",
-        "text": "3. Modelo de Dominio Orientado a Objetos (`parsikit.models`)",
+        "id": "3-bankcard-card_number-str",
+        "text": "3. `BankCard(card_number: str)`",
         "level": 2
       },
       {
-        "id": "4-tipografía-y-reshaping-gráfico-parsikit-reshaper",
-        "text": "4. Tipografía y Reshaping Gráfico (`parsikit.reshaper`)",
+        "id": "4-sheba-sheba_code-str",
+        "text": "4. `Sheba(sheba_code: str)`",
+        "level": 2
+      },
+      {
+        "id": "5-vehicleplate-plate_text-str",
+        "text": "5. `VehiclePlate(plate_text: str)`",
+        "level": 2
+      },
+      {
+        "id": "6-fixedline-phone-str",
+        "text": "6. `FixedLine(phone: str)`",
+        "level": 2
+      },
+      {
+        "id": "7-persiantext-text-str",
+        "text": "7. `PersianText(text: str)`",
         "level": 2
       }
     ],
-    "filePath": "/app/applet/repo_data/docs/es/features.md",
-    "counterparts": {}
+    "filePath": "/app/applet/repo_data/docs/en/api/models.md",
+    "counterparts": {
+      "fa": "api/models",
+      "prs-af": "api/models",
+      "tg": "api/models"
+    },
+    "counterpartSlug": "api/models"
   },
   {
-    "id": "es-index",
-    "slug": "index",
-    "lang": "es",
-    "category": "getting-started",
-    "title": "Documentación de ParsiKit",
-    "summary": "Bienvenido a la documentación oficial de ParsiKit en español.",
-    "content": "# Documentación de ParsiKit\n\nBienvenido a la documentación oficial de **ParsiKit** en español.\n\nParsiKit es una biblioteca de infraestructura de datos en Python puro de alto rendimiento, diseñada específicamente para el procesamiento, normalización, validación y cálculos del idioma persa (farsi) y los estándares de datos de Irán.\n\n---\n\n## Características Principales\n\n- **Python Puro**: Cero dependencias externas. Compatible con Python 3.10+.\n- **Normalización de Texto**: Corrección de caracteres arábigos a persas, manejo preciso del espacio de no separación de ancho cero (ZWNJ / نیم‌فاصله) y limpieza de diacríticos.\n- **Validación y Checksums**: Algoritmo Módulo 11 para Código Nacional Iraní, algoritmo de Luhn para tarjetas bancarias y validación de IBAN (Sheba).\n- **Calendario Jalalí (Hégira Solar)**: Conversión astronómica de fechas con cálculo exacto del ciclo bisiesto de 33 años.\n- **Cálculos Financieros**: Conversiones entre Riales y Tomanes, cálculo del IVA (ارزش افزوده) y conversión de números a palabras en persa.\n- **Seguridad de Datos**: Enmascaramiento de datos personales identificables (PII) como teléfonos móviles, tarjetas bancarias y números de cuenta.\n\n---\n\n## Enlaces Rápidos\n\n- [Guía de Instalación](/es/docs/installation)\n- [Guía de Inicio Rápido](/es/docs/quickstart)\n- [Características del Sistema](/es/docs/features)\n- [Referencia de la API](/es/docs/api/index)\n\n---\n\n## Autor y Licencia\n\nDesarrollado y mantenido por **Ali Kamrani** ([@MRThugh](https://github.com/MRThugh)).\nLicencia de código abierto MIT.\n",
+    "id": "en-api-number_and_currency",
+    "slug": "api/number_and_currency",
+    "lang": "en",
+    "category": "api",
+    "title": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
+    "summary": "Replaces English digits (0-9) with Persian digits (۰-۹).",
+    "content": "# Numbers & Currency API (`parsikit.number`, `parsikit.currency`)\n\n## Numbers (`parsikit.number`)\n\n### `english_to_persian(text: str) -> str`\nReplaces English digits (`0-9`) with Persian digits (`۰-۹`).\n\n### `persian_to_english(text: str) -> str`\nReplaces Persian and Arabic digits with English ASCII digits.\n\n### `number_to_words(number: int | float) -> str`\nTranslates integers up to 999 septillion into written Persian words.\n\n---\n\n## Currency (`parsikit.currency`)\n\n### `rial_to_toman(amount: int | float) -> int | float`\nConverts Rial to Toman by dividing by 10.\n\n### `toman_to_rial(amount: int | float) -> int | float`\nConverts Toman to Rial by multiplying by 10.\n\n### `format_currency(amount, currency=\"toman\", *, persian_digits=False) -> str`\nFormats a numeric amount with thousand separators and currency symbol.\n\n### `format_currency_to_words(amount, currency=\"toman\") -> str`\nExpresses an amount in written Persian words with the currency label.\n\n### `add_tax_and_toll(amount, tax_rate=None) -> dict`\nCalculates Value-Added Tax (VAT) and the total price.\n\n### `calculate_installments(principal, annual_interest_rate, months) -> dict`\nCalculates loan amortization schedule according to the Central Bank of Iran formula.\n",
     "headings": [
       {
-        "id": "documentación-de-parsikit",
-        "text": "Documentación de ParsiKit",
+        "id": "numbers-currency-api-parsikit-number-parsikit-currency",
+        "text": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
         "level": 1
       },
       {
-        "id": "características-principales",
-        "text": "Características Principales",
+        "id": "numbers-parsikit-number",
+        "text": "Numbers (`parsikit.number`)",
         "level": 2
       },
       {
-        "id": "enlaces-rápidos",
-        "text": "Enlaces Rápidos",
+        "id": "english_to_persian-text-str-str",
+        "text": "`english_to_persian(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "persian_to_english-text-str-str",
+        "text": "`persian_to_english(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "number_to_words-number-int-float-str",
+        "text": "`number_to_words(number: int | float) -> str`",
+        "level": 3
+      },
+      {
+        "id": "currency-parsikit-currency",
+        "text": "Currency (`parsikit.currency`)",
         "level": 2
       },
       {
-        "id": "autor-y-licencia",
-        "text": "Autor y Licencia",
+        "id": "rial_to_toman-amount-int-float-int-float",
+        "text": "`rial_to_toman(amount: int | float) -> int | float`",
+        "level": 3
+      },
+      {
+        "id": "toman_to_rial-amount-int-float-int-float",
+        "text": "`toman_to_rial(amount: int | float) -> int | float`",
+        "level": 3
+      },
+      {
+        "id": "format_currency-amount-currency-toman-persian_digits-false-str",
+        "text": "`format_currency(amount, currency=\"toman\", *, persian_digits=False) -> str`",
+        "level": 3
+      },
+      {
+        "id": "format_currency_to_words-amount-currency-toman-str",
+        "text": "`format_currency_to_words(amount, currency=\"toman\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "add_tax_and_toll-amount-tax_rate-none-dict",
+        "text": "`add_tax_and_toll(amount, tax_rate=None) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "calculate_installments-principal-annual_interest_rate-months-dict",
+        "text": "`calculate_installments(principal, annual_interest_rate, months) -> dict`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/number_and_currency.md",
+    "counterparts": {
+      "fa": "api/number_and_currency",
+      "prs-af": "api/number_and_currency",
+      "tg": "api/number_and_currency"
+    },
+    "counterpartSlug": "api/number_and_currency"
+  },
+  {
+    "id": "en-api-reshaper",
+    "slug": "api/reshaper",
+    "lang": "en",
+    "category": "api",
+    "title": "Reshaper API (`parsikit.reshaper`)",
+    "summary": "Lightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.",
+    "content": "# Reshaper API (`parsikit.reshaper`)\n\nLightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.\n\n---\n\n## Overview\n\nMost graphic engines (such as Pygame, OpenCV, Pillow without `raqm`, Matplotlib, OpenGL, and PDF generators) assume left-to-right Latin typography. When rendering Persian text without a shaping engine, letters appear disconnected, disjointed, and backwards (e.g. `س ل ا م` instead of `سلام`).\n\n`parsikit.reshaper` converts standard Persian Unicode characters into their contextual contextual presentation forms (Isolated, Initial, Medial, Final) and reorders glyphs for naive LTR renderers.\n\n---\n\n## Public Functions\n\n### `reshape_for_graphics(text: str, reverse: bool = True) -> str`\n\nConnects cursive Persian characters into appropriate presentation glyphs and manages bidirectional text blocks.\n\n#### Parameters:\n- **`text`** (`str`): The Persian or mixed Persian-Latin string to reshape.\n- **`reverse`** (`bool`, default `True`): If `True`, reverses RTL character order for graphics engines that draw from left to right. Embedded Latin words and digits are preserved in correct left-to-right order.\n\n#### Returns:\n- `str`: Shaped Unicode presentation string ready for graphic blitting.\n\n#### Direction & Reversal Semantics:\n- **`reverse=True` (Default)**: Intended for naive graphic rendering environments (such as basic Pygame, OpenCV, Matplotlib, or simple Canvas) that draw characters strictly from left to right. RTL character runs are inverted so they draw correctly from right to left, while embedded LTR runs (Latin words, URLs, emails, dates, and numbers) remain in forward left-to-right reading order.\n- **`reverse=False`**: Intended for engines that already handle BiDi cursor positioning or text flow, but lack font cursive shaping support. Only glyph shaping (Initial, Medial, Final, Isolated) and Lam-Alef ligatures are performed, preserving original logical character order.\n\n#### Supported Features:\n- Complete Persian and Arabic alphabet presentation mapping (including `ۀ`, `ك`, `ي`, and Kurdish `ە`).\n- Standard **Lam-Alef ligatures** (`لا`, `لآ`, `لأ`, `لإ`) in isolated and final positions.\n- **Diacritics & Combining Graphemes**: Ignores short vowels during connectivity checks and preserves combining diacritics attached to base letters upon reversal.\n- **BiDi Block & Numeral Preservation**: Preserves Latin words, URLs, emails, dates, and numbers (both ASCII and Persian/Arabic digits) in standard LTR order without inversion.\n\n#### Limitations & Boundary Scope:\n`parsikit.reshaper` is a lightweight, zero-dependency layout helper. It is **not** a complete implementation of the Unicode Bidirectional Algorithm (UAX #9). While it correctly segments sequential RTL and LTR blocks (including embedded Latin phrases, numbers, and URLs), deeply nested bidirectional text (e.g., an Arabic clause embedded within an English phrase inside a Persian sentence with complex punctuation neutrals) requires a specialized full-layout engine such as HarfBuzz with Raqm/FriBidi.\n\n#### Usage Example:\n\n```python\nimport parsikit\n\nraw_text = \"سلام دنیا (نسخه 3.3.1)\"\n# Shaped and reversed for Pygame or Pillow:\nready_text = parsikit.reshape_for_graphics(raw_text)\n\n# Shaped without reversing (for engines with native BiDi but lacking font shaping):\nshaped_only = parsikit.reshape_for_graphics(raw_text, reverse=False)\n```\n\n---\n\n### `reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`\n\nAutomatically word-wraps a long paragraph of Persian text and reshapes each line for graphical drawing.\n\n#### Parameters:\n- **`text`** (`str`): Paragraph text to wrap and shape.\n- **`max_chars_per_line`** (`int`): Maximum character width per line.\n- **`reverse`** (`bool`, default `True`): Whether to reverse RTL blocks for LTR canvas drawing.\n\n#### Returns:\n- `list[str]`: A list of shaped line strings.\n\n#### Usage Example:\n\n```python\nimport parsikit\n\nparagraph = \"پارسی‌کیت یک کتابخانه استاندارد پایتونی برای پردازش اطلاعات فارسی، تقویم شمسی و اعتبارسنجی است.\"\nlines = parsikit.reshape_paragraph_for_graphics(paragraph, max_chars_per_line=30)\nfor line in lines:\n    print(line)\n```\n\n---\n\n## Relationship to Other Modules\n\n- **`parsikit.text.standardize_persian`**: Recommended before shaping to unify Arabic characters and fix zero-width non-joiners.\n- **`parsikit.gui.bind_persian_input`**: Integrates live typing assistance for GUI frameworks (Tkinter, CustomTkinter, Qt).\n\n",
+    "headings": [
+      {
+        "id": "reshaper-api-parsikit-reshaper",
+        "text": "Reshaper API (`parsikit.reshaper`)",
+        "level": 1
+      },
+      {
+        "id": "overview",
+        "text": "Overview",
+        "level": 2
+      },
+      {
+        "id": "public-functions",
+        "text": "Public Functions",
+        "level": 2
+      },
+      {
+        "id": "reshape_for_graphics-text-str-reverse-bool-true-str",
+        "text": "`reshape_for_graphics(text: str, reverse: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "shaped-and-reversed-for-pygame-or-pillow",
+        "text": "Shaped and reversed for Pygame or Pillow:",
+        "level": 1
+      },
+      {
+        "id": "shaped-without-reversing-for-engines-with-native-bidi-but-lacking-font-shaping",
+        "text": "Shaped without reversing (for engines with native BiDi but lacking font shaping):",
+        "level": 1
+      },
+      {
+        "id": "reshape_paragraph_for_graphics-text-str-max_chars_per_line-int-reverse-bool-true-list-str",
+        "text": "`reshape_paragraph_for_graphics(text: str, max_chars_per_line: int, reverse: bool = True) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "relationship-to-other-modules",
+        "text": "Relationship to Other Modules",
         "level": 2
       }
     ],
-    "filePath": "/app/applet/repo_data/docs/es/index.md",
+    "filePath": "/app/applet/repo_data/docs/en/api/reshaper.md",
     "counterparts": {
-      "en": "index",
-      "fa": "index"
+      "fa": "api/reshaper"
+    },
+    "counterpartSlug": "api/reshaper"
+  },
+  {
+    "id": "en-api-text",
+    "slug": "api/text",
+    "lang": "en",
+    "category": "api",
+    "title": "Text Processing API (`parsikit.text`)",
+    "summary": "High-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.",
+    "content": "# Text Processing API (`parsikit.text`)\n\nHigh-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.\n\n---\n\n## Standardization & Normalization\n\n### `standardize_persian(text: str, *, strip_diacritics_opt: bool = False, preserve_arabic: bool = False) -> str`\nNormalizes raw Persian and mixed-language text according to standard orthographic rules:\n- **Scope & Multilingual Support**:\n  - By default (`preserve_arabic=False`), standardizes text within a Persian orthographic context, mapping Arabic loanword variants to standard Persian letters:\n    - Arabic Yeh (`ي` / `\\u064A` and `ى` / `\\u0649`) → Persian Yeh (`ی` / `\\u06CC`)\n    - Arabic Kaf (`ك` / `\\u0643`) → Persian Keheh (`ک` / `\\u06A9`)\n    - Arabic Ta Marbuta (`ة` / `\\u0629`) → Persian Heh (`ه` / `\\u0647`) in loanwords (e.g. `دایرة المعارف` → `دایره المعارف`)\n    - Arabic digits (`٠١٢٣٤٥٦٧٨٩`) → Persian digits (`۰۱۲۳۴۵۶۷۸۹`)\n    - Heh with Yeh Above (`ۀ` / `\\u06C0`) → `هٔ` (`\\u0647\\u0654`)\n  - When `preserve_arabic=True`, Arabic-specific characters (`ة`, `ي`, `ى`) are strictly preserved, preventing unwanted alteration of Arabic text (e.g. `\"هذه لغة عربية جميلة\"`).\n  - Kurdish characters such as Kurdish Ae (`ە` / `\\u06D5`) are **never** converted to `ه` and remain completely preserved.\n  - English and other Latin-script words remain unmodified.\n- **Unicode Canonical Normalization**: Applies standard Unicode canonical composition (`NFC`), ensuring decomposed sequences (such as decomposed `آ`) match precomposed Persian characters.\n- **Zero-Width Non-Joiner (ZWNJ) Engine**:\n  - Automatically adjusts half-spaces for standard prefixes (`می‌`, `نمی‌`, `بی‌`) and suffixes (`‌ها`, `‌های`, `‌ترین`, `‌تر`, `‌ای`, etc.).\n  - Preserves word boundaries: spaces surrounding ZWNJ between independent words (e.g. `\"الف \\u200c ب\"`) collapse into a standard space (`\"الف ب\"`), ensuring separate words are not unintentionally conjoined.\n  - Cleans up single-sided space-adjacent ZWNJ (e.g. `\"دانش \\u200cآموز\"` → `\"دانش\\u200cآموز\"`), preserving meaningful Persian half-spaces.\n  - Removes redundant ZWNJs adjacent to punctuation marks (`.`, `،`, `؛`, `؟`, `!`, `:`, `()`, `[]`, `{}`, `«»`).\n  - Collapses duplicate consecutive ZWNJs (`\\u200C{2,}`) into a single `\\u200C`.\n  - Trims leading and trailing ZWNJs from text boundaries.\n- **Idempotence**: Strictly satisfies `standardize_persian(standardize_persian(x)) == standardize_persian(x)`.\n- **Whitespace & Line Breaks**: Collapses redundant spaces into a single space and trims edge margins while preserving line breaks and paragraph structure.\n- **Optional Diacritics Removal**: When `strip_diacritics_opt=True`, strips vowel diacritics via `strip_diacritics`.\n\n### `strip_diacritics(text: str) -> str`\nRemoves Persian and Arabic vowel diacritic marks (Fatha, Damma, Kasra, Tanwin, Tashdid, Sukun) via precompiled regular expressions.\n\n### `is_persian(text: str) -> bool`\nReturns `True` if the string contains at least one character in the Persian/Arabic Unicode blocks (including Presentation Forms).\n\n### `clean_text(text: str, *, preserve_arabic: bool = False) -> str`\nSanitizes raw or multi-line strings through a comprehensive pipeline:\n1. **Token Protection**: Shields URLs, email addresses, key-value configurations, semantic versions, and technical IDs from digit conversions and spacing modifications.\n2. **Standardization**: Normalizes characters and ZWNJ layout via `standardize_persian(..., preserve_arabic=preserve_arabic)`.\n3. **Digit Conversion**: Converts prose ASCII and Arabic numbers to Persian numerals via `english_to_persian`, while strictly keeping technical identifiers and URLs in ASCII.\n4. **Spacing Beautification**: Optimizes punctuation spacing via `beautify_persian_spacing`.\n5. **Control Character Stripping**: Strips invisible zero-width and bidirectional control characters (`\\u200B`, `\\uFEFF`, `\\u200E-\\u200F`, `\\u202A-\\u202E`), strictly preserving intentional ZWNJ (`\\u200C`).\n6. **Paragraph Clean-up**: Collapses redundant blank lines (allowing at most 1 empty line between paragraphs) and trims margins per line.\n7. **Token Restoration**: Restores protected URLs, emails, and technical strings to their exact original forms.\n\n### `normalize_whitespace(text: str, keep_paragraphs: bool = True) -> str`\nNormalizes non-standard Unicode spaces (tabs, non-breaking spaces `\\u00A0`, thin spaces, narrow spaces) to standard spaces.\n- If `keep_paragraphs=True` (default), preserves paragraph separations while clipping redundant blank lines.\n- If `keep_paragraphs=False`, flattens all text into a single continuous line.\n\n### `beautify_persian_spacing(text: str) -> str`\nOptimizes spacing around Persian and Latin punctuation marks with strict content protection:\n- Standardizes Persian commas (`،`) and semicolons (`؛`).\n- Removes redundant spaces before punctuation marks (`.`, `،`, `؛`, `؟`, `!`, `:`, `)`).\n- Inserts a single space after Persian punctuation (`،`, `؛`, `؟`, `!`).\n- Adjusts spacing around parentheses, brackets, and Persian quotation marks (`«»`), ensuring closing brackets followed by sentence punctuation (`.`, `،`) do not gain unwanted spaces.\n- Does NOT alter digits.\n- **Safety Protection**:\n  - **URLs**: Preserves web addresses, query strings (`?x=1&y=2`), paths, ports (`:8080`), fragments (`#section`), and percent-encoding (`%20`) without inserting spaces after question marks, colons, or slashes.\n  - **Trailing Sentence Punctuation**: Punctuation following a URL or closing parenthesis is formatted cleanly without being absorbed into the URL or separated by redundant spaces.\n  - **Emails**: Preserves email addresses (e.g. `user.name+tag@example.co.uk`) without corrupting usernames or domains.\n  - **Decimal Numbers**: Preserves floating-point numbers in ASCII and Persian scripts (e.g. `3.14`, `۱۲.۵`).\n  - **Timestamps**: Preserves clock times (e.g. `12:30`, `۱۴:۴۵`).\n  - **Technical Tokens**: Preserves version strings (e.g. `version=v2.0.1`, `Python 3.13.3`) and technical IDs (e.g. `ID-2026-0042`).\n  - **Code & Filenames**: Preserves technical file extensions (e.g. `test.py`, `script.min.js`).\n  - **Ellipses**: Preserves consecutive dots (`...`).\n\n---\n\n## Keyboard Layout & Collation\n\n### `correct_keyboard_layout(text: str) -> str`\nTranslates Persian text accidentally typed while the system keyboard was set to English QWERTY into proper Persian characters (e.g. `\"sghl\"` → `\"سلام\"`).\n\n### `persian_sort_key(s: str) -> tuple[int, ...]`\nGenerates a precomputed sorting key tuple respecting the official Persian alphabet collation order (`آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی`), normalizing Arabic variants (`أ`, `إ`, `ٱ`, `ؤ`, `ئ`) into base Persian letters, placing ZWNJ before space, and ordering numbers before letters.\n\n### `persian_sorted(iterable: Iterable[T], *, reverse: bool = False) -> list[T]`\nSorts an iterable of strings using the optimized Persian collation key.\n\n---\n\n## Extraction & Conversion\n\n### `words_to_number(text: str) -> int`\nHigh-performance parser converting Persian textual number expressions (e.g. `\"سی و دو هزار و پانصد\"`) into exact integers (`32500`). Supports negative numbers (`\"منفی پنجاه\"` → `-50`), compound scale multipliers (e.g. `\"هزار میلیارد\"` → `1000000000000`), and large magnitudes up to septillions.\n\n### `convert_numbers(text: str, to: Literal[\"persian\", \"english\"] = \"persian\") -> str`\nConverts numeric digits within arbitrary text between Persian (`۰-۹`) and English (`0-9`) numeral representations.\n\n### `slugify(text: str, separator: str = \"-\") -> str`\nGenerates clean, SEO-optimized URL slugs from Persian text with dictionary-backed transliteration:\n- Transliterates common words, prepositions, and technical terms (`پایتون` → `python`, `وردپرس` → `wordpress`, `در` → `dar`, `کتاب` → `ketab`).\n- Converts digits to ASCII.\n- Filters out special characters and collapses repeated separators.\n\n### `extract_mobiles(text: str) -> list[str]`\nExtracts and validates all unique Iranian mobile phone numbers found in unformatted text.\n\n### `extract_national_codes(text: str) -> list[str]`\nExtracts and validates all 10-digit Iranian National Codes satisfying the official civil registration checksum.\n\n---\n\n## Sensitive Data Masking\n\n### `mask_mobile(phone: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of an Iranian mobile number (e.g. `\"09123456789\"` → `\"0912***6789\"`).\n\n### `mask_card(card: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of a 16-digit debit/credit card number (e.g. `\"6037991122334455\"` → `\"6037-99**-****-4455\"`).\n\n### `mask_national_code(code: str, mask_char: str = \"*\") -> str`\nMasks the middle digits of a 10-digit National Code (e.g. `\"7730123452\"` → `\"773-****45-2\"`).\n\n### `mask_email(email: str, mask_char: str = \"*\") -> str`\nMasks username characters in an email address (e.g. `\"kamrani.exe@gmail.com\"` → `\"ka********e@gmail.com\"`).\n\n",
+    "headings": [
+      {
+        "id": "text-processing-api-parsikit-text",
+        "text": "Text Processing API (`parsikit.text`)",
+        "level": 1
+      },
+      {
+        "id": "standardization-normalization",
+        "text": "Standardization & Normalization",
+        "level": 2
+      },
+      {
+        "id": "standardize_persian-text-str-strip_diacritics_opt-bool-false-preserve_arabic-bool-false-str",
+        "text": "`standardize_persian(text: str, *, strip_diacritics_opt: bool = False, preserve_arabic: bool = False) -> str`",
+        "level": 3
+      },
+      {
+        "id": "strip_diacritics-text-str-str",
+        "text": "`strip_diacritics(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "is_persian-text-str-bool",
+        "text": "`is_persian(text: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "clean_text-text-str-preserve_arabic-bool-false-str",
+        "text": "`clean_text(text: str, *, preserve_arabic: bool = False) -> str`",
+        "level": 3
+      },
+      {
+        "id": "normalize_whitespace-text-str-keep_paragraphs-bool-true-str",
+        "text": "`normalize_whitespace(text: str, keep_paragraphs: bool = True) -> str`",
+        "level": 3
+      },
+      {
+        "id": "beautify_persian_spacing-text-str-str",
+        "text": "`beautify_persian_spacing(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "keyboard-layout-collation",
+        "text": "Keyboard Layout & Collation",
+        "level": 2
+      },
+      {
+        "id": "correct_keyboard_layout-text-str-str",
+        "text": "`correct_keyboard_layout(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "persian_sort_key-s-str-tuple-int",
+        "text": "`persian_sort_key(s: str) -> tuple[int, ...]`",
+        "level": 3
+      },
+      {
+        "id": "persian_sorted-iterable-iterable-t-reverse-bool-false-list-t",
+        "text": "`persian_sorted(iterable: Iterable[T], *, reverse: bool = False) -> list[T]`",
+        "level": 3
+      },
+      {
+        "id": "extraction-conversion",
+        "text": "Extraction & Conversion",
+        "level": 2
+      },
+      {
+        "id": "words_to_number-text-str-int",
+        "text": "`words_to_number(text: str) -> int`",
+        "level": 3
+      },
+      {
+        "id": "convert_numbers-text-str-to-literal-persian-english-persian-str",
+        "text": "`convert_numbers(text: str, to: Literal[\"persian\", \"english\"] = \"persian\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "slugify-text-str-separator-str-str",
+        "text": "`slugify(text: str, separator: str = \"-\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "extract_mobiles-text-str-list-str",
+        "text": "`extract_mobiles(text: str) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "extract_national_codes-text-str-list-str",
+        "text": "`extract_national_codes(text: str) -> list[str]`",
+        "level": 3
+      },
+      {
+        "id": "sensitive-data-masking",
+        "text": "Sensitive Data Masking",
+        "level": 2
+      },
+      {
+        "id": "mask_mobile-phone-str-mask_char-str-str",
+        "text": "`mask_mobile(phone: str, mask_char: str = \"*\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "mask_card-card-str-mask_char-str-str",
+        "text": "`mask_card(card: str, mask_char: str = \"*\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "mask_national_code-code-str-mask_char-str-str",
+        "text": "`mask_national_code(code: str, mask_char: str = \"*\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "mask_email-email-str-mask_char-str-str",
+        "text": "`mask_email(email: str, mask_char: str = \"*\") -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/text.md",
+    "counterparts": {
+      "fa": "api/text",
+      "prs-af": "api/text",
+      "tg": "api/text"
+    },
+    "counterpartSlug": "api/text"
+  },
+  {
+    "id": "en-api-validators",
+    "slug": "api/validators",
+    "lang": "en",
+    "category": "api",
+    "title": "Validators API (`parsikit.validators`)",
+    "summary": "Validates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when strict=True.",
+    "content": "# Validators API (`parsikit.validators`)\n\n## Functions\n\n### `is_valid_national_code(code: str, strict: bool = True) -> bool`\nValidates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when `strict=True`.\n\n### `format_national_code(code: str) -> str`\nFormats a national code in the standard 3-6-1 format (`XXX-XXXXXX-X`).\n\n### `detect_national_code_location(code: str) -> dict | None`\nDetects the issuing province and city based on the first three digits of the national code.\n\n### `is_valid_mobile(phone: str) -> bool`\nValidates an Iranian mobile phone number across all licensed operators.\n\n### `normalize_mobile(phone: str, prefix: str = \"0\") -> str`\nNormalizes mobile numbers into standard national format (`09...`) or international format (`+989...`).\n\n### `detect_mobile_operator(phone: str) -> str | None`\nIdentifies the carrier operator name (`MCI`, `MTN`, `Rightel`, etc.).\n\n### `is_valid_landline(phone: str) -> bool`\nValidates Iranian landline numbers against official provincial area codes.\n\n### `detect_landline_province(phone: str) -> str | None`\nIdentifies the province of an Iranian landline phone number.\n\n### `is_valid_card_number(card: str) -> bool`\nValidates 16-digit bank card numbers using the Luhn algorithm.\n\n### `format_card_number(card: str, separator: str = \"-\") -> str`\nFormats a 16-digit card into four 4-digit groups.\n\n### `detect_bank_from_card(card: str) -> str | None`\nIdentifies the issuing bank based on the first 6 digits (IIN / BIN).\n\n### `is_valid_sheba(sheba: str) -> bool`\nValidates an Iranian IBAN (Sheba) using the ISO 7064 Mod 97-10 checksum algorithm.\n\n### `format_sheba(sheba: str, chunk_size: int = 4) -> str`\nFormats a Sheba string into readable 4-character blocks.\n\n### `detect_bank_from_sheba(sheba: str) -> str | None`\nDetects the bank name from the bank identifier code in the Sheba string.\n\n### `is_valid_postal_code(code: str) -> bool`\nValidates 10-digit Iranian postal codes.\n\n### `format_postal_code(code: str) -> str`\nFormats a postal code into the standard 5-5 layout (`XXXXX-XXXXX`).\n\n### `is_valid_corporate_id(corp_id: str) -> bool`\nValidates 11-digit legal entity corporate registration numbers.\n\n### `is_valid_bill_and_payment(bill_id: str, pay_id: str) -> bool`\nValidates utility bill IDs and payment IDs.\n\n### `extract_bill_details(bill_id: str, pay_id: str) -> dict`\nExtracts bill type, amount in Rials, and billing period.\n\n### `is_valid_plate(plate: str) -> bool`\nValidates Iranian vehicle license plate formats.\n\n### `parse_plate(plate: str) -> dict`\nParses license plate digits, middle letter, and provincial Iran code.\n\n### `detect(text: str) -> str | None`\nAutomatically detects the data type of the input string (`national_code`, `mobile`, `card`, `sheba`, `email`, `url`, `ip`).\n",
+    "headings": [
+      {
+        "id": "validators-api-parsikit-validators",
+        "text": "Validators API (`parsikit.validators`)",
+        "level": 1
+      },
+      {
+        "id": "functions",
+        "text": "Functions",
+        "level": 2
+      },
+      {
+        "id": "is_valid_national_code-code-str-strict-bool-true-bool",
+        "text": "`is_valid_national_code(code: str, strict: bool = True) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "format_national_code-code-str-str",
+        "text": "`format_national_code(code: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "detect_national_code_location-code-str-dict-none",
+        "text": "`detect_national_code_location(code: str) -> dict | None`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_mobile-phone-str-bool",
+        "text": "`is_valid_mobile(phone: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "normalize_mobile-phone-str-prefix-str-0-str",
+        "text": "`normalize_mobile(phone: str, prefix: str = \"0\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "detect_mobile_operator-phone-str-str-none",
+        "text": "`detect_mobile_operator(phone: str) -> str | None`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_landline-phone-str-bool",
+        "text": "`is_valid_landline(phone: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "detect_landline_province-phone-str-str-none",
+        "text": "`detect_landline_province(phone: str) -> str | None`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_card_number-card-str-bool",
+        "text": "`is_valid_card_number(card: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "format_card_number-card-str-separator-str-str",
+        "text": "`format_card_number(card: str, separator: str = \"-\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "detect_bank_from_card-card-str-str-none",
+        "text": "`detect_bank_from_card(card: str) -> str | None`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_sheba-sheba-str-bool",
+        "text": "`is_valid_sheba(sheba: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "format_sheba-sheba-str-chunk_size-int-4-str",
+        "text": "`format_sheba(sheba: str, chunk_size: int = 4) -> str`",
+        "level": 3
+      },
+      {
+        "id": "detect_bank_from_sheba-sheba-str-str-none",
+        "text": "`detect_bank_from_sheba(sheba: str) -> str | None`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_postal_code-code-str-bool",
+        "text": "`is_valid_postal_code(code: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "format_postal_code-code-str-str",
+        "text": "`format_postal_code(code: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_corporate_id-corp_id-str-bool",
+        "text": "`is_valid_corporate_id(corp_id: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_bill_and_payment-bill_id-str-pay_id-str-bool",
+        "text": "`is_valid_bill_and_payment(bill_id: str, pay_id: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "extract_bill_details-bill_id-str-pay_id-str-dict",
+        "text": "`extract_bill_details(bill_id: str, pay_id: str) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_plate-plate-str-bool",
+        "text": "`is_valid_plate(plate: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "parse_plate-plate-str-dict",
+        "text": "`parse_plate(plate: str) -> dict`",
+        "level": 3
+      },
+      {
+        "id": "detect-text-str-str-none",
+        "text": "`detect(text: str) -> str | None`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/api/validators.md",
+    "counterparts": {
+      "fa": "api/validators",
+      "prs-af": "api/validators",
+      "tg": "api/validators"
+    },
+    "counterpartSlug": "api/validators"
+  },
+  {
+    "id": "en-faq",
+    "slug": "faq",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "Frequently Asked Questions (FAQ)",
+    "summary": "ParsiKit supports Python 3.10 and newer (including 3.10, 3.11, 3.12, and 3.13).",
+    "content": "# Frequently Asked Questions (FAQ)\n\n### 1. Which Python versions does ParsiKit support?\nParsiKit supports Python **3.10 and newer** (including 3.10, 3.11, 3.12, and 3.13).\n\n---\n\n### 2. Does ParsiKit have external dependencies?\nNo. ParsiKit is 100% pure Python with zero external runtime dependencies. It installs instantly and has minimal overhead.\n\n---\n\n### 3. How does ParsiKit differ from Hazm or PersianJS?\n- **Hazm** is focused on Natural Language Processing (NLP), part-of-speech tagging, and morphological analysis.\n- **ParsiKit** is a full software infrastructure library for real-world web applications, financial software, database normalization, national ID validation, and secure PII handling.\n\n---\n\n### 4. Is ParsiKit thread-safe?\nYes. Global configurations and the internal cache use Python's re-entrant locks (`threading.RLock`) to guarantee thread safety in multi-threaded application servers like Gunicorn and Uvicorn.\n\n---\n\n### 5. Does ParsiKit expose sensitive customer data in logs?\nNo. In v3.3.1, exceptions like `InvalidCardNumberError` sanitize messages, and all domain models provide a `.masked` property for safe logging and administration dashboards.\n\n---\n\n### 6. What is the software license?\nParsiKit is licensed under the permissive **MIT License**. You are free to use it in commercial, open-source, and private projects.\n",
+    "headings": [
+      {
+        "id": "frequently-asked-questions-faq",
+        "text": "Frequently Asked Questions (FAQ)",
+        "level": 1
+      },
+      {
+        "id": "1-which-python-versions-does-parsikit-support",
+        "text": "1. Which Python versions does ParsiKit support?",
+        "level": 3
+      },
+      {
+        "id": "2-does-parsikit-have-external-dependencies",
+        "text": "2. Does ParsiKit have external dependencies?",
+        "level": 3
+      },
+      {
+        "id": "3-how-does-parsikit-differ-from-hazm-or-persianjs",
+        "text": "3. How does ParsiKit differ from Hazm or PersianJS?",
+        "level": 3
+      },
+      {
+        "id": "4-is-parsikit-thread-safe",
+        "text": "4. Is ParsiKit thread-safe?",
+        "level": 3
+      },
+      {
+        "id": "5-does-parsikit-expose-sensitive-customer-data-in-logs",
+        "text": "5. Does ParsiKit expose sensitive customer data in logs?",
+        "level": 3
+      },
+      {
+        "id": "6-what-is-the-software-license",
+        "text": "6. What is the software license?",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/faq.md",
+    "counterparts": {
+      "fa": "faq",
+      "prs-af": "faq",
+      "tg": "faq"
+    },
+    "counterpartSlug": "faq"
+  },
+  {
+    "id": "en-guides-forms_and_security",
+    "slug": "guides/forms_and_security",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Form Validation & Sensitive Data Security",
+    "summary": "Handling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application ",
+    "content": "# Guide: Form Validation & Sensitive Data Security\n\nHandling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application logs, APM systems, and customer service dashboards.\n\n---\n\n## 1. Input Sanitization Before Storage\n\nAlways sanitize text input from web forms before storing it in databases:\n\n```python\nimport parsikit\n\ndef sanitize_user_input(raw_full_name: str, raw_address: str):\n    return {\n        \"full_name\": parsikit.clean_text(raw_full_name),\n        \"address\": parsikit.beautify_persian_spacing(parsikit.clean_text(raw_address)),\n    }\n```\n\n---\n\n## 2. Preventing PII Leakage in Logs\n\nWhen logging user transactions, NEVER log raw card numbers or national codes. Use the `.masked` property or `mask_*` functions:\n\n```python\nimport logging\nimport parsikit\n\nlogger = logging.getLogger(\"payment\")\n\ndef process_payment(card_number_raw: str, national_code_raw: str):\n    card = parsikit.BankCard(card_number_raw)\n    nc = parsikit.NationalCode(national_code_raw)\n\n    # SECURE: Log only masked representations\n    logger.info(\n        \"Initiating payment for user (National Code: %s) using Card: %s (%s)\",\n        nc.masked,\n        card.masked,\n        card.bank_name,\n    )\n```\n\n---\n\n## 3. Safe Exception Handling\n\nIn ParsiKit v3.3.1, exceptions like `InvalidCardNumberError` and `InvalidNationalCodeError` are sanitized by default so they do not print the raw secret card number into stack traces or Sentry events.\n\n```python\nimport parsikit\n\ntry:\n    card = parsikit.BankCard(\"6037991122339999\")  # Invalid Luhn\nexcept parsikit.InvalidCardNumberError as exc:\n    # exc message is safe and contains no sensitive PII\n    logger.warning(\"Payment validation failed: %s\", exc)\n```\n",
+    "headings": [
+      {
+        "id": "guide-form-validation-sensitive-data-security",
+        "text": "Guide: Form Validation & Sensitive Data Security",
+        "level": 1
+      },
+      {
+        "id": "1-input-sanitization-before-storage",
+        "text": "1. Input Sanitization Before Storage",
+        "level": 2
+      },
+      {
+        "id": "2-preventing-pii-leakage-in-logs",
+        "text": "2. Preventing PII Leakage in Logs",
+        "level": 2
+      },
+      {
+        "id": "secure-log-only-masked-representations",
+        "text": "SECURE: Log only masked representations",
+        "level": 1
+      },
+      {
+        "id": "3-safe-exception-handling",
+        "text": "3. Safe Exception Handling",
+        "level": 2
+      },
+      {
+        "id": "exc-message-is-safe-and-contains-no-sensitive-pii",
+        "text": "exc message is safe and contains no sensitive PII",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/guides/forms_and_security.md",
+    "counterparts": {
+      "fa": "guides/forms_and_security",
+      "prs-af": "guides/forms_and_security",
+      "tg": "guides/forms_and_security"
+    },
+    "counterpartSlug": "guides/forms_and_security"
+  },
+  {
+    "id": "en-guides-gui_integration",
+    "slug": "guides/gui_integration",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Desktop GUI & Graphics Integration",
+    "summary": "Rendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and righ",
+    "content": "# Guide: Desktop GUI & Graphics Integration\n\nRendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and right-to-left bidirectional (BiDi) display.\n\n---\n\n## 1. Graphics Engines & Image Generation (Pillow / OpenCV)\n\nWithout shaping, Persian letters render disconnected from left-to-right. Use `reshape_for_graphics`:\n\n```python\nfrom PIL import Image, ImageDraw, ImageFont\nimport parsikit\n\n# Create a blank image\nimage = Image.new(\"RGB\", (600, 200), color=(255, 255, 255))\ndraw = ImageDraw.Draw(image)\n\n# Reshape Persian text (BiDi and cursive glyph joining)\ntext = \"سامانه هوشمند مدیریت اسناد پارسی\"\nreshaped = parsikit.reshape_for_graphics(text)\n\n# Render to canvas\n# font = ImageFont.truetype(\"Vazirmatn-Bold.ttf\", 32)\n# draw.text((50, 80), reshaped, font=font, fill=(0, 0, 0))\n```\n\n---\n\n## 2. Multi-Line Paragraphs (`reshape_paragraph_for_graphics`)\n\nFor multi-line text boxes in graphics rendering, wrap each line with consistent width:\n\n```python\nimport parsikit\n\nparagraph = (\n    \"کتابخانه پارسی‌کیت مجموعه‌ای از ابزارهای استانداردسازی و \"\n    \"اعتبارسنجی داده‌های فارسی برای توسعه‌دهندگان پایتون است.\"\n)\n\nwrapped = parsikit.reshape_paragraph_for_graphics(paragraph, max_chars_per_line=30)\n# Returns formatted lines ready for drawing\n```\n\n---\n\n## 3. Real-Time Typing Helper in Tkinter / CustomTkinter\n\nAutomatically normalize Persian text as the user types:\n\n```python\nimport tkinter as tk\nimport parsikit\n\nroot = tk.Tk()\nentry = tk.Entry(root, font=(\"Vazirmatn\", 14))\nentry.pack(padx=20, pady=20)\n\n# Bind automated Persian keyboard conversion & character fixing\nparsikit.bind_persian_input(entry)\n\nroot.mainloop()\n```\n",
+    "headings": [
+      {
+        "id": "guide-desktop-gui-graphics-integration",
+        "text": "Guide: Desktop GUI & Graphics Integration",
+        "level": 1
+      },
+      {
+        "id": "1-graphics-engines-image-generation-pillow-opencv",
+        "text": "1. Graphics Engines & Image Generation (Pillow / OpenCV)",
+        "level": 2
+      },
+      {
+        "id": "create-a-blank-image",
+        "text": "Create a blank image",
+        "level": 1
+      },
+      {
+        "id": "reshape-persian-text-bidi-and-cursive-glyph-joining",
+        "text": "Reshape Persian text (BiDi and cursive glyph joining)",
+        "level": 1
+      },
+      {
+        "id": "render-to-canvas",
+        "text": "Render to canvas",
+        "level": 1
+      },
+      {
+        "id": "font-imagefont-truetype-vazirmatn-bold-ttf-32",
+        "text": "font = ImageFont.truetype(\"Vazirmatn-Bold.ttf\", 32)",
+        "level": 1
+      },
+      {
+        "id": "draw-text-50-80-reshaped-font-font-fill-0-0-0",
+        "text": "draw.text((50, 80), reshaped, font=font, fill=(0, 0, 0))",
+        "level": 1
+      },
+      {
+        "id": "2-multi-line-paragraphs-reshape_paragraph_for_graphics",
+        "text": "2. Multi-Line Paragraphs (`reshape_paragraph_for_graphics`)",
+        "level": 2
+      },
+      {
+        "id": "returns-formatted-lines-ready-for-drawing",
+        "text": "Returns formatted lines ready for drawing",
+        "level": 1
+      },
+      {
+        "id": "3-real-time-typing-helper-in-tkinter-customtkinter",
+        "text": "3. Real-Time Typing Helper in Tkinter / CustomTkinter",
+        "level": 2
+      },
+      {
+        "id": "bind-automated-persian-keyboard-conversion-character-fixing",
+        "text": "Bind automated Persian keyboard conversion & character fixing",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/guides/gui_integration.md",
+    "counterparts": {
+      "fa": "guides/gui_integration"
+    },
+    "counterpartSlug": "guides/gui_integration"
+  },
+  {
+    "id": "en-guides-web_backends",
+    "slug": "guides/web_backends",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Web Backends (FastAPI & Django Integration)",
+    "summary": "This guide shows how to integrate ParsiKit into production web backends.",
+    "content": "# Guide: Web Backends (FastAPI & Django Integration)\n\nThis guide shows how to integrate ParsiKit into production web backends.\n\n---\n\n## 1. FastAPI Integration\n\nBecause ParsiKit domain models natively support Pydantic v2 core schemas, you can declare them directly as request body or query parameter types.\n\n```python\nfrom fastapi import FastAPI, HTTPException\nimport parsikit\n\napp = FastAPI(title=\"Iranian E-Commerce API\")\n\nfrom pydantic import BaseModel\n\nclass CheckoutRequest(BaseModel):\n    customer_name: str\n    national_code: parsikit.NationalCode\n    mobile: parsikit.MobileNumber\n    sheba: parsikit.Sheba\n\n@app.post(\"/api/checkout\")\ndef checkout(payload: CheckoutRequest):\n    # Data is already guaranteed valid when execution reaches here!\n    return {\n        \"status\": \"success\",\n        \"customer\": parsikit.standardize_persian(payload.customer_name),\n        \"national_code_masked\": payload.national_code.masked,\n        \"mobile\": payload.mobile.national,\n        \"bank\": payload.sheba.bank_name,\n    }\n```\n\n---\n\n## 2. Django Model & Form Validation\n\nIn Django, use ParsiKit validators inside clean methods or custom model fields:\n\n```python\nfrom django.core.exceptions import ValidationError\nfrom django.db import models\nimport parsikit\n\nclass IranianNationalCodeField(models.CharField):\n    description = \"Iranian 10-digit National Code\"\n\n    def __init__(self, *args, **kwargs):\n        kwargs['max_length'] = 10\n        super().__init__(*args, **kwargs)\n\n    def validate(self, value, model_instance):\n        super().validate(value, model_instance)\n        if not parsikit.is_valid_national_code(value):\n            raise ValidationError(\n                f\"کد ملی وارد شده معتبر نمی‌باشد.\",\n                code=\"invalid_national_code\"\n            )\n```\n\n---\n\n## 3. Database Query Normalization Middleware\n\nTo ensure search queries match records in PostgreSQL or MySQL regardless of whether the user typed Arabic Yeh (`ي`) or Persian Yeh (`ی`):\n\n```python\ndef normalize_search_query(user_query: str) -> str:\n    clean = parsikit.standardize_persian(user_query, strip_diacritics_opt=True)\n    return clean\n```\n",
+    "headings": [
+      {
+        "id": "guide-web-backends-fastapi-django-integration",
+        "text": "Guide: Web Backends (FastAPI & Django Integration)",
+        "level": 1
+      },
+      {
+        "id": "1-fastapi-integration",
+        "text": "1. FastAPI Integration",
+        "level": 2
+      },
+      {
+        "id": "data-is-already-guaranteed-valid-when-execution-reaches-here",
+        "text": "Data is already guaranteed valid when execution reaches here!",
+        "level": 1
+      },
+      {
+        "id": "2-django-model-form-validation",
+        "text": "2. Django Model & Form Validation",
+        "level": 2
+      },
+      {
+        "id": "3-database-query-normalization-middleware",
+        "text": "3. Database Query Normalization Middleware",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/guides/web_backends.md",
+    "counterparts": {
+      "fa": "guides/web_backends"
+    },
+    "counterpartSlug": "guides/web_backends"
+  },
+  {
+    "id": "en-index",
+    "slug": "index",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "ParsiKit Official Documentation (v3.3.1)",
+    "summary": "Welcome to the official documentation for ParsiKit!",
+    "content": "# ParsiKit Official Documentation (v3.3.1)\n\nWelcome to the official documentation for **ParsiKit**!  \nCreated and maintained by **Ali Kamrani (MRThugh)**, ParsiKit is a pure Python software infrastructure library designed for Persian data standardization, validation algorithms, financial computations, astronomical Jalali calendar transformations, graphical font reshaping, developer diagnostics, and sensitive data protection.\n\n---\n\n## What is ParsiKit?\n\nParsiKit solves standard challenges encountered when handling Persian text and Iranian data in Python:\n- **Text & Typography Standardization**: Converts Arabic letters (ي/ك/ة) to standard Persian glyphs, correctly positions Zero-Width Non-Joiners (ZWNJ) for prefixes (`می‌`) and suffixes (`‌ها`), eliminates redundant whitespace, and strips diacritics.\n- **Official National Validations**: Checks mathematical checksum algorithms for Iranian National Codes (modulo 11), 16-digit debit/credit card numbers (Luhn check), Sheba IBANs (ISO 7064 Mod 97-10), mobile phones, fixed landlines, corporate IDs, postal codes, bills, and vehicle plates.\n- **Numbers & Currencies**: Translates numerals between Persian, Arabic, and Latin scripts, converts huge numbers into Persian words, performs Rial and Toman conversions, computes VAT, and calculates loan installments.\n- **Astronomical Jalali Dates**: Bidirectional date conversions between Gregorian and Jalali calendars with leap year validation and relative-time humanization.\n- **Object-Oriented Domain Models**: Rich value objects (`PersianText`, `NationalCode`, `MobileNumber`, `BankCard`, `Sheba`, `VehiclePlate`) with instant validation, masked views, and native Pydantic v2 support.\n- **Security & Privacy**: Masking helpers (`mask_card`, `mask_mobile`, `mask_national_code`, `mask_email`) and sanitized exceptions to prevent PII exposure in logs and metrics.\n- **Zero External Dependencies**: Pure Python, zero compile steps, minimal memory footprint.\n\n---\n\n## What ParsiKit Does NOT Do\n\n1. **Identity Inquiries (Registration Office / Civil Registry)**:  \n   `is_valid_national_code` mathematically verifies length and checksum against the official algorithm. It does not call an online governmental web service to verify the person's identity or living status.\n2. **Bank Balance or Live Account Status**:  \n   `BankCard` and `Sheba` verify format, check digits, and issuer bank identity. They do not connect to banking APIs to check available balance or card blocking status.\n\n---\n\n## Documentation Navigation\n\n- 🚀 **[Installation](installation.md)** — Install via pip or from source.\n- ⚡ **[Quickstart](quickstart.md)** — Practical examples in 5 minutes.\n- 📚 **Step-by-Step Tutorials:**\n  - [Text Processing & ZWNJ](tutorials/text_processing.md)\n  - [Validation & Checksums](tutorials/validation.md)\n  - [Numbers & Financial Operations](tutorials/numbers_and_currency.md)\n  - [Jalali Calendar & Humanized Time](tutorials/datetime.md)\n  - [Object-Oriented Models & Pydantic](tutorials/models.md)\n- 🛠 **Guides:**\n  - [Web Backends (FastAPI & Django)](guides/web_backends.md)\n  - [Forms & Security Best Practices](guides/forms_and_security.md)\n  - [GUI Integration (Tkinter, CustomTkinter, Graphics)](guides/gui_integration.md)\n- 📖 **[API Reference](api/index.md)** — Complete module and function reference.\n- 🔧 **[Troubleshooting](troubleshooting.md)** — Solutions to common issues.\n- ❓ **[FAQ](faq.md)** — Frequently Asked Questions.\n",
+    "headings": [
+      {
+        "id": "parsikit-official-documentation-v3-3-1",
+        "text": "ParsiKit Official Documentation (v3.3.1)",
+        "level": 1
+      },
+      {
+        "id": "what-is-parsikit",
+        "text": "What is ParsiKit?",
+        "level": 2
+      },
+      {
+        "id": "what-parsikit-does-not-do",
+        "text": "What ParsiKit Does NOT Do",
+        "level": 2
+      },
+      {
+        "id": "documentation-navigation",
+        "text": "Documentation Navigation",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/index.md",
+    "counterparts": {
+      "fa": "index",
+      "prs-af": "index",
+      "tg": "index"
     },
     "counterpartSlug": "index"
   },
   {
-    "id": "es-installation",
+    "id": "en-installation",
     "slug": "installation",
-    "lang": "es",
+    "lang": "en",
     "category": "getting-started",
-    "title": "Guía de Instalación",
-    "summary": "ParsiKit requiere Python 3.10 o superior. Es una biblioteca pura en Python sin dependencias externas de tiempo de ejecución.",
-    "content": "# Guía de Instalación\n\nParsiKit requiere **Python 3.10** o superior. Es una biblioteca pura en Python sin dependencias externas de tiempo de ejecución.\n\n---\n\n## 1. Instalación mediante PyPI\n\nPara instalar la última versión estable oficial desde el Python Package Index:\n\n```bash\npip install parsikit\n```\n\nPara actualizar una instalación existente a la última versión:\n\n```bash\npip install --upgrade parsikit\n```\n\n---\n\n## 2. Entornos Virtuales y Gestores de Paquetes\n\n### Uso con `venv` (Módulo estándar de Python)\n```bash\npython3 -m venv .venv\nsource .venv/bin/activate  # En Windows: .venv\\Scripts\\activate\npip install parsikit\n```\n\n### Uso con Poetry\n```bash\npoetry add parsikit\n```\n\n### Uso con uv\n```bash\nuv pip install parsikit\n```\n\n---\n\n## 3. Instalación desde el Código Fuente de GitHub\n\nSi deseas compilar directamente desde el repositorio oficial:\n\n```bash\ngit clone https://github.com/MRThugh/ParsiKit.git\ncd ParsiKit\npip install -e .\n```\n\n---\n\n## 4. Verificación de la Instalación\n\nComprueba que ParsiKit se ha instalado correctamente ejecutando este comando en la terminal:\n\n```bash\npython3 -c \"import parsikit; print('Versión de ParsiKit instalada:', parsikit.__version__)\"\n```\n\nDebería mostrar la versión instalada (por ejemplo, `3.3.1`).\n",
+    "title": "Installation Guide",
+    "summary": "ParsiKit requires Python 3.10 or higher. It has no external dependencies.",
+    "content": "# Installation Guide\n\nParsiKit requires Python **3.10** or higher. It has no external dependencies.\n\n---\n\n## 1. Install via PyPI\n\n```bash\npip install parsikit\n```\n\nTo upgrade to the latest stable release:\n```bash\npip install --upgrade parsikit\n```\n\n---\n\n## 2. Install in Virtual Environments\n\n### Using `venv`\n```bash\npython3 -m venv .venv\nsource .venv/bin/activate  # On Windows: .venv\\Scripts\\activate\npip install parsikit\n```\n\n### Using Poetry\n```bash\npoetry add parsikit\n```\n\n### Using uv\n```bash\nuv pip install parsikit\n```\n\n---\n\n## 3. Install from Source\n\n```bash\ngit clone https://github.com/MRThugh/ParsiKit.git\ncd ParsiKit\npip install -e .\n```\n\n---\n\n## 4. Verification\n\nRun the following command to verify installation:\n\n```bash\npython3 -c \"import parsikit; print('ParsiKit version:', parsikit.__version__)\"\n```\n",
     "headings": [
       {
-        "id": "guía-de-instalación",
-        "text": "Guía de Instalación",
+        "id": "installation-guide",
+        "text": "Installation Guide",
         "level": 1
       },
       {
-        "id": "1-instalación-mediante-pypi",
-        "text": "1. Instalación mediante PyPI",
+        "id": "1-install-via-pypi",
+        "text": "1. Install via PyPI",
         "level": 2
       },
       {
-        "id": "2-entornos-virtuales-y-gestores-de-paquetes",
-        "text": "2. Entornos Virtuales y Gestores de Paquetes",
+        "id": "2-install-in-virtual-environments",
+        "text": "2. Install in Virtual Environments",
         "level": 2
       },
       {
-        "id": "uso-con-venv-módulo-estándar-de-python",
-        "text": "Uso con `venv` (Módulo estándar de Python)",
+        "id": "using-venv",
+        "text": "Using `venv`",
         "level": 3
       },
       {
-        "id": "uso-con-poetry",
-        "text": "Uso con Poetry",
+        "id": "using-poetry",
+        "text": "Using Poetry",
         "level": 3
       },
       {
-        "id": "uso-con-uv",
-        "text": "Uso con uv",
+        "id": "using-uv",
+        "text": "Using uv",
         "level": 3
       },
       {
-        "id": "3-instalación-desde-el-código-fuente-de-github",
-        "text": "3. Instalación desde el Código Fuente de GitHub",
+        "id": "3-install-from-source",
+        "text": "3. Install from Source",
         "level": 2
       },
       {
-        "id": "4-verificación-de-la-instalación",
-        "text": "4. Verificación de la Instalación",
+        "id": "4-verification",
+        "text": "4. Verification",
         "level": 2
       }
     ],
-    "filePath": "/app/applet/repo_data/docs/es/installation.md",
+    "filePath": "/app/applet/repo_data/docs/en/installation.md",
     "counterparts": {
-      "en": "installation",
-      "fa": "installation"
+      "fa": "installation",
+      "prs-af": "installation",
+      "tg": "installation"
     },
     "counterpartSlug": "installation"
   },
   {
-    "id": "es-quickstart",
+    "id": "en-quickstart",
     "slug": "quickstart",
-    "lang": "es",
+    "lang": "en",
     "category": "getting-started",
-    "title": "Guía de Inicio Rápido",
-    "summary": "Comienza a utilizar ParsiKit en tu aplicación Python en menos de cinco minutos.",
-    "content": "# Guía de Inicio Rápido\n\nComienza a utilizar ParsiKit en tu aplicación Python en menos de cinco minutos.\n\n---\n\n## 1. Normalización de Texto y Limpieza de ZWNJ\n\nParsiKit corrige inconsistencias tipográficas persas y caracteres arábigos comunes:\n\n```python\nimport parsikit\n\n# Normalización de caracteres y نیم‌فاصله (ZWNJ)\nraw_text = \"كتاب هاي آموزشي و خانه ها\"\nclean_text = parsikit.clean_text(raw_text)\nprint(clean_text)\n# Salida: \"کتاب‌های آموزشی و خانه‌ها\"\n```\n\n---\n\n## 2. Validación de Identificadores Nacionales y Bancarios\n\nValida identificadores del estándar iraní sin realizar peticiones de red:\n\n```python\nimport parsikit\n\n# Validación de Código Nacional (Módulo 11)\nis_valid_national = parsikit.is_valid_national_code(\"0013581534\")\nprint(\"Código Nacional válido:\", is_valid_national)\n\n# Validación de tarjeta bancaria (Algoritmo de Luhn) y detección de banco\ncard_number = \"6037991199999999\"\nif parsikit.is_valid_card(card_number):\n    bank_info = parsikit.get_bank_info(card_number)\n    print(\"Banco emisor:\", bank_info.name_fa)\n```\n\n---\n\n## 3. Conversión de Calendario Jalalí a Gregoriano\n\nConvierte fechas solares persas a fechas gregorianas con cálculo exacto de bisiestos:\n\n```python\nfrom parsikit import JalaliDate, gregorian_to_jalali, jalali_to_gregorian\n\n# Convertir fecha actual a Jalalí\nj_date = JalaliDate.today()\nprint(f\"Hoy es: {j_date.year}/{j_date.month}/{j_date.day}\")\n\n# Conversión directa\ng_year, g_month, g_day = jalali_to_gregorian(1403, 7, 15)\nprint(f\"Fecha gregoriana: {g_year}-{g_month:02d}-{g_day:02d}\")\n```\n\n---\n\n## 4. Números a Palabras y Conversión de Divisas\n\n```python\nimport parsikit\n\n# Conversión de dígitos a palabras en persa\nwords = parsikit.number_to_words(1250000)\nprint(words)\n# Salida: \"یک میلیون و دویست و پنجاه هزار\"\n\n# Conversión de Riales a Tomanes\ntoman = parsikit.rial_to_toman(5000000)\nprint(f\"{toman:,} تومان\")\n```\n\n---\n\n## 5. Enmascaramiento y Seguridad de Datos Personales\n\n```python\nimport parsikit\n\n# Enmascarar número de tarjeta bancaria\nmasked_card = parsikit.mask_card(\"6037997123456789\")\nprint(masked_card)\n# Salida: \"6037-99**-****-6789\"\n\n# Enmascarar número de teléfono móvil\nmasked_phone = parsikit.mask_mobile(\"09123456789\")\nprint(masked_phone)\n# Salida: \"0912***6789\"\n```\n",
+    "title": "ParsiKit Quickstart Guide",
+    "summary": "Get up and running with ParsiKit in less than 5 minutes.",
+    "content": "# ParsiKit Quickstart Guide\n\nGet up and running with ParsiKit in less than 5 minutes.\n\n---\n\n## 1. Text Normalization & Standardization\n\n```python\nimport parsikit\n\n# Fix Arabic letters and irregular spacing\nraw_text = \"ي كافيه كتاب ها رو برداري و بري\"\nclean_text = parsikit.standardize_persian(raw_text)\n\nprint(clean_text)\n# Output: ی کافیه کتاب‌ها رو برداری و بری\n```\n\n---\n\n## 2. Iranian National Code (کد ملی)\n\n```python\nimport parsikit\n\ncode = \"0010123458\"\nnc = parsikit.NationalCode(code)\n\nprint(nc.is_valid)   # True\nprint(nc.formatted)  # '001-012345-8'\nprint(nc.masked)     # '001-****45-8'\nprint(nc.location)   # {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 3. Numbers & Currency\n\n```python\nimport parsikit\n\namount = 1500000\n\n# Format with Persian digits and separator\nformatted = parsikit.format_currency(amount, \"toman\", persian_digits=True)\nprint(formatted)\n# Output: ۱،۵۰۰،۰۰۰ تومان\n\n# Convert to written words\nwords = parsikit.number_to_words(amount)\nprint(f\"{words} تومان\")\n# Output: یک میلیون و پانصد هزار تومان\n```\n\n---\n\n## 4. Jalali Astronomical Dates\n\n```python\nimport parsikit\n\n# Convert Gregorian to Jalali\njy, jm, jd = parsikit.gregorian_to_jalali(2026, 7, 6)\nmonth_name = parsikit.get_jalali_month_name(jm)\nprint(f\"{jd} {month_name} {jy}\")\n# Output: 15 تیر 1405\n\n# Humanize relative time\nprint(parsikit.humanize_relative_time(-300))\n# Output: ۵ دقیقه پیش\n```\n\n---\n\n## 5. Mobile Numbers & Bank Cards\n\n```python\nimport parsikit\n\n# Mobile number\nmobile = parsikit.MobileNumber(\"09123456789\")\nprint(mobile.international)  # '+989123456789'\nprint(mobile.operator)       # 'MCI'\nprint(mobile.masked)         # '0912***6789'\n\n# Bank card\ncard = parsikit.BankCard(\"6037991122334455\")\nprint(card.bank_name)        # 'بانک ملی ایران'\nprint(card.formatted)        # '6037-9911-2233-4455'\nprint(card.masked)           # '6037-99**-****-4455'\n```\n",
     "headings": [
       {
-        "id": "guía-de-inicio-rápido",
-        "text": "Guía de Inicio Rápido",
+        "id": "parsikit-quickstart-guide",
+        "text": "ParsiKit Quickstart Guide",
         "level": 1
       },
       {
-        "id": "1-normalización-de-texto-y-limpieza-de-zwnj",
-        "text": "1. Normalización de Texto y Limpieza de ZWNJ",
+        "id": "1-text-normalization-standardization",
+        "text": "1. Text Normalization & Standardization",
         "level": 2
       },
       {
-        "id": "normalización-de-caracteres-y-نیم-فاصله-zwnj",
-        "text": "Normalización de caracteres y نیم‌فاصله (ZWNJ)",
+        "id": "fix-arabic-letters-and-irregular-spacing",
+        "text": "Fix Arabic letters and irregular spacing",
         "level": 1
       },
       {
-        "id": "salida-کتاب-های-آموزشی-و-خانه-ها",
-        "text": "Salida: \"کتاب‌های آموزشی و خانه‌ها\"",
+        "id": "output-ی-کافیه-کتاب-ها-رو-برداری-و-بری",
+        "text": "Output: ی کافیه کتاب‌ها رو برداری و بری",
         "level": 1
       },
       {
-        "id": "2-validación-de-identificadores-nacionales-y-bancarios",
-        "text": "2. Validación de Identificadores Nacionales y Bancarios",
+        "id": "2-iranian-national-code-کد-ملی",
+        "text": "2. Iranian National Code (کد ملی)",
         "level": 2
       },
       {
-        "id": "validación-de-código-nacional-módulo-11",
-        "text": "Validación de Código Nacional (Módulo 11)",
-        "level": 1
-      },
-      {
-        "id": "validación-de-tarjeta-bancaria-algoritmo-de-luhn-y-detección-de-banco",
-        "text": "Validación de tarjeta bancaria (Algoritmo de Luhn) y detección de banco",
-        "level": 1
-      },
-      {
-        "id": "3-conversión-de-calendario-jalalí-a-gregoriano",
-        "text": "3. Conversión de Calendario Jalalí a Gregoriano",
+        "id": "3-numbers-currency",
+        "text": "3. Numbers & Currency",
         "level": 2
       },
       {
-        "id": "convertir-fecha-actual-a-jalalí",
-        "text": "Convertir fecha actual a Jalalí",
+        "id": "format-with-persian-digits-and-separator",
+        "text": "Format with Persian digits and separator",
         "level": 1
       },
       {
-        "id": "conversión-directa",
-        "text": "Conversión directa",
+        "id": "output-۱،۵۰۰،۰۰۰-تومان",
+        "text": "Output: ۱،۵۰۰،۰۰۰ تومان",
         "level": 1
       },
       {
-        "id": "4-números-a-palabras-y-conversión-de-divisas",
-        "text": "4. Números a Palabras y Conversión de Divisas",
+        "id": "convert-to-written-words",
+        "text": "Convert to written words",
+        "level": 1
+      },
+      {
+        "id": "output-یک-میلیون-و-پانصد-هزار-تومان",
+        "text": "Output: یک میلیون و پانصد هزار تومان",
+        "level": 1
+      },
+      {
+        "id": "4-jalali-astronomical-dates",
+        "text": "4. Jalali Astronomical Dates",
         "level": 2
       },
       {
-        "id": "conversión-de-dígitos-a-palabras-en-persa",
-        "text": "Conversión de dígitos a palabras en persa",
+        "id": "convert-gregorian-to-jalali",
+        "text": "Convert Gregorian to Jalali",
         "level": 1
       },
       {
-        "id": "salida-یک-میلیون-و-دویست-و-پنجاه-هزار",
-        "text": "Salida: \"یک میلیون و دویست و پنجاه هزار\"",
+        "id": "output-15-تیر-1405",
+        "text": "Output: 15 تیر 1405",
         "level": 1
       },
       {
-        "id": "conversión-de-riales-a-tomanes",
-        "text": "Conversión de Riales a Tomanes",
+        "id": "humanize-relative-time",
+        "text": "Humanize relative time",
         "level": 1
       },
       {
-        "id": "5-enmascaramiento-y-seguridad-de-datos-personales",
-        "text": "5. Enmascaramiento y Seguridad de Datos Personales",
+        "id": "output-۵-دقیقه-پیش",
+        "text": "Output: ۵ دقیقه پیش",
+        "level": 1
+      },
+      {
+        "id": "5-mobile-numbers-bank-cards",
+        "text": "5. Mobile Numbers & Bank Cards",
         "level": 2
       },
       {
-        "id": "enmascarar-número-de-tarjeta-bancaria",
-        "text": "Enmascarar número de tarjeta bancaria",
+        "id": "mobile-number",
+        "text": "Mobile number",
         "level": 1
       },
       {
-        "id": "salida-6037-99-6789",
-        "text": "Salida: \"6037-99**-****-6789\"",
-        "level": 1
-      },
-      {
-        "id": "enmascarar-número-de-teléfono-móvil",
-        "text": "Enmascarar número de teléfono móvil",
-        "level": 1
-      },
-      {
-        "id": "salida-0912-6789",
-        "text": "Salida: \"0912***6789\"",
+        "id": "bank-card",
+        "text": "Bank card",
         "level": 1
       }
     ],
-    "filePath": "/app/applet/repo_data/docs/es/quickstart.md",
+    "filePath": "/app/applet/repo_data/docs/en/quickstart.md",
     "counterparts": {
-      "en": "quickstart",
-      "fa": "quickstart"
+      "fa": "quickstart",
+      "prs-af": "quickstart",
+      "tg": "quickstart"
     },
     "counterpartSlug": "quickstart"
+  },
+  {
+    "id": "en-troubleshooting",
+    "slug": "troubleshooting",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "Troubleshooting Guide (English)",
+    "summary": "Solutions to common issues encountered when using ParsiKit.",
+    "content": "# Troubleshooting Guide (English)\n\nSolutions to common issues encountered when using ParsiKit.\n\n---\n\n## 1. SyntaxError in Python 3.10 / 3.11\n\n### Problem\nPrior to Python 3.12, backslashes inside f-string expressions were prohibited by the Python grammar (PEP 701). In ParsiKit v3.3.0, a line in `parsikit.dev.debug_text` triggered this syntax error on Python 3.10 and 3.11.\n\n### Solution\nThis issue is fixed in ParsiKit v3.3.1. Upgrade to v3.3.1:\n```bash\npip install --upgrade parsikit\n```\n\n---\n\n## 2. Garbled Characters in Console or Terminal\n\n### Problem\nTerminal does not default to UTF-8 output encoding, causing Persian characters to render as question marks or mojibake.\n\n### Solution\nEnsure UTF-8 encoding is enabled in your environment:\n\nLinux/macOS:\n```bash\nexport PYTHONIOENCODING=utf-8\n```\n\nWindows PowerShell:\n```powershell\n$env:PYTHONIOENCODING=\"utf-8\"\n[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n```\n\n---\n\n## 3. Disconnected or Reversed Persian in Pillow / OpenCV\n\n### Problem\n2D rendering engines render Persian characters disconnected from left-to-right because they lack cursive Arabic text shaping and Unicode Bidirectional (BiDi) algorithm support.\n\n### Solution\nUse `parsikit.reshape_for_graphics`:\n```python\nimport parsikit\n\nraw = \"پردازش تصویر\"\nreshaped = parsikit.reshape_for_graphics(raw)\n# Pass reshaped to draw.text(...)\n```\n\n---\n\n## 4. `InvalidNationalCodeError` on 10-Digit Inputs\n\n### Problem\nA 10-digit number may still be rejected if:\n1. It consists of 10 identical digits (e.g. `1111111111`).\n2. Its 10th digit does not match the modulo-11 checksum calculated from the first 9 digits.\n\n### Solution\nEnsure test fixtures use mathematically valid check digits (e.g. for prefix `001012345`, the valid check digit is `8`: `0010123458`).\n",
+    "headings": [
+      {
+        "id": "troubleshooting-guide-english",
+        "text": "Troubleshooting Guide (English)",
+        "level": 1
+      },
+      {
+        "id": "1-syntaxerror-in-python-3-10-3-11",
+        "text": "1. SyntaxError in Python 3.10 / 3.11",
+        "level": 2
+      },
+      {
+        "id": "problem",
+        "text": "Problem",
+        "level": 3
+      },
+      {
+        "id": "solution",
+        "text": "Solution",
+        "level": 3
+      },
+      {
+        "id": "2-garbled-characters-in-console-or-terminal",
+        "text": "2. Garbled Characters in Console or Terminal",
+        "level": 2
+      },
+      {
+        "id": "problem",
+        "text": "Problem",
+        "level": 3
+      },
+      {
+        "id": "solution",
+        "text": "Solution",
+        "level": 3
+      },
+      {
+        "id": "3-disconnected-or-reversed-persian-in-pillow-opencv",
+        "text": "3. Disconnected or Reversed Persian in Pillow / OpenCV",
+        "level": 2
+      },
+      {
+        "id": "problem",
+        "text": "Problem",
+        "level": 3
+      },
+      {
+        "id": "solution",
+        "text": "Solution",
+        "level": 3
+      },
+      {
+        "id": "pass-reshaped-to-draw-text",
+        "text": "Pass reshaped to draw.text(...)",
+        "level": 1
+      },
+      {
+        "id": "4-invalidnationalcodeerror-on-10-digit-inputs",
+        "text": "4. `InvalidNationalCodeError` on 10-Digit Inputs",
+        "level": 2
+      },
+      {
+        "id": "problem",
+        "text": "Problem",
+        "level": 3
+      },
+      {
+        "id": "solution",
+        "text": "Solution",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/troubleshooting.md",
+    "counterparts": {
+      "fa": "troubleshooting",
+      "prs-af": "troubleshooting",
+      "tg": "troubleshooting"
+    },
+    "counterpartSlug": "troubleshooting"
+  },
+  {
+    "id": "en-tutorials-datetime",
+    "slug": "tutorials/datetime",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
+    "summary": "The Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.",
+    "content": "# Tutorial: Jalali (Solar Hijri) Dates & Relative Time\n\nThe Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.\n\n---\n\n## 1. Gregorian to Jalali Conversion\n\n```python\nimport parsikit\n\n# Convert Gregorian date (Year, Month, Day)\njy, jm, jd = parsikit.gregorian_to_jalali(2026, 7, 6)\nprint(f\"Jalali date: {jy}/{jm:02d}/{jd:02d}\")\n# Output: Jalali date: 1405/04/15\n\n# Persian month name\nmonth_name = parsikit.get_jalali_month_name(jm)\nprint(f\"{jd} {month_name} {jy}\")\n# Output: 15 تیر 1405\n```\n\n---\n\n## 2. Jalali to Gregorian Conversion\n\n```python\nimport parsikit\n\n# Convert Jalali date back to Gregorian\ngy, gm, gd = parsikit.jalali_to_gregorian(1405, 4, 15)\nprint(f\"Gregorian date: {gy}-{gm:02d}-{gd:02d}\")\n# Output: Gregorian date: 2026-07-06\n```\n\n---\n\n## 3. Jalali Leap Years (سال کبیسه)\n\nIn the Jalali calendar, a normal year has 365 days (months 1-6 have 31 days, 7-11 have 30 days, and month 12 has 29 days). A leap year has 366 days, with month 12 (Esfand) having 30 days.\n\n```python\nimport parsikit\n\n# Check astronomical leap years\nprint(parsikit.is_jalali_leap(1399))  # True\nprint(parsikit.is_jalali_leap(1400))  # False\nprint(parsikit.is_jalali_leap(1403))  # True\nprint(parsikit.is_jalali_leap(1404))  # False\n```\n\n---\n\n## 4. Humanized Relative Time\n\nTurn timestamps or second offsets into natural Persian strings:\n\n```python\nimport datetime\nimport parsikit\n\nnow = datetime.datetime.now()\n\n# 5 minutes ago\nprint(parsikit.humanize_relative_time(-300))\n# Output: ۵ دقیقه پیش\n\n# 3 hours ago\nprint(parsikit.humanize_relative_time(-10800))\n# Output: ۴ ساعت پیش\n\n# In 2 days\nprint(parsikit.humanize_relative_time(2 * 86400))\n# Output: پس‌فردا\n```\n",
+    "headings": [
+      {
+        "id": "tutorial-jalali-solar-hijri-dates-relative-time",
+        "text": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
+        "level": 1
+      },
+      {
+        "id": "1-gregorian-to-jalali-conversion",
+        "text": "1. Gregorian to Jalali Conversion",
+        "level": 2
+      },
+      {
+        "id": "convert-gregorian-date-year-month-day",
+        "text": "Convert Gregorian date (Year, Month, Day)",
+        "level": 1
+      },
+      {
+        "id": "output-jalali-date-1405-04-15",
+        "text": "Output: Jalali date: 1405/04/15",
+        "level": 1
+      },
+      {
+        "id": "persian-month-name",
+        "text": "Persian month name",
+        "level": 1
+      },
+      {
+        "id": "output-15-تیر-1405",
+        "text": "Output: 15 تیر 1405",
+        "level": 1
+      },
+      {
+        "id": "2-jalali-to-gregorian-conversion",
+        "text": "2. Jalali to Gregorian Conversion",
+        "level": 2
+      },
+      {
+        "id": "convert-jalali-date-back-to-gregorian",
+        "text": "Convert Jalali date back to Gregorian",
+        "level": 1
+      },
+      {
+        "id": "output-gregorian-date-2026-07-06",
+        "text": "Output: Gregorian date: 2026-07-06",
+        "level": 1
+      },
+      {
+        "id": "3-jalali-leap-years-سال-کبیسه",
+        "text": "3. Jalali Leap Years (سال کبیسه)",
+        "level": 2
+      },
+      {
+        "id": "check-astronomical-leap-years",
+        "text": "Check astronomical leap years",
+        "level": 1
+      },
+      {
+        "id": "4-humanized-relative-time",
+        "text": "4. Humanized Relative Time",
+        "level": 2
+      },
+      {
+        "id": "5-minutes-ago",
+        "text": "5 minutes ago",
+        "level": 1
+      },
+      {
+        "id": "output-۵-دقیقه-پیش",
+        "text": "Output: ۵ دقیقه پیش",
+        "level": 1
+      },
+      {
+        "id": "3-hours-ago",
+        "text": "3 hours ago",
+        "level": 1
+      },
+      {
+        "id": "output-۴-ساعت-پیش",
+        "text": "Output: ۴ ساعت پیش",
+        "level": 1
+      },
+      {
+        "id": "in-2-days",
+        "text": "In 2 days",
+        "level": 1
+      },
+      {
+        "id": "output-پس-فردا",
+        "text": "Output: پس‌فردا",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/tutorials/datetime.md",
+    "counterparts": {
+      "fa": "tutorials/datetime",
+      "prs-af": "tutorials/datetime",
+      "tg": "tutorials/datetime"
+    },
+    "counterpartSlug": "tutorials/datetime"
+  },
+  {
+    "id": "en-tutorials-models",
+    "slug": "tutorials/models",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Object-Oriented Domain Models",
+    "summary": "ParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.",
+    "content": "# Tutorial: Object-Oriented Domain Models\n\nParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.\n\n---\n\n## 1. Domain Models Overview\n\nEach model validates input on initialization and raises a structured exception if invalid:\n\n| Model | Target Data | Exception on Invalid Input |\n|---|---|---|\n| `NationalCode` | Iranian National Code (10 digits) | `InvalidNationalCodeError` |\n| `MobileNumber` | Iranian mobile phone numbers | `InvalidMobileError` |\n| `FixedLine` | Landline phones with province detection | `ValidationError` |\n| `BankCard` | 16-digit debit/credit card numbers | `InvalidCardNumberError` |\n| `Sheba` | Iranian IBAN numbers (24 digits + IR) | `InvalidShebaError` |\n| `VehiclePlate` | Automobile license plates | `InvalidPlateError` |\n| `PersianText` | Rich text with fluent transformations | `ValidationError` |\n\n---\n\n## 2. Using NationalCode\n\n```python\nimport parsikit\n\nnc = parsikit.NationalCode(\"0010123458\")\n\n# String representation and duck typing\nprint(str(nc))        # '0010123458'\nprint(nc.formatted)   # '001-012345-8'\nprint(nc.masked)      # '001-****45-8' (safe for logs)\nprint(nc.location)    # {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 3. Using MobileNumber\n\n```python\nimport parsikit\n\nm = parsikit.MobileNumber(\"+989123456789\")\n\nprint(m.national)       # '09123456789'\nprint(m.international)  # '+989123456789'\nprint(m.operator)       # 'MCI'\nprint(m.masked)         # '0912***6789'\n```\n\n---\n\n## 4. Using BankCard\n\n```python\nimport parsikit\n\ncard = parsikit.BankCard(\"6037991122334455\")\n\nprint(card.bank_name)  # 'بانک ملی ایران'\nprint(card.formatted)  # '6037-9911-2233-4455'\nprint(card.masked)     # '6037-99**-****-4455'\n```\n\n---\n\n## 5. Native Integration with Pydantic v2 & FastAPI\n\nParsiKit models implement `__get_pydantic_core_schema__`, allowing them to be used directly as field types in Pydantic schemas:\n\n```python\nfrom pydantic import BaseModel\nimport parsikit\n\nclass UserProfileSchema(BaseModel):\n    name: str\n    national_code: parsikit.NationalCode\n    phone: parsikit.MobileNumber\n    card: parsikit.BankCard\n\n# Automatic parsing and validation\nprofile = UserProfileSchema(\n    name=\"Ali Kamrani\",\n    national_code=\"0010123458\",\n    phone=\"09123456789\",\n    card=\"6037991122334455\",\n)\n\nprint(profile.model_dump())\n# All fields serialize cleanly to standard validated strings!\n```\n",
+    "headings": [
+      {
+        "id": "tutorial-object-oriented-domain-models",
+        "text": "Tutorial: Object-Oriented Domain Models",
+        "level": 1
+      },
+      {
+        "id": "1-domain-models-overview",
+        "text": "1. Domain Models Overview",
+        "level": 2
+      },
+      {
+        "id": "2-using-nationalcode",
+        "text": "2. Using NationalCode",
+        "level": 2
+      },
+      {
+        "id": "string-representation-and-duck-typing",
+        "text": "String representation and duck typing",
+        "level": 1
+      },
+      {
+        "id": "3-using-mobilenumber",
+        "text": "3. Using MobileNumber",
+        "level": 2
+      },
+      {
+        "id": "4-using-bankcard",
+        "text": "4. Using BankCard",
+        "level": 2
+      },
+      {
+        "id": "5-native-integration-with-pydantic-v2-fastapi",
+        "text": "5. Native Integration with Pydantic v2 & FastAPI",
+        "level": 2
+      },
+      {
+        "id": "automatic-parsing-and-validation",
+        "text": "Automatic parsing and validation",
+        "level": 1
+      },
+      {
+        "id": "all-fields-serialize-cleanly-to-standard-validated-strings",
+        "text": "All fields serialize cleanly to standard validated strings!",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/tutorials/models.md",
+    "counterparts": {
+      "fa": "tutorials/models"
+    },
+    "counterpartSlug": "tutorials/models"
+  },
+  {
+    "id": "en-tutorials-numbers_and_currency",
+    "slug": "tutorials/numbers_and_currency",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Persian Numbers & Financial Calculations",
+    "summary": "This tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.",
+    "content": "# Tutorial: Persian Numbers & Financial Calculations\n\nThis tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.\n\n---\n\n## 1. Digit Script Conversions\n\nConvert numbers between Persian (`۰-۹`), Arabic (`٠-٩`), and English/Latin (`0-9`):\n\n```python\nimport parsikit\n\n# English to Persian\nprint(parsikit.english_to_persian(\"User ID: 1042\"))\n# 'User ID: ۱۰۴۲'\n\n# Persian/Arabic to English\nprint(parsikit.persian_to_english(\"مبلغ: ۲۵۰۰۰ ریال\"))\n# 'مبلغ: 25000 ریال'\n```\n\n---\n\n## 2. Converting Numbers to Written Words\n\nTurn numbers into natural Persian words with high performance (cached):\n\n```python\nimport parsikit\n\nprint(parsikit.number_to_words(0))\n# 'صفر'\n\nprint(parsikit.number_to_words(1250000))\n# 'یک میلیون و دویست و پنجاه هزار'\n\nprint(parsikit.number_to_words(-42))\n# 'منفی چهل و دو'\n```\n\n---\n\n## 3. Currency Transformations (Rial & Toman)\n\n```python\nimport parsikit\n\n# Rial to Toman (divide by 10)\nprint(parsikit.rial_to_toman(500000))  # 50000\n\n# Toman to Rial (multiply by 10)\nprint(parsikit.toman_to_rial(50000))   # 500000\n\n# Formatted currency string\nprint(parsikit.format_currency(12500000, \"toman\", persian_digits=True))\n# '۱۲،۵۰۰،۰۰۰ تومان'\n\n# Full written currency\nprint(parsikit.format_currency_to_words(12500000, \"toman\"))\n# 'دوازده میلیون و پانصد هزار تومان'\n```\n\n---\n\n## 4. Invoicing & VAT (ارزش افزوده)\n\nCalculate VAT according to the configured tax rate (default: 10%):\n\n```python\nimport parsikit\n\ninvoice = parsikit.add_tax_and_toll(10000000)\nprint(f\"Base: {invoice['original_amount']:,}\")\nprint(f\"VAT ({invoice['tax_rate']*100}%): {invoice['tax_amount']:,}\")\nprint(f\"Total: {invoice['total_amount']:,}\")\n```\n\n---\n\n## 5. Loan Installments (محاسبه اقساط)\n\nCalculate monthly installment payments and total interest using the official Central Bank formula:\n\n```python\nimport parsikit\n\n# 100,000,000 Toman loan at 23% interest for 24 months\nloan = parsikit.calculate_installments(100_000_000, 23.0, 24)\n\nprint(\"Monthly installment:\", loan['monthly_installment'])\nprint(\"Total payment:\", loan['total_payment'])\nprint(\"Total interest:\", loan['total_interest'])\n```\n",
+    "headings": [
+      {
+        "id": "tutorial-persian-numbers-financial-calculations",
+        "text": "Tutorial: Persian Numbers & Financial Calculations",
+        "level": 1
+      },
+      {
+        "id": "1-digit-script-conversions",
+        "text": "1. Digit Script Conversions",
+        "level": 2
+      },
+      {
+        "id": "english-to-persian",
+        "text": "English to Persian",
+        "level": 1
+      },
+      {
+        "id": "user-id-۱۰۴۲",
+        "text": "'User ID: ۱۰۴۲'",
+        "level": 1
+      },
+      {
+        "id": "persian-arabic-to-english",
+        "text": "Persian/Arabic to English",
+        "level": 1
+      },
+      {
+        "id": "مبلغ-25000-ریال",
+        "text": "'مبلغ: 25000 ریال'",
+        "level": 1
+      },
+      {
+        "id": "2-converting-numbers-to-written-words",
+        "text": "2. Converting Numbers to Written Words",
+        "level": 2
+      },
+      {
+        "id": "صفر",
+        "text": "'صفر'",
+        "level": 1
+      },
+      {
+        "id": "یک-میلیون-و-دویست-و-پنجاه-هزار",
+        "text": "'یک میلیون و دویست و پنجاه هزار'",
+        "level": 1
+      },
+      {
+        "id": "منفی-چهل-و-دو",
+        "text": "'منفی چهل و دو'",
+        "level": 1
+      },
+      {
+        "id": "3-currency-transformations-rial-toman",
+        "text": "3. Currency Transformations (Rial & Toman)",
+        "level": 2
+      },
+      {
+        "id": "rial-to-toman-divide-by-10",
+        "text": "Rial to Toman (divide by 10)",
+        "level": 1
+      },
+      {
+        "id": "toman-to-rial-multiply-by-10",
+        "text": "Toman to Rial (multiply by 10)",
+        "level": 1
+      },
+      {
+        "id": "formatted-currency-string",
+        "text": "Formatted currency string",
+        "level": 1
+      },
+      {
+        "id": "۱۲،۵۰۰،۰۰۰-تومان",
+        "text": "'۱۲،۵۰۰،۰۰۰ تومان'",
+        "level": 1
+      },
+      {
+        "id": "full-written-currency",
+        "text": "Full written currency",
+        "level": 1
+      },
+      {
+        "id": "دوازده-میلیون-و-پانصد-هزار-تومان",
+        "text": "'دوازده میلیون و پانصد هزار تومان'",
+        "level": 1
+      },
+      {
+        "id": "4-invoicing-vat-ارزش-افزوده",
+        "text": "4. Invoicing & VAT (ارزش افزوده)",
+        "level": 2
+      },
+      {
+        "id": "5-loan-installments-محاسبه-اقساط",
+        "text": "5. Loan Installments (محاسبه اقساط)",
+        "level": 2
+      },
+      {
+        "id": "100-000-000-toman-loan-at-23-interest-for-24-months",
+        "text": "100,000,000 Toman loan at 23% interest for 24 months",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/tutorials/numbers_and_currency.md",
+    "counterparts": {
+      "fa": "tutorials/numbers_and_currency",
+      "prs-af": "tutorials/numbers_and_currency",
+      "tg": "tutorials/numbers_and_currency"
+    },
+    "counterpartSlug": "tutorials/numbers_and_currency"
+  },
+  {
+    "id": "en-tutorials-text_processing",
+    "slug": "tutorials/text_processing",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Persian Text Processing & Standardization",
+    "summary": "Handling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.",
+    "content": "# Tutorial: Persian Text Processing & Standardization\n\nHandling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.\n\n---\n\n## 1. Character Standardization\n\nUsers frequently enter Arabic letterforms from mismatched keyboard layouts:\n- Arabic Yeh (`ي` / `\\u064A`) instead of Persian Yeh (`ی` / `\\u06CC`)\n- Arabic Kaf (`ك` / `\\u0643`) instead of Persian Keheh (`ک` / `\\u06A9`)\n- Arabic Teh Marbuta (`ة` / `\\u0629`)\n\n`standardize_persian` unifies these into canonical Persian characters:\n\n```python\nimport parsikit\n\ndirty = \"اين يك متن پيچيده با كدملي است.\"\nclean = parsikit.standardize_persian(dirty)\nprint(clean)\n# 'این یک متن پیچیده با کدملي است.'\n```\n\n---\n\n## 2. Zero-Width Non-Joiner (ZWNJ / نیم‌فاصله)\n\nIn Persian grammar, verbal prefixes (`می‌`, `نمی‌`) and grammatical suffixes (`‌ها`, `‌ترین`, `‌مند`) require a half-space (ZWNJ, `\\u200C`) rather than a full ASCII space.\n\n```python\nimport parsikit\n\nraw = \"کتاب ها می روند و بر می گردند\"\nclean = parsikit.standardize_persian(raw)\nprint(clean)\n# 'کتاب‌ها می‌روند و برمی‌گردند'\n```\n\n---\n\n## 3. Stripping Diacritics (اعراب‌زدایی)\n\nDiacritics (َ ِ ُ ً ٍ ٌ ّ ْ) can interfere with database searching and full-text index lookups:\n\n```python\nimport parsikit\n\nvowelized = \"سَلامٌ عَلَیکُم وَ رَحمَةُ الله\"\nclean = parsikit.strip_diacritics(vowelized)\nprint(clean)\n# 'سلام علیکم و رحمة الله'\n```\n\n---\n\n## 4. Converting Mistyped English Keyboards\n\nWhen a user types on an English keyboard layout while intending to type Persian:\n\n```python\nimport parsikit\n\nmistyped = \"sghl phgaj,k ],ji?\"\npersian = parsikit.correct_keyboard_layout(mistyped)\nprint(persian)\n# 'سلام حالتون چطوره؟'\n```\n\n---\n\n## 5. SEO URL Slug Generation (`slugify`)\n\nParsiKit includes an intelligent Persian transliteration dictionary to turn Persian article titles into readable Finglish slugs:\n\n```python\nimport parsikit\n\ntitle = \"معرفی نسخه جدید پارسی کیت\"\nslug = parsikit.slugify(title)\nprint(slug)\n# 'moarefi-neskheh-jadid-parsi-kit'\n```\n",
+    "headings": [
+      {
+        "id": "tutorial-persian-text-processing-standardization",
+        "text": "Tutorial: Persian Text Processing & Standardization",
+        "level": 1
+      },
+      {
+        "id": "1-character-standardization",
+        "text": "1. Character Standardization",
+        "level": 2
+      },
+      {
+        "id": "این-یک-متن-پیچیده-با-کدملي-است",
+        "text": "'این یک متن پیچیده با کدملي است.'",
+        "level": 1
+      },
+      {
+        "id": "2-zero-width-non-joiner-zwnj-نیم-فاصله",
+        "text": "2. Zero-Width Non-Joiner (ZWNJ / نیم‌فاصله)",
+        "level": 2
+      },
+      {
+        "id": "کتاب-ها-می-روند-و-برمی-گردند",
+        "text": "'کتاب‌ها می‌روند و برمی‌گردند'",
+        "level": 1
+      },
+      {
+        "id": "3-stripping-diacritics-اعراب-زدایی",
+        "text": "3. Stripping Diacritics (اعراب‌زدایی)",
+        "level": 2
+      },
+      {
+        "id": "سلام-علیکم-و-رحمة-الله",
+        "text": "'سلام علیکم و رحمة الله'",
+        "level": 1
+      },
+      {
+        "id": "4-converting-mistyped-english-keyboards",
+        "text": "4. Converting Mistyped English Keyboards",
+        "level": 2
+      },
+      {
+        "id": "سلام-حالتون-چطوره؟",
+        "text": "'سلام حالتون چطوره؟'",
+        "level": 1
+      },
+      {
+        "id": "5-seo-url-slug-generation-slugify",
+        "text": "5. SEO URL Slug Generation (`slugify`)",
+        "level": 2
+      },
+      {
+        "id": "moarefi-neskheh-jadid-parsi-kit",
+        "text": "'moarefi-neskheh-jadid-parsi-kit'",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/tutorials/text_processing.md",
+    "counterparts": {
+      "fa": "tutorials/text_processing",
+      "prs-af": "tutorials/text_processing",
+      "tg": "tutorials/text_processing"
+    },
+    "counterpartSlug": "tutorials/text_processing"
+  },
+  {
+    "id": "en-tutorials-validation",
+    "slug": "tutorials/validation",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: National Identifiers & Format Validation",
+    "summary": "ParsiKit provides validation engines for all major Iranian public identification standards.",
+    "content": "# Tutorial: National Identifiers & Format Validation\n\nParsiKit provides validation engines for all major Iranian public identification standards.\n\n---\n\n## 1. Iranian National Code (کد ملی)\n\nThe Iranian National Code is a 10-digit number where the 10th digit is a checksum computed modulo 11 with weights from 10 down to 2.\n\n```python\nimport parsikit\n\n# Verification\nprint(parsikit.is_valid_national_code(\"0010123458\"))  # True\nprint(parsikit.is_valid_national_code(\"1111111111\"))  # False (repeated digits)\nprint(parsikit.is_valid_national_code(\"0010123451\"))  # False (invalid checksum)\n\n# Formatting\nprint(parsikit.format_national_code(\"0010123458\"))    # '001-012345-8'\n\n# Origin detection\nprint(parsikit.detect_national_code_location(\"0010123458\"))\n# {'province': 'تهران', 'city': 'تهران مرکزی'}\n```\n\n---\n\n## 2. Iranian Mobile Numbers (شماره موبایل)\n\nSupports standard 11-digit Iranian mobile numbers across MCI (Hamrah-e Aval), Irancell (MTN), Rightel, Shatel Mobile, and enterprise virtual operators:\n\n```python\nimport parsikit\n\nphone = \"+989123456789\"\nprint(parsikit.is_valid_mobile(phone))           # True\nprint(parsikit.normalize_mobile(phone, \"0\"))     # '09123456789'\nprint(parsikit.detect_mobile_operator(phone))    # 'MCI'\n```\n\n---\n\n## 3. Bank Cards & Sheba IBANs\n\n### 16-Digit Debit Cards (کارت بانکی شتاب)\nUses the Luhn algorithm (mod-10 double-add-double) and matches issuer bank codes:\n\n```python\nimport parsikit\n\ncard = \"6037991122334455\"\nprint(parsikit.is_valid_card_number(card))       # True\nprint(parsikit.format_card_number(card))         # '6037-9911-2233-4455'\nprint(parsikit.detect_bank_from_card(card))      # 'بانک ملی ایران'\n```\n\n### Sheba (شناسه بانکی ایران - IBAN)\nEvaluates 24-digit Iranian IBAN numbers according to ISO 7064 Mod 97-10:\n\n```python\nimport parsikit\n\nsheba = \"IR120170000000123456789012\"\nprint(parsikit.is_valid_sheba(sheba))             # True\nprint(parsikit.detect_bank_from_sheba(sheba))     # 'بانک ملی ایران'\n```\n\n---\n\n## 4. Postal Codes & Utility Bills\n\n### Postal Code (کد پستی)\nValidates 10-digit codes against postal layout rules (no 0 or 2 in certain positions) and formats as 5-5:\n\n```python\nimport parsikit\n\nprint(parsikit.is_valid_postal_code(\"1417466191\"))  # True\nprint(parsikit.format_postal_code(\"1417466191\"))    # '14174-66191'\n```\n\n### Utility Bills (شناسه قبض و پرداخت)\nChecks electricity, water, gas, and telephone bills and calculates payable amounts:\n\n```python\nimport parsikit\n\nbill_id = \"982765410123\"\npay_id = \"12500345\"\n# Verifies check digits and parses bill metadata\n```\n",
+    "headings": [
+      {
+        "id": "tutorial-national-identifiers-format-validation",
+        "text": "Tutorial: National Identifiers & Format Validation",
+        "level": 1
+      },
+      {
+        "id": "1-iranian-national-code-کد-ملی",
+        "text": "1. Iranian National Code (کد ملی)",
+        "level": 2
+      },
+      {
+        "id": "verification",
+        "text": "Verification",
+        "level": 1
+      },
+      {
+        "id": "formatting",
+        "text": "Formatting",
+        "level": 1
+      },
+      {
+        "id": "origin-detection",
+        "text": "Origin detection",
+        "level": 1
+      },
+      {
+        "id": "province-تهران-city-تهران-مرکزی",
+        "text": "{'province': 'تهران', 'city': 'تهران مرکزی'}",
+        "level": 1
+      },
+      {
+        "id": "2-iranian-mobile-numbers-شماره-موبایل",
+        "text": "2. Iranian Mobile Numbers (شماره موبایل)",
+        "level": 2
+      },
+      {
+        "id": "3-bank-cards-sheba-ibans",
+        "text": "3. Bank Cards & Sheba IBANs",
+        "level": 2
+      },
+      {
+        "id": "16-digit-debit-cards-کارت-بانکی-شتاب",
+        "text": "16-Digit Debit Cards (کارت بانکی شتاب)",
+        "level": 3
+      },
+      {
+        "id": "sheba-شناسه-بانکی-ایران-iban",
+        "text": "Sheba (شناسه بانکی ایران - IBAN)",
+        "level": 3
+      },
+      {
+        "id": "4-postal-codes-utility-bills",
+        "text": "4. Postal Codes & Utility Bills",
+        "level": 2
+      },
+      {
+        "id": "postal-code-کد-پستی",
+        "text": "Postal Code (کد پستی)",
+        "level": 3
+      },
+      {
+        "id": "utility-bills-شناسه-قبض-و-پرداخت",
+        "text": "Utility Bills (شناسه قبض و پرداخت)",
+        "level": 3
+      },
+      {
+        "id": "verifies-check-digits-and-parses-bill-metadata",
+        "text": "Verifies check digits and parses bill metadata",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/en/tutorials/validation.md",
+    "counterparts": {
+      "fa": "tutorials/validation",
+      "prs-af": "tutorials/validation",
+      "tg": "tutorials/validation"
+    },
+    "counterpartSlug": "tutorials/validation"
+  },
+  {
+    "id": "prs-af-api-cache",
+    "slug": "api/cache",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "سیستم کش چندنخی (parsikit.cache)",
+    "summary": "ماژول parsikit.cache یک سیستم حافظه موقت امن در محیط‌های چندنخی (Thread-safe LRU Cache) فراهم می‌کند تا تبدیل‌های محاسباتی سنگین تکراری بدون افت عملکرد انجام شوند.",
+    "content": "# سیستم کش چندنخی (parsikit.cache)\n\nماژول `parsikit.cache` یک سیستم حافظه موقت امن در محیط‌های چندنخی (Thread-safe LRU Cache) فراهم می‌کند تا تبدیل‌های محاسباتی سنگین تکراری بدون افت عملکرد انجام شوند.\n\n---\n\n## ویژگی‌ها\n\n- پیاده‌سازی با کلاس‌های استاندارد پایتون بدون نیاز به کتابخانه‌های سنگین\n- بهره‌مندی از قفل انحصاری `threading.Lock` برای جلوگیری از Race Condition در سرورهای وب چندنخی (FastAPI، Django، Flask)\n- محدودیت اندازه قابل تنظیم (maxsize پیش‌فرض: ۱۰۲۴ مورد)\n",
+    "headings": [
+      {
+        "id": "سیستم-کش-چندنخی-parsikit-cache",
+        "text": "سیستم کش چندنخی (parsikit.cache)",
+        "level": 1
+      },
+      {
+        "id": "ویژگی-ها",
+        "text": "ویژگی‌ها",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/cache.md",
+    "counterparts": {
+      "fa": "api/cache",
+      "en": "api/cache",
+      "tg": "api/cache"
+    },
+    "counterpartSlug": "api/cache"
+  },
+  {
+    "id": "prs-af-api-datetime",
+    "slug": "api/datetime",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "ماژول تقویم و زمان (parsikit.datetime)",
+    "summary": "ماژول parsikit.datetime محاسبات دقیق و تبدیل‌های زمانی میان تقویم میلادی (Gregorian) و هجری شمسی (Solar Hijri / Jalali) را ارائه می‌دهد.",
+    "content": "# ماژول تقویم و زمان (parsikit.datetime)\n\nماژول `parsikit.datetime` محاسبات دقیق و تبدیل‌های زمانی میان تقویم میلادی (Gregorian) و هجری شمسی (Solar Hijri / Jalali) را ارائه می‌دهد.\n\n---\n\n## توابع اصلی\n\n### `gregorian_to_jalali(gy: int, gm: int, gd: int) -> Tuple[int, int, int]`\nتبدیل سال، ماه و روز میلادی به تاریخ معادل هجری شمسی.\n\n### `jalali_to_gregorian(jy: int, jm: int, jd: int) -> Tuple[int, int, int]`\nتبدیل تاریخ هجری شمسی به تاریخ معادل میلادی.\n\n### `is_jalali_leap(year: int) -> bool`\nمحاسبه وضعیت سال کبیسه در تقویم هجری شمسی بر مبنای چرخه ۳۳ ساله نجومی.\n\n### `humanize_relative_time(minutes_ago: int) -> str`\nنمایش زمان به صورت متنی و انسانی در زبان فارسی دری (مانند: «۱۵ دقیقه پیش»).\n",
+    "headings": [
+      {
+        "id": "ماژول-تقویم-و-زمان-parsikit-datetime",
+        "text": "ماژول تقویم و زمان (parsikit.datetime)",
+        "level": 1
+      },
+      {
+        "id": "توابع-اصلی",
+        "text": "توابع اصلی",
+        "level": 2
+      },
+      {
+        "id": "gregorian_to_jalali-gy-int-gm-int-gd-int-tuple-int-int-int",
+        "text": "`gregorian_to_jalali(gy: int, gm: int, gd: int) -> Tuple[int, int, int]`",
+        "level": 3
+      },
+      {
+        "id": "jalali_to_gregorian-jy-int-jm-int-jd-int-tuple-int-int-int",
+        "text": "`jalali_to_gregorian(jy: int, jm: int, jd: int) -> Tuple[int, int, int]`",
+        "level": 3
+      },
+      {
+        "id": "is_jalali_leap-year-int-bool",
+        "text": "`is_jalali_leap(year: int) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "humanize_relative_time-minutes_ago-int-str",
+        "text": "`humanize_relative_time(minutes_ago: int) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/datetime.md",
+    "counterparts": {
+      "fa": "api/datetime",
+      "en": "api/datetime",
+      "tg": "api/datetime"
+    },
+    "counterpartSlug": "api/datetime"
+  },
+  {
+    "id": "prs-af-api-index",
+    "slug": "api/index",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مرجع کامل توابع و کلاس‌های پارسی‌کیت (API)",
+    "summary": "این مستند فهرست جامع تمام ماژول‌ها، کلاس‌ها و توابع موجود در کتابخانه پارسی‌کیت را معرفی می‌نماید.",
+    "content": "# مرجع کامل توابع و کلاس‌های پارسی‌کیت (API)\n\nاین مستند فهرست جامع تمام ماژول‌ها، کلاس‌ها و توابع موجود در کتابخانه پارسی‌کیت را معرفی می‌نماید.\n\n---\n\n## ساختار ماژول‌ها\n\n| ماژول | توضیح و کاربرد اصلی |\n| :--- | :--- |\n| `parsikit.text` | تصفیه متون، تنظیم نیم‌فاصله‌ها، حذف اعراب و معیارسازی حروف |\n| `parsikit.validators` | اعتبارسنجی تذکره، کارت‌های بانکی، شبا، شناسه ملی و موبایل |\n| `parsikit.datetime` | تقویم نجومی هجری شمسی، تبدیل تاریخ و محاسبه سال کبیسه |\n| `parsikit.currency` | تبدیل ارقام به حروف، قالب‌بندی مالی و محاسبات ارزی |\n| `parsikit.models` | مدل‌های داده‌ای شیءگرا با سازگاری Pydantic v2 |\n| `parsikit.cache` | سیستم کش چندنخی (Thread-safe LRU Cache) |\n| `parsikit.exceptions` | سلسله‌مراتب خطاهای اختصاصی و استاندارد |\n| `parsikit.dev` | ابزارهای عیب‌یابی و محاسبه طول واقعی متون فارسی |\n",
+    "headings": [
+      {
+        "id": "مرجع-کامل-توابع-و-کلاس-های-پارسی-کیت-api",
+        "text": "مرجع کامل توابع و کلاس‌های پارسی‌کیت (API)",
+        "level": 1
+      },
+      {
+        "id": "ساختار-ماژول-ها",
+        "text": "ساختار ماژول‌ها",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/index.md",
+    "counterparts": {
+      "fa": "api/index",
+      "en": "api/index",
+      "tg": "api/index"
+    },
+    "counterpartSlug": "api/index"
+  },
+  {
+    "id": "prs-af-api-models",
+    "slug": "api/models",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "مدل‌های شیءگرا (parsikit.models)",
+    "summary": "ماژول parsikit.models کلاس‌های داده‌ای غنی (Domain Models) را برای کپسوله‌سازی و اعتبارسنجی خودکار مقادیر فراهم می‌آورد.",
+    "content": "# مدل‌های شیءگرا (parsikit.models)\n\nماژول `parsikit.models` کلاس‌های داده‌ای غنی (Domain Models) را برای کپسوله‌سازی و اعتبارسنجی خودکار مقادیر فراهم می‌آورد.\n\n---\n\n## کلاس‌های موجود\n\n### `NationalCode`\nکلاس نگه‌دارنده شماره هویت و تذکره همراه با بررسی صحت خودکار در زمان ساخته‌شدن شیء:\n- `nc.formatted`: فرمت تفکیک‌شده با خط تیره\n- `nc.masked`: فرمت امن با ستاره\n- `nc.clean`: رشته ارقام خالص\n- `nc.province`: نام استان یا ولایت صادرکننده\n\n### `BankCard`\nکلاس داده‌ای کارت بانکی:\n- `card.is_valid`: وضعیت درستی شماره با الگوریتم لون\n- `card.bank_name`: نام بانک عامل صادرکننده\n- `card.masked`: شماره ماسک‌شده امن\n\n### `MobileNumber`\nکلاس شماره تلفن همراه:\n- `m.operator`: نام اپراتور شبکه مخابراتی\n- `m.international`: فرمت بین‌المللی با کد کشور (+98 / +93)\n",
+    "headings": [
+      {
+        "id": "مدل-های-شیءگرا-parsikit-models",
+        "text": "مدل‌های شیءگرا (parsikit.models)",
+        "level": 1
+      },
+      {
+        "id": "کلاس-های-موجود",
+        "text": "کلاس‌های موجود",
+        "level": 2
+      },
+      {
+        "id": "nationalcode",
+        "text": "`NationalCode`",
+        "level": 3
+      },
+      {
+        "id": "bankcard",
+        "text": "`BankCard`",
+        "level": 3
+      },
+      {
+        "id": "mobilenumber",
+        "text": "`MobileNumber`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/models.md",
+    "counterparts": {
+      "fa": "api/models",
+      "en": "api/models",
+      "tg": "api/models"
+    },
+    "counterpartSlug": "api/models"
+  },
+  {
+    "id": "prs-af-api-number_and_currency",
+    "slug": "api/number_and_currency",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "ماژول اعداد و ارز (parsikit.currency)",
+    "summary": "ماژول parsikit.currency و توابع مربوطه، تبدیل ارقام به نوشتار حروفی و محاسبات پولی را مدیریت می‌نمایند.",
+    "content": "# ماژول اعداد و ارز (parsikit.currency)\n\nماژول `parsikit.currency` و توابع مربوطه، تبدیل ارقام به نوشتار حروفی و محاسبات پولی را مدیریت می‌نمایند.\n\n---\n\n## توابع پرکاربرد\n\n### `number_to_persian_words(num: int) -> str`\nتبدیل اعداد صحیح تا ۹۹۹ سپتیلیون به حروف روان و طبیعی.\n\n### `format_currency(amount: int, unit: str = \"toman\") -> str`\nقالب‌بندی مبالغ با جداسازی ۳ رقمی ارقام و ذکر واحد پولی.\n\n### `to_persian_digits(text: str) -> str`\nتبدیل ارقام انگلیسی یا عربی به اعداد فارسی.\n",
+    "headings": [
+      {
+        "id": "ماژول-اعداد-و-ارز-parsikit-currency",
+        "text": "ماژول اعداد و ارز (parsikit.currency)",
+        "level": 1
+      },
+      {
+        "id": "توابع-پرکاربرد",
+        "text": "توابع پرکاربرد",
+        "level": 2
+      },
+      {
+        "id": "number_to_persian_words-num-int-str",
+        "text": "`number_to_persian_words(num: int) -> str`",
+        "level": 3
+      },
+      {
+        "id": "format_currency-amount-int-unit-str-toman-str",
+        "text": "`format_currency(amount: int, unit: str = \"toman\") -> str`",
+        "level": 3
+      },
+      {
+        "id": "to_persian_digits-text-str-str",
+        "text": "`to_persian_digits(text: str) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/number_and_currency.md",
+    "counterparts": {
+      "fa": "api/number_and_currency",
+      "en": "api/number_and_currency",
+      "tg": "api/number_and_currency"
+    },
+    "counterpartSlug": "api/number_and_currency"
+  },
+  {
+    "id": "prs-af-api-text",
+    "slug": "api/text",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "ماژول پردازش متن (parsikit.text)",
+    "summary": "ماژول parsikit.text مجموعه‌ای از توابع کارآمد را برای پاکسازی و یکنواخت‌سازی متون زبان فارسی دری فراهم می‌آورد.",
+    "content": "# ماژول پردازش متن (parsikit.text)\n\nماژول `parsikit.text` مجموعه‌ای از توابع کارآمد را برای پاکسازی و یکنواخت‌سازی متون زبان فارسی دری فراهم می‌آورد.\n\n---\n\n## توابع اصلی\n\n### `standardize_persian(text: str) -> str`\nکاراکترهای عربی مانند «ي» و «ك» را به حروف معیاری دری تبدیل کرده و فواصل نامناسب را فشرده می‌سازد.\n\n### `clean_text(text: str) -> str`\nپاکسازی همه‌جانبه شامل حذف اعراب غیرضروری، کنترل نیم‌فاصله‌ها و حذف کاراکترهای مخفی.\n\n### `slugify(text: str) -> str`\nتولید پیوندهای یکتا (URL Slug) با نویسه‌گردانی دقیق حروف به حروف لاتین (Pinglish).\n",
+    "headings": [
+      {
+        "id": "ماژول-پردازش-متن-parsikit-text",
+        "text": "ماژول پردازش متن (parsikit.text)",
+        "level": 1
+      },
+      {
+        "id": "توابع-اصلی",
+        "text": "توابع اصلی",
+        "level": 2
+      },
+      {
+        "id": "standardize_persian-text-str-str",
+        "text": "`standardize_persian(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "clean_text-text-str-str",
+        "text": "`clean_text(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "slugify-text-str-str",
+        "text": "`slugify(text: str) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/text.md",
+    "counterparts": {
+      "fa": "api/text",
+      "en": "api/text",
+      "tg": "api/text"
+    },
+    "counterpartSlug": "api/text"
+  },
+  {
+    "id": "prs-af-api-validators",
+    "slug": "api/validators",
+    "lang": "prs-af",
+    "category": "api",
+    "title": "ماژول اعتبارسنجی (parsikit.validators)",
+    "summary": "ماژول parsikit.validators الگوریتم‌های رسمی برای بررسی صحت داده‌های هویتی، مالی و مخابراتی را فراهم می‌سازد.",
+    "content": "# ماژول اعتبارسنجی (parsikit.validators)\n\nماژول `parsikit.validators` الگوریتم‌های رسمی برای بررسی صحت داده‌های هویتی، مالی و مخابراتی را فراهم می‌سازد.\n\n---\n\n## توابع اعتبارسنجی\n\n### `is_valid_national_code(code: str) -> bool`\nبررسی صحت شماره هویت با الگوریتم پیمانه ۱۱.\n\n### `is_valid_card_number(card: str) -> bool`\nبررسی صحت شماره ۱۶ رقمی کارت بانکی با الگوریتم لان (Luhn Algorithm).\n\n### `detect_bank_from_card(card: str) -> Optional[str]`\nشناسایی خودکار بانک عامل صادرکننده کارت بانکی بر اساس ۶ رقم نخست.\n\n### `mask_card(card: str) -> str`\nماسک‌کردن امن شماره کارت به فرمت استاندارد (مثال: `6037-9911-****-4455`).\n\n### `mask_mobile(mobile: str) -> str`\nمخفی‌سازی ارقام میانی شماره تماس به منظور رعایت حریم خصوصی.\n",
+    "headings": [
+      {
+        "id": "ماژول-اعتبارسنجی-parsikit-validators",
+        "text": "ماژول اعتبارسنجی (parsikit.validators)",
+        "level": 1
+      },
+      {
+        "id": "توابع-اعتبارسنجی",
+        "text": "توابع اعتبارسنجی",
+        "level": 2
+      },
+      {
+        "id": "is_valid_national_code-code-str-bool",
+        "text": "`is_valid_national_code(code: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_card_number-card-str-bool",
+        "text": "`is_valid_card_number(card: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "detect_bank_from_card-card-str-optional-str",
+        "text": "`detect_bank_from_card(card: str) -> Optional[str]`",
+        "level": 3
+      },
+      {
+        "id": "mask_card-card-str-str",
+        "text": "`mask_card(card: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "mask_mobile-mobile-str-str",
+        "text": "`mask_mobile(mobile: str) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/api/validators.md",
+    "counterparts": {
+      "fa": "api/validators",
+      "en": "api/validators",
+      "tg": "api/validators"
+    },
+    "counterpartSlug": "api/validators"
+  },
+  {
+    "id": "prs-af-faq",
+    "slug": "faq",
+    "lang": "prs-af",
+    "category": "getting-started",
+    "title": "پرسش‌های مکرر (FAQ)",
+    "summary": "در این بخش به پرسش‌های رایج پیرامون کتابخانه پارسی‌کیت پاسخ داده شده است.",
+    "content": "# پرسش‌های مکرر (FAQ)\n\nدر این بخش به پرسش‌های رایج پیرامون کتابخانه پارسی‌کیت پاسخ داده شده است.\n\n---\n\n## ۱. آیا پارسی‌کیت نیاز به نصب کتابخانه‌های خارجی دارد؟\n\nخیر. پارسی‌کیت بر اساس فلسفه **صفر وابستگی (Zero Dependencies)** ساخته شده است و صد در صد با پایتون خالص (Pure Python) اجرا می‌شود. هیچ نیازی به ابزارهای جانبی یا کامپایلر نیست.\n\n---\n\n## ۲. پارسی‌کیت با کدام نسخه‌های پایتون سازگار است؟\n\nپارسی‌کیت از پایتون نسخه ۳.۱۰ و بالاتر (Python 3.10، 3.11، 3.12 و 3.13) به طور کامل پشتیبانی می‌کند.\n\n---\n\n## ۳. آیا از الگوریتم‌های تذکره و اسناد هویت پشتیبانی می‌شود؟\n\nبلی. الگوریتم رسمی پیمانه ۱۱ و قواعد کنترل چک‌سام در کتابخانه تعبیه شده است و همچنین شماره‌های تماس و کارت‌های بانکی با الگوریتم لون بررسی می‌گردند.\n\n---\n\n## ۴. محاسبات تقویم هجری شمسی بر چه مبنایی استوار است؟\n\nمحاسبات تقویم بر پایه چرخه ۳۳ ساله نجومی تقویم جلالی/هجری شمسی استوار است که دقیق‌ترین مدل محاسباتی بدون انحراف زمانی به شمار می‌رود.\n",
+    "headings": [
+      {
+        "id": "پرسش-های-مکرر-faq",
+        "text": "پرسش‌های مکرر (FAQ)",
+        "level": 1
+      },
+      {
+        "id": "۱-آیا-پارسی-کیت-نیاز-به-نصب-کتابخانه-های-خارجی-دارد؟",
+        "text": "۱. آیا پارسی‌کیت نیاز به نصب کتابخانه‌های خارجی دارد؟",
+        "level": 2
+      },
+      {
+        "id": "۲-پارسی-کیت-با-کدام-نسخه-های-پایتون-سازگار-است؟",
+        "text": "۲. پارسی‌کیت با کدام نسخه‌های پایتون سازگار است؟",
+        "level": 2
+      },
+      {
+        "id": "۳-آیا-از-الگوریتم-های-تذکره-و-اسناد-هویت-پشتیبانی-می-شود؟",
+        "text": "۳. آیا از الگوریتم‌های تذکره و اسناد هویت پشتیبانی می‌شود؟",
+        "level": 2
+      },
+      {
+        "id": "۴-محاسبات-تقویم-هجری-شمسی-بر-چه-مبنایی-استوار-است؟",
+        "text": "۴. محاسبات تقویم هجری شمسی بر چه مبنایی استوار است؟",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/faq.md",
+    "counterparts": {
+      "fa": "faq",
+      "en": "faq",
+      "tg": "faq"
+    },
+    "counterpartSlug": "faq"
+  },
+  {
+    "id": "prs-af-guides-forms_and_security",
+    "slug": "guides/forms_and_security",
+    "lang": "prs-af",
+    "category": "guides",
+    "title": "راهنمای امنیت داده‌ها و اعتبارسنجی فرم‌ها",
+    "summary": "این راهنما شیوه پیاده‌سازی اعتبارسنجی امن و جلوگیری از نشت اطلاعات حساس (PII) را بیان می‌کند.",
+    "content": "# راهنمای امنیت داده‌ها و اعتبارسنجی فرم‌ها\n\nاین راهنما شیوه پیاده‌سازی اعتبارسنجی امن و جلوگیری از نشت اطلاعات حساس (PII) را بیان می‌کند.\n\n---\n\n## ۱. ماسک‌کردن شماره کارت و شماره تماس در لاگ‌ها\n\nهرگز اطلاعات هویتی و شماره‌های بانکی کاربران را به صورت خام در فایل‌های لاگ یا پاسخ‌های API ذخیره نکنید:\n\n```python\nimport parsikit\n\nraw_card = \"6037991122334455\"\nraw_mobile = \"09123456789\"\n\nsafe_card = parsikit.mask_card(raw_card)\nsafe_mobile = parsikit.mask_mobile(raw_mobile)\n\nprint(f\"Log: payment attempt for card={safe_card}, user={safe_mobile}\")\n```\n\n---\n\n## ۲. استفاده از استثناهای ساختاریافته در FastAPI\n\n```python\nfrom parsikit.models import NationalCode\nfrom parsikit.exceptions import InvalidNationalCodeError\n\ndef validate_user_input(code_str: str):\n    try:\n        nc = NationalCode(code_str)\n        return nc.clean\n    except InvalidNationalCodeError:\n        raise ValueError(\"شماره هویت نامعتبر است.\")\n```\n",
+    "headings": [
+      {
+        "id": "راهنمای-امنیت-داده-ها-و-اعتبارسنجی-فرم-ها",
+        "text": "راهنمای امنیت داده‌ها و اعتبارسنجی فرم‌ها",
+        "level": 1
+      },
+      {
+        "id": "۱-ماسک-کردن-شماره-کارت-و-شماره-تماس-در-لاگ-ها",
+        "text": "۱. ماسک‌کردن شماره کارت و شماره تماس در لاگ‌ها",
+        "level": 2
+      },
+      {
+        "id": "۲-استفاده-از-استثناهای-ساختاریافته-در-fastapi",
+        "text": "۲. استفاده از استثناهای ساختاریافته در FastAPI",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/guides/forms_and_security.md",
+    "counterparts": {
+      "fa": "guides/forms_and_security",
+      "en": "guides/forms_and_security",
+      "tg": "guides/forms_and_security"
+    },
+    "counterpartSlug": "guides/forms_and_security"
+  },
+  {
+    "id": "prs-af-index",
+    "slug": "index",
+    "lang": "prs-af",
+    "category": "getting-started",
+    "title": "رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)",
+    "summary": "به مرکز اسناد و رهنمودهای رسمی کتابخانه پارسی‌کیت (ParsiKit) خوش آمدید.",
+    "content": "# رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)\n\nبه مرکز اسناد و رهنمودهای رسمی کتابخانه **پارسی‌کیت (ParsiKit)** خوش آمدید.\n\nپارسی‌کیت یک کتابخانه معیاری، سریع و سبک در زبان پایتون (Python 3.10+) است که بدون هرگونه وابستگی بیرونی (Zero Dependencies)، ابزارهای همه‌جانبه‌ای را برای تصفیه متون زبان فارسی دری، تثبیت اعتبار شماره‌های هویت و تذکره، کارت‌های بانکی، تقویم هجری شمسی و محاسبات پولی در اختیار توسعه‌دهندگان نرم‌افزار قرار می‌دهد.\n\n---\n\n## بخش‌های اصلی رهنمود\n\n- [رهنمود نصب و راه‌اندازی](installation.md) — طریقه نصب با pip، poetry و uv\n- [آغاز سریع در ۵ دقیقه](quickstart.md) — آشنایی با مثال‌های پرکاربرد و روزمره\n- [پرسش‌های مکرر (FAQ)](faq.md) — پاسخ به سوالات اساسی پیرامون لایسنس و کارکردها\n- [عیب‌یابی و حل مشکلات](troubleshooting.md) — راهکارهای حل خطاهای رایج در پروژه‌ها\n\n---\n\n## آموزش‌های گام‌به‌گام\n\n- [تصفیه متن و نیم‌فاصله‌های معیاری](tutorials/text_processing.md) — معیارسازی حروف و فواصل\n- [تثبیت اعتبار اسناد و کارت‌ها](tutorials/validation.md) — الگوریتم پیمانه ۱۱ و الگوریتم لون\n- [تقویم نجومی هجری شمسی](tutorials/datetime.md) — تبدیلات دقیق تقویم و محاسبه سال‌های کبیسه\n- [محاسبات ارقام و مبالغ مالی](tutorials/numbers_and_currency.md) — تبدیل اعداد به حروف و مدیریت مبالغ\n\n---\n\n## فهرست توابع و ماژول‌ها (API Reference)\n\n- [مرجع جامع API](api/index.md) — فهرست تمام کلاس‌ها و توابع در دسترس\n- [ماژول پردازش متن (parsikit.text)](api/text.md) — توابع پاکسازی و آماده‌سازی متن\n- [ماژول تثبیت اعتبار (parsikit.validators)](api/validators.md) — توابع چک‌سام و بررسی صحت\n- [ماژول تقویم و زمان (parsikit.datetime)](api/datetime.md) — تبدیل تاریخ میلادی و شمسی\n- [مدل‌های شیءگرا (parsikit.models)](api/models.md) — کلاس‌های داده‌ای با اعتبارسنجی خودکار\n\n---\n\n## مشخصات فنی\n\n- **نسخه کنونی:** 3.3.1\n- **نیازمندی پایتون:** Python >= 3.10\n- **مجوز نرم‌افزاری:** MIT License\n- **مولف و مهندس ناظر:** علی کامرانی (MRThugh)\n",
+    "headings": [
+      {
+        "id": "رهنمودهای-جامع-کتابخانه-پارسی-کیت-parsikit",
+        "text": "رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)",
+        "level": 1
+      },
+      {
+        "id": "بخش-های-اصلی-رهنمود",
+        "text": "بخش‌های اصلی رهنمود",
+        "level": 2
+      },
+      {
+        "id": "آموزش-های-گام-به-گام",
+        "text": "آموزش‌های گام‌به‌گام",
+        "level": 2
+      },
+      {
+        "id": "فهرست-توابع-و-ماژول-ها-api-reference",
+        "text": "فهرست توابع و ماژول‌ها (API Reference)",
+        "level": 2
+      },
+      {
+        "id": "مشخصات-فنی",
+        "text": "مشخصات فنی",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/index.md",
+    "counterparts": {
+      "fa": "index",
+      "en": "index",
+      "tg": "index"
+    },
+    "counterpartSlug": "index"
+  },
+  {
+    "id": "prs-af-installation",
+    "slug": "installation",
+    "lang": "prs-af",
+    "category": "getting-started",
+    "title": "رهنمود نصب و راه‌اندازی پارسی‌کیت",
+    "summary": "کتابخانه پارسی‌کیت کاملاً با پایتون خالص (Pure Python) نوشته شده و هیچ وابستگی به پکیج‌های خارجی یا کتابخانه‌های باینری ندارد. بنابراین در تمام سیستم‌های عامل (لینوکس، ویندوز و مک‌او‌اس) به سرعت و بدو",
+    "content": "# رهنمود نصب و راه‌اندازی پارسی‌کیت\n\nکتابخانه پارسی‌کیت کاملاً با پایتون خالص (Pure Python) نوشته شده و هیچ وابستگی به پکیج‌های خارجی یا کتابخانه‌های باینری ندارد. بنابراین در تمام سیستم‌های عامل (لینوکس، ویندوز و مک‌او‌اس) به سرعت و بدون مشکل نصب می‌شود.\n\n---\n\n## نیازمندی‌های سیستم\n\n- پایتون نسخه **۳.۱۰** یا بالاتر (پشتیبانی مکمل از Python 3.10، 3.11، 3.12 و 3.13)\n- بدون ضرورت به کامپایلر یا برنامه‌های جانبی\n\n---\n\n## ۱. نصب مستقیم از طریق pip\n\nساده‌ترین شیوه برای نصب آخرین نسخه پایدار از مخزن PyPI:\n\n```bash\npip install parsikit\n```\n\nاگر از پکیج منیجرهای معاصر مانند Poetry یا uv استفاده می‌نمایید:\n\n```bash\n# نصب با Poetry\npoetry add parsikit\n\n# نصب با uv\nuv add parsikit\n```\n\n---\n\n## ۲. نصب مستقیم از سورس کد (GitHub)\n\nبرای نصب آخرین تغییرات از شاخه توسعه در گیت‌هاب:\n\n```bash\ngit clone https://github.com/MRThugh/ParsiKit.git\ncd ParsiKit\npip install .\n```\n\nبرای نصب در حالت ویرایش همزمان (Editable Mode):\n\n```bash\npip install -e .\n```\n\n---\n\n## ۳. آزمایش نصب در محیط پایتون\n\nبرای اطمینان از صحت نصب، پایتون را در ترمینال باز نموده و دستورات ذیل را اجرا فرمایید:\n\n```python\nimport parsikit\n\nprint(parsikit.__version__)\n# خروجی باید '3.3.1' باشد\n```\n",
+    "headings": [
+      {
+        "id": "رهنمود-نصب-و-راه-اندازی-پارسی-کیت",
+        "text": "رهنمود نصب و راه‌اندازی پارسی‌کیت",
+        "level": 1
+      },
+      {
+        "id": "نیازمندی-های-سیستم",
+        "text": "نیازمندی‌های سیستم",
+        "level": 2
+      },
+      {
+        "id": "۱-نصب-مستقیم-از-طریق-pip",
+        "text": "۱. نصب مستقیم از طریق pip",
+        "level": 2
+      },
+      {
+        "id": "نصب-با-poetry",
+        "text": "نصب با Poetry",
+        "level": 1
+      },
+      {
+        "id": "نصب-با-uv",
+        "text": "نصب با uv",
+        "level": 1
+      },
+      {
+        "id": "۲-نصب-مستقیم-از-سورس-کد-github",
+        "text": "۲. نصب مستقیم از سورس کد (GitHub)",
+        "level": 2
+      },
+      {
+        "id": "۳-آزمایش-نصب-در-محیط-پایتون",
+        "text": "۳. آزمایش نصب در محیط پایتون",
+        "level": 2
+      },
+      {
+        "id": "خروجی-باید-3-3-1-باشد",
+        "text": "خروجی باید '3.3.1' باشد",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/installation.md",
+    "counterparts": {
+      "fa": "installation",
+      "en": "installation",
+      "tg": "installation"
+    },
+    "counterpartSlug": "installation"
+  },
+  {
+    "id": "prs-af-quickstart",
+    "slug": "quickstart",
+    "lang": "prs-af",
+    "category": "getting-started",
+    "title": "آغاز سریع با پارسی‌کیت (Quickstart)",
+    "summary": "در این بخش با چند مثال کاربردی و روزمره با قابلیت‌های اساسی پارسی‌کیت آشنا می‌شویم.",
+    "content": "# آغاز سریع با پارسی‌کیت (Quickstart)\n\nدر این بخش با چند مثال کاربردی و روزمره با قابلیت‌های اساسی پارسی‌کیت آشنا می‌شویم.\n\n---\n\n## ۱. تصفیه متن و معیارسازی حروف و نیم‌فاصله‌ها\n\nیکی از چالش‌های رایج در متون دری، اختلاط حروف عربی («ي» و «ك») و نبود نیم‌فاصله معیاری در کلمات مرکب است:\n\n```python\nimport parsikit\n\nraw_text = \"ي كافيه كتاب ها را جمع آوري كنم\"\ncleaned = parsikit.standardize_persian(raw_text)\n\nprint(cleaned)\n# خروجی: 'ی کافیه کتاب‌ها را جمع‌آوری کنم'\n```\n\nحروف «ی» و «ک» اصلاح شده و نیم‌فاصله‌های استاندارد به درستی جاگذاری گردیدند.\n\n---\n\n## ۲. تثبیت اعتبار شماره هویت و تذکره الکترونیکی\n\nشما می‌توانید از تابع مستقیم یا کلاس شیءگرای `NationalCode` استفاده فرمایید:\n\n```python\nimport parsikit\n\n# بررسی تابعی:\nis_valid = parsikit.is_valid_national_code(\"0010123458\")\nprint(is_valid)  # خروجی: True\n\n# بررسی شیءگرا:\nnc = parsikit.NationalCode(\"0010123458\")\nprint(nc.formatted)  # '001-012345-8'\nprint(nc.masked)     # '001-****45-8'\nprint(nc.clean)      # '0010123458'\n```\n\nدر صورت نامعتبر بودن شماره یا عدم تطابق الگوریتم پیمانه ۱۱، خطای ساختاریافته `InvalidNationalCodeError` صادر خواهد شد.\n\n---\n\n## ۳. تثبیت کارت بانکی با الگوریتم لون\n\n```python\nimport parsikit\n\ncard_number = \"6037991122334455\"\n\n# بررسی صحت شماره کارت\nprint(parsikit.is_valid_card_number(card_number))  # True\n\n# تشخیص خودکار بانک صادرکننده\nprint(parsikit.detect_bank_from_card(card_number))  # 'بانک ملی ایران'\n\n# ماسک‌کردن امن جهت حفظ محرمانگی\nprint(parsikit.mask_card(card_number))  # '6037-9911-****-4455'\n```\n\n---\n\n## ۴. تقویم هجری شمسی و سال کبیسه\n\n```python\nimport parsikit\n\n# تبدیل تاریخ میلادی به هجری شمسی\nshamsi = parsikit.gregorian_to_jalali(2026, 10, 21)\nprint(shamsi)\n# خروجی: (1405, 7, 29) -> ۲۹ میزان (مهر) ۱۴۰۵\n\n# محاسبه دقیق سال کبیسه در چرخه ۳۳ ساله نجومی\nprint(parsikit.is_jalali_leap(1403))  # True\nprint(parsikit.is_jalali_leap(1404))  # False\n```\n\n---\n\n## ۵. تبدیل ارقام و مبالغ به حروف\n\n```python\nimport parsikit\n\namount = 3500000\nwords = parsikit.number_to_persian_words(amount)\nprint(words)\n# خروجی: 'سه میلیون و پانصد هزار'\n```\n",
+    "headings": [
+      {
+        "id": "آغاز-سریع-با-پارسی-کیت-quickstart",
+        "text": "آغاز سریع با پارسی‌کیت (Quickstart)",
+        "level": 1
+      },
+      {
+        "id": "۱-تصفیه-متن-و-معیارسازی-حروف-و-نیم-فاصله-ها",
+        "text": "۱. تصفیه متن و معیارسازی حروف و نیم‌فاصله‌ها",
+        "level": 2
+      },
+      {
+        "id": "خروجی-ی-کافیه-کتاب-ها-را-جمع-آوری-کنم",
+        "text": "خروجی: 'ی کافیه کتاب‌ها را جمع‌آوری کنم'",
+        "level": 1
+      },
+      {
+        "id": "۲-تثبیت-اعتبار-شماره-هویت-و-تذکره-الکترونیکی",
+        "text": "۲. تثبیت اعتبار شماره هویت و تذکره الکترونیکی",
+        "level": 2
+      },
+      {
+        "id": "بررسی-تابعی",
+        "text": "بررسی تابعی:",
+        "level": 1
+      },
+      {
+        "id": "بررسی-شیءگرا",
+        "text": "بررسی شیءگرا:",
+        "level": 1
+      },
+      {
+        "id": "۳-تثبیت-کارت-بانکی-با-الگوریتم-لون",
+        "text": "۳. تثبیت کارت بانکی با الگوریتم لون",
+        "level": 2
+      },
+      {
+        "id": "بررسی-صحت-شماره-کارت",
+        "text": "بررسی صحت شماره کارت",
+        "level": 1
+      },
+      {
+        "id": "تشخیص-خودکار-بانک-صادرکننده",
+        "text": "تشخیص خودکار بانک صادرکننده",
+        "level": 1
+      },
+      {
+        "id": "ماسک-کردن-امن-جهت-حفظ-محرمانگی",
+        "text": "ماسک‌کردن امن جهت حفظ محرمانگی",
+        "level": 1
+      },
+      {
+        "id": "۴-تقویم-هجری-شمسی-و-سال-کبیسه",
+        "text": "۴. تقویم هجری شمسی و سال کبیسه",
+        "level": 2
+      },
+      {
+        "id": "تبدیل-تاریخ-میلادی-به-هجری-شمسی",
+        "text": "تبدیل تاریخ میلادی به هجری شمسی",
+        "level": 1
+      },
+      {
+        "id": "خروجی-1405-7-29-۲۹-میزان-مهر-۱۴۰۵",
+        "text": "خروجی: (1405, 7, 29) -> ۲۹ میزان (مهر) ۱۴۰۵",
+        "level": 1
+      },
+      {
+        "id": "محاسبه-دقیق-سال-کبیسه-در-چرخه-۳۳-ساله-نجومی",
+        "text": "محاسبه دقیق سال کبیسه در چرخه ۳۳ ساله نجومی",
+        "level": 1
+      },
+      {
+        "id": "۵-تبدیل-ارقام-و-مبالغ-به-حروف",
+        "text": "۵. تبدیل ارقام و مبالغ به حروف",
+        "level": 2
+      },
+      {
+        "id": "خروجی-سه-میلیون-و-پانصد-هزار",
+        "text": "خروجی: 'سه میلیون و پانصد هزار'",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/quickstart.md",
+    "counterparts": {
+      "fa": "quickstart",
+      "en": "quickstart",
+      "tg": "quickstart"
+    },
+    "counterpartSlug": "quickstart"
+  },
+  {
+    "id": "prs-af-troubleshooting",
+    "slug": "troubleshooting",
+    "lang": "prs-af",
+    "category": "getting-started",
+    "title": "عیب‌یابی و رفع اشکالات متداول",
+    "summary": "راهکارهای حل اشکالاتی که ممکن است در جریان استفاده از پارسی‌کیت با آنها روبرو شوید.",
+    "content": "# عیب‌یابی و رفع اشکالات متداول\n\nراهکارهای حل اشکالاتی که ممکن است در جریان استفاده از پارسی‌کیت با آنها روبرو شوید.\n\n---\n\n## ۱. خطای `InvalidNationalCodeError`\n\nاین استثنا زمانی رخ می‌دهد که ورودی با استانداردهای چک‌سام پیمانه ۱۱ همخوانی نداشته باشد:\n\n- اطمینان حاصل کنید که ارقام ورودی دقیقاً ۱۰ رقم باشند.\n- ورودی نباید از ۱۰ رقم تکراری یکسان (مانند `1111111111`) تشکیل شده باشد.\n- با استفاده از بلوک `try ... except` این خطا را به درستی مدیریت نمایید:\n\n```python\nfrom parsikit.exceptions import InvalidNationalCodeError\nfrom parsikit.models import NationalCode\n\ntry:\n    code = NationalCode(\"1234567890\")\nexcept InvalidNationalCodeError as e:\n    print(f\"شماره هویت نامعتبر است: {e}\")\n```\n\n---\n\n## ۲. خطای `InvalidCardNumberError`\n\nاین خطا ناشی از عدم تطابق شماره کارت با الگوریتم لون (Luhn Checksum) است:\n\n- شماره کارت باید ۱۶ رقم باشد.\n- فواصل و خط فاصله‌ها به صورت خودکار توسط متدها حذف می‌شوند.\n\n---\n\n## ۳. عدم نمایش صحیح متون دارای نیم‌فاصله در ترمینال\n\nبعضی از ترمینال‌های قدیمی کاراکتر نیم‌فاصله (ZWNJ) را به شکل نامرئی یا با فاصله نادرست ترسیم می‌کنند. برای نمایش دقیق در کنسول می‌توانید از متدهای موجود در ماژول `parsikit.dev` جهت تراز بصری متن‌ها استفاده کنید.\n",
+    "headings": [
+      {
+        "id": "عیب-یابی-و-رفع-اشکالات-متداول",
+        "text": "عیب‌یابی و رفع اشکالات متداول",
+        "level": 1
+      },
+      {
+        "id": "۱-خطای-invalidnationalcodeerror",
+        "text": "۱. خطای `InvalidNationalCodeError`",
+        "level": 2
+      },
+      {
+        "id": "۲-خطای-invalidcardnumbererror",
+        "text": "۲. خطای `InvalidCardNumberError`",
+        "level": 2
+      },
+      {
+        "id": "۳-عدم-نمایش-صحیح-متون-دارای-نیم-فاصله-در-ترمینال",
+        "text": "۳. عدم نمایش صحیح متون دارای نیم‌فاصله در ترمینال",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/troubleshooting.md",
+    "counterparts": {
+      "fa": "troubleshooting",
+      "en": "troubleshooting",
+      "tg": "troubleshooting"
+    },
+    "counterpartSlug": "troubleshooting"
+  },
+  {
+    "id": "prs-af-tutorials-datetime",
+    "slug": "tutorials/datetime",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش تقویم نجومی هجری شمسی",
+    "summary": "نحوه تبدیل تاریخ‌ها و مدیریت محاسبات تقویم خورشیدی در پروژه‌های پایتون.",
+    "content": "# آموزش تقویم نجومی هجری شمسی\n\nنحوه تبدیل تاریخ‌ها و مدیریت محاسبات تقویم خورشیدی در پروژه‌های پایتون.\n\n---\n\n## ۱. تبدیل تاریخ میلادی به هجری شمسی\n\n```python\nimport parsikit\n\nyear, month, day = 2026, 10, 21\njy, jm, jd = parsikit.gregorian_to_jalali(year, month, day)\n\nprint(f\"تاریخ هجری شمسی: {jy}/{jm:02d}/{jd:02d}\")\n# خروجی: 1405/07/29\n```\n\n---\n\n## ۲. بررسی سال کبیسه در چرخه ۳۳ ساله\n\n```python\nimport parsikit\n\nprint(\"1403 کبیسه است؟\", parsikit.is_jalali_leap(1403))  # True\nprint(\"1404 کبیسه است؟\", parsikit.is_jalali_leap(1404))  # False\n```\n",
+    "headings": [
+      {
+        "id": "آموزش-تقویم-نجومی-هجری-شمسی",
+        "text": "آموزش تقویم نجومی هجری شمسی",
+        "level": 1
+      },
+      {
+        "id": "۱-تبدیل-تاریخ-میلادی-به-هجری-شمسی",
+        "text": "۱. تبدیل تاریخ میلادی به هجری شمسی",
+        "level": 2
+      },
+      {
+        "id": "خروجی-1405-07-29",
+        "text": "خروجی: 1405/07/29",
+        "level": 1
+      },
+      {
+        "id": "۲-بررسی-سال-کبیسه-در-چرخه-۳۳-ساله",
+        "text": "۲. بررسی سال کبیسه در چرخه ۳۳ ساله",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/tutorials/datetime.md",
+    "counterparts": {
+      "fa": "tutorials/datetime",
+      "en": "tutorials/datetime",
+      "tg": "tutorials/datetime"
+    },
+    "counterpartSlug": "tutorials/datetime"
+  },
+  {
+    "id": "prs-af-tutorials-numbers_and_currency",
+    "slug": "tutorials/numbers_and_currency",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش محاسبات ارقام و مبالغ مالی",
+    "summary": "آموزش تبدیل اعداد به نوشتار حروفی و قالب‌بندی ارقام.",
+    "content": "# آموزش محاسبات ارقام و مبالغ مالی\n\nآموزش تبدیل اعداد به نوشتار حروفی و قالب‌بندی ارقام.\n\n---\n\n## ۱. تبدیل اعداد به حروف\n\n```python\nimport parsikit\n\nnum = 12450000\nwords = parsikit.number_to_persian_words(num)\nprint(words)\n# خروجی: 'دوازده میلیون و چهارصد و پنجاه هزار'\n```\n\n---\n\n## ۲. قالب‌بندی مبالغ پولی\n\n```python\nimport parsikit\n\nformatted = parsikit.format_currency(3500000, unit=\"افغانی\")\nprint(formatted)\n```\n",
+    "headings": [
+      {
+        "id": "آموزش-محاسبات-ارقام-و-مبالغ-مالی",
+        "text": "آموزش محاسبات ارقام و مبالغ مالی",
+        "level": 1
+      },
+      {
+        "id": "۱-تبدیل-اعداد-به-حروف",
+        "text": "۱. تبدیل اعداد به حروف",
+        "level": 2
+      },
+      {
+        "id": "خروجی-دوازده-میلیون-و-چهارصد-و-پنجاه-هزار",
+        "text": "خروجی: 'دوازده میلیون و چهارصد و پنجاه هزار'",
+        "level": 1
+      },
+      {
+        "id": "۲-قالب-بندی-مبالغ-پولی",
+        "text": "۲. قالب‌بندی مبالغ پولی",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/tutorials/numbers_and_currency.md",
+    "counterparts": {
+      "fa": "tutorials/numbers_and_currency",
+      "en": "tutorials/numbers_and_currency",
+      "tg": "tutorials/numbers_and_currency"
+    },
+    "counterpartSlug": "tutorials/numbers_and_currency"
+  },
+  {
+    "id": "prs-af-tutorials-text_processing",
+    "slug": "tutorials/text_processing",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش تصفیه متن و نیم‌فاصله‌ها در زبان دری",
+    "summary": "در این آموزش گام‌به‌گام با نحوه استفاده از ابزارهای تصفیه متن و نیم‌فاصله‌ها در پارسی‌کیت آشنا می‌شوید.",
+    "content": "# آموزش تصفیه متن و نیم‌فاصله‌ها در زبان دری\n\nدر این آموزش گام‌به‌گام با نحوه استفاده از ابزارهای تصفیه متن و نیم‌فاصله‌ها در پارسی‌کیت آشنا می‌شوید.\n\n---\n\n## ۱. حذف کاراکترهای عربی ناخواسته\n\nمتون فارسی و دری که از کیبوردهای متفرقه یا پایگاه‌های داده وب جمع‌آوری می‌شوند اغلب دارای کاراکترهای عربی مانند «ي» با دو نقطه یا «ك» با همزه هستند:\n\n```python\nimport parsikit\n\ndirty = \"اين يك متن آزمايشي است\"\nclean = parsikit.standardize_persian(dirty)\nprint(clean)\n# خروجی: 'این یک متن آزمایشی است'\n```\n\n---\n\n## ۲. تصحیح نیم‌فاصله‌های پیشوندی و پسوندی\n\nکلمات دارای پسوند جمع («ها») یا پیشوند استمرار («می») نیازمند نیم‌فاصله (ZWNJ) هستند تا به درستی نگارش شوند:\n\n```python\nimport parsikit\n\ntext = \"کتاب ها را می خوانم\"\ncorrected = parsikit.clean_text(text)\nprint(corrected)\n# خروجی: 'کتاب‌ها را می‌خوانم'\n```\n",
+    "headings": [
+      {
+        "id": "آموزش-تصفیه-متن-و-نیم-فاصله-ها-در-زبان-دری",
+        "text": "آموزش تصفیه متن و نیم‌فاصله‌ها در زبان دری",
+        "level": 1
+      },
+      {
+        "id": "۱-حذف-کاراکترهای-عربی-ناخواسته",
+        "text": "۱. حذف کاراکترهای عربی ناخواسته",
+        "level": 2
+      },
+      {
+        "id": "خروجی-این-یک-متن-آزمایشی-است",
+        "text": "خروجی: 'این یک متن آزمایشی است'",
+        "level": 1
+      },
+      {
+        "id": "۲-تصحیح-نیم-فاصله-های-پیشوندی-و-پسوندی",
+        "text": "۲. تصحیح نیم‌فاصله‌های پیشوندی و پسوندی",
+        "level": 2
+      },
+      {
+        "id": "خروجی-کتاب-ها-را-می-خوانم",
+        "text": "خروجی: 'کتاب‌ها را می‌خوانم'",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/tutorials/text_processing.md",
+    "counterparts": {
+      "fa": "tutorials/text_processing",
+      "en": "tutorials/text_processing",
+      "tg": "tutorials/text_processing"
+    },
+    "counterpartSlug": "tutorials/text_processing"
+  },
+  {
+    "id": "prs-af-tutorials-validation",
+    "slug": "tutorials/validation",
+    "lang": "prs-af",
+    "category": "tutorials",
+    "title": "آموزش تثبیت اعتبار اسناد و کارت‌های بانکی",
+    "summary": "این آموزش به تشریح نحوه اعتبارسنجی شماره‌های تذکره الکترونیکی، کد ملی و کارت‌های بانکی می‌پردازد.",
+    "content": "# آموزش تثبیت اعتبار اسناد و کارت‌های بانکی\n\nاین آموزش به تشریح نحوه اعتبارسنجی شماره‌های تذکره الکترونیکی، کد ملی و کارت‌های بانکی می‌پردازد.\n\n---\n\n## ۱. تثبیت اعتبار با الگوریتم پیمانه ۱۱\n\nالگوریتم پیمانه ۱۱ با ضرب وزن‌های نزولی در ارقام و محاسبه باقیمانده بر ۱۱ کار می‌کند:\n\n```python\nimport parsikit\n\n# بررسی شماره تذکره / کد ملی\nvalid = parsikit.is_valid_national_code(\"0010123458\")\nprint(f\"وضعیت اعتبار: {valid}\")\n```\n\n---\n\n## ۲. بررسی کارت بانکی با الگوریتم لون\n\n```python\nimport parsikit\n\ncard = \"6037991122334455\"\nif parsikit.is_valid_card_number(card):\n    bank = parsikit.detect_bank_from_card(card)\n    masked = parsikit.mask_card(card)\n    print(f\"بانک صادرکننده: {bank} | شماره ماسک‌شده: {masked}\")\n```\n",
+    "headings": [
+      {
+        "id": "آموزش-تثبیت-اعتبار-اسناد-و-کارت-های-بانکی",
+        "text": "آموزش تثبیت اعتبار اسناد و کارت‌های بانکی",
+        "level": 1
+      },
+      {
+        "id": "۱-تثبیت-اعتبار-با-الگوریتم-پیمانه-۱۱",
+        "text": "۱. تثبیت اعتبار با الگوریتم پیمانه ۱۱",
+        "level": 2
+      },
+      {
+        "id": "بررسی-شماره-تذکره-کد-ملی",
+        "text": "بررسی شماره تذکره / کد ملی",
+        "level": 1
+      },
+      {
+        "id": "۲-بررسی-کارت-بانکی-با-الگوریتم-لون",
+        "text": "۲. بررسی کارت بانکی با الگوریتم لون",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/prs-af/tutorials/validation.md",
+    "counterparts": {
+      "fa": "tutorials/validation",
+      "en": "tutorials/validation",
+      "tg": "tutorials/validation"
+    },
+    "counterpartSlug": "tutorials/validation"
+  },
+  {
+    "id": "tg-api-cache",
+    "slug": "api/cache",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули кеши сареъ (parsikit.cache)",
+    "summary": "Модули parsikit.cache механизми кешкунии бисёрриштагӣ (Thread-safe LRU Cache)-ро таъмин менамояд.",
+    "content": "# Модули кеши сареъ (parsikit.cache)\n\nМодули `parsikit.cache` механизми кешкунии бисёрриштагӣ (Thread-safe LRU Cache)-ро таъмин менамояд.\n\n---\n\n## Хусусиятҳо\n\n- Истифода аз модулҳои стандартии Python бе ниёз ба китобхонаҳои беруна\n- Қулфбандии `threading.Lock` барои ҳифзи амнияти риштаҳо дар сервери веб\n- Андозаи танзимшаванда (андозаи пешфарз: 1024)\n",
+    "headings": [
+      {
+        "id": "модули-кеши-сареъ-parsikit-cache",
+        "text": "Модули кеши сареъ (parsikit.cache)",
+        "level": 1
+      },
+      {
+        "id": "хусусиятҳо",
+        "text": "Хусусиятҳо",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/cache.md",
+    "counterparts": {
+      "fa": "api/cache",
+      "en": "api/cache",
+      "prs-af": "api/cache"
+    },
+    "counterpartSlug": "api/cache"
+  },
+  {
+    "id": "tg-api-datetime",
+    "slug": "api/datetime",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули тақвим ва замон (parsikit.datetime)",
+    "summary": "Табдили дақиқи таърихҳои мелодӣ ва ҳиҷрии шамсӣ (Jalali).",
+    "content": "# Модули тақвим ва замон (parsikit.datetime)\n\nТабдили дақиқи таърихҳои мелодӣ ва ҳиҷрии шамсӣ (Jalali).\n\n---\n\n## Тавобеи асосӣ\n\n### `gregorian_to_jalali(gy: int, gm: int, gd: int) -> Tuple[int, int, int]`\nТабдили санаи мелодӣ ба санаи муодили ҳиҷрии шамсӣ.\n\n### `jalali_to_gregorian(jy: int, jm: int, jd: int) -> Tuple[int, int, int]`\nТабдили санаи ҳиҷрии шамсӣ ба санаи мелодӣ.\n\n### `is_jalali_leap(year: int) -> bool`\nҲисоби соли кабиса дар даври 33-солаи нуҷумӣ.\n",
+    "headings": [
+      {
+        "id": "модули-тақвим-ва-замон-parsikit-datetime",
+        "text": "Модули тақвим ва замон (parsikit.datetime)",
+        "level": 1
+      },
+      {
+        "id": "тавобеи-асосӣ",
+        "text": "Тавобеи асосӣ",
+        "level": 2
+      },
+      {
+        "id": "gregorian_to_jalali-gy-int-gm-int-gd-int-tuple-int-int-int",
+        "text": "`gregorian_to_jalali(gy: int, gm: int, gd: int) -> Tuple[int, int, int]`",
+        "level": 3
+      },
+      {
+        "id": "jalali_to_gregorian-jy-int-jm-int-jd-int-tuple-int-int-int",
+        "text": "`jalali_to_gregorian(jy: int, jm: int, jd: int) -> Tuple[int, int, int]`",
+        "level": 3
+      },
+      {
+        "id": "is_jalali_leap-year-int-bool",
+        "text": "`is_jalali_leap(year: int) -> bool`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/datetime.md",
+    "counterparts": {
+      "fa": "api/datetime",
+      "en": "api/datetime",
+      "prs-af": "api/datetime"
+    },
+    "counterpartSlug": "api/datetime"
+  },
+  {
+    "id": "tg-api-index",
+    "slug": "api/index",
+    "lang": "tg",
+    "category": "api",
+    "title": "Мундариҷаи расмии API (ParsiKit)",
+    "summary": "Ин саҳифа тамоми модулҳо, тавобеъ ва классҳои китобхонаи ParsiKit-ро дар бар мегирад.",
+    "content": "# Мундариҷаи расмии API (ParsiKit)\n\nИн саҳифа тамоми модулҳо, тавобеъ ва классҳои китобхонаи ParsiKit-ро дар бар мегирад.\n\n---\n\n## Модулҳо\n\n| Модул | Вазифа ва шарҳ |\n| :--- | :--- |\n| `parsikit.text` | Поксозии матн, танзими нимафосилаҳо ва мутобиқсозии ҳарфҳо |\n| `parsikit.validators` | Санҷиши чексам ва эътибори рақами миллӣ ва кортҳои бонкӣ |\n| `parsikit.datetime` | Тақвими нуҷумии ҳиҷрии шамсӣ ва ҳисоби соли кабиса |\n| `parsikit.currency` | Табдили ададҳо ба калимаҳо ва ҳисобҳои воҳидҳои пулӣ |\n| `parsikit.models` | Моделҳои объектгаро бо санҷиши худкор |\n| `parsikit.cache` | Кеши сареъ барои муҳити бисёрриштагӣ (Thread-safe LRU Cache) |\n",
+    "headings": [
+      {
+        "id": "мундариҷаи-расмии-api-parsikit",
+        "text": "Мундариҷаи расмии API (ParsiKit)",
+        "level": 1
+      },
+      {
+        "id": "модулҳо",
+        "text": "Модулҳо",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/index.md",
+    "counterparts": {
+      "fa": "api/index",
+      "en": "api/index",
+      "prs-af": "api/index"
+    },
+    "counterpartSlug": "api/index"
+  },
+  {
+    "id": "tg-api-models",
+    "slug": "api/models",
+    "lang": "tg",
+    "category": "api",
+    "title": "Моделҳои объектгаро (parsikit.models)",
+    "summary": "Классҳои моделӣ барои нигоҳдорӣ ва санҷиши худкори додаҳо.",
+    "content": "# Моделҳои объектгаро (parsikit.models)\n\nКлассҳои моделӣ барои нигоҳдорӣ ва санҷиши худкори додаҳо.\n\n---\n\n## Классҳо\n\n### `NationalCode`\nМодели нигоҳдорандаи рақами миллӣ:\n- `nc.formatted`: шакли ҷудошуда бо тире\n- `nc.masked`: шакли амн бо ситорачаҳо\n- `nc.clean`: сатри холиси рақамҳо\n\n### `BankCard`\nМодели корти бонкӣ:\n- `card.is_valid`: вазъияти эътибор бо Лун\n- `card.bank_name`: номи бонки интишоркунанда\n- `card.masked`: рақами амни ниқоббаста\n",
+    "headings": [
+      {
+        "id": "моделҳои-объектгаро-parsikit-models",
+        "text": "Моделҳои объектгаро (parsikit.models)",
+        "level": 1
+      },
+      {
+        "id": "классҳо",
+        "text": "Классҳо",
+        "level": 2
+      },
+      {
+        "id": "nationalcode",
+        "text": "`NationalCode`",
+        "level": 3
+      },
+      {
+        "id": "bankcard",
+        "text": "`BankCard`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/models.md",
+    "counterparts": {
+      "fa": "api/models",
+      "en": "api/models",
+      "prs-af": "api/models"
+    },
+    "counterpartSlug": "api/models"
+  },
+  {
+    "id": "tg-api-number_and_currency",
+    "slug": "api/number_and_currency",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули ҳисобҳои молӣ ва калимаҳо (parsikit.currency)",
+    "summary": "Табдили ададҳо ба калимаҳои хоно ва ҳисобҳои воҳидҳои пулӣ.",
+    "content": "# Модули ҳисобҳои молӣ ва калимаҳо (parsikit.currency)\n\nТабдили ададҳо ба калимаҳои хоно ва ҳисобҳои воҳидҳои пулӣ.\n\n---\n\n## Тавобеъ\n\n### `number_to_persian_words(num: int) -> str`\nТабдили ададҳо то 999 септиллион ба шакли лафзӣ.\n\n### `format_currency(amount: int, unit: str = \"toman\") -> str`\nТартибдиҳии ададҳо бо ҷудокунии 3-рақама ва номи воҳиди пул.\n",
+    "headings": [
+      {
+        "id": "модули-ҳисобҳои-молӣ-ва-калимаҳо-parsikit-currency",
+        "text": "Модули ҳисобҳои молӣ ва калимаҳо (parsikit.currency)",
+        "level": 1
+      },
+      {
+        "id": "тавобеъ",
+        "text": "Тавобеъ",
+        "level": 2
+      },
+      {
+        "id": "number_to_persian_words-num-int-str",
+        "text": "`number_to_persian_words(num: int) -> str`",
+        "level": 3
+      },
+      {
+        "id": "format_currency-amount-int-unit-str-toman-str",
+        "text": "`format_currency(amount: int, unit: str = \"toman\") -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/number_and_currency.md",
+    "counterparts": {
+      "fa": "api/number_and_currency",
+      "en": "api/number_and_currency",
+      "prs-af": "api/number_and_currency"
+    },
+    "counterpartSlug": "api/number_and_currency"
+  },
+  {
+    "id": "tg-api-text",
+    "slug": "api/text",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули коркарди матн (parsikit.text)",
+    "summary": "Тавобеи ин модул барои яксонсозии матн ва ислоҳи нимафосилаҳо мусоидат мекунанд.",
+    "content": "# Модули коркарди матн (parsikit.text)\n\nТавобеи ин модул барои яксонсозии матн ва ислоҳи нимафосилаҳо мусоидат мекунанд.\n\n---\n\n## Тавобеи муҳим\n\n### `standardize_persian(text: str) -> str`\nҲарфҳои арабиро ба ҳуруфи стандартӣ табдил дода, фосилаҳои зиёдатиро ихтисор мекунад.\n\n### `clean_text(text: str) -> str`\nПоксозии куллӣ ва ҷойгузинии нимафосилаҳо дар пешвандҳо ва пасвандҳо.\n\n### `slugify(text: str) -> str`\nСохтани URL slug бо тарҷумаи овоӣ ба алифбои лотинӣ.\n",
+    "headings": [
+      {
+        "id": "модули-коркарди-матн-parsikit-text",
+        "text": "Модули коркарди матн (parsikit.text)",
+        "level": 1
+      },
+      {
+        "id": "тавобеи-муҳим",
+        "text": "Тавобеи муҳим",
+        "level": 2
+      },
+      {
+        "id": "standardize_persian-text-str-str",
+        "text": "`standardize_persian(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "clean_text-text-str-str",
+        "text": "`clean_text(text: str) -> str`",
+        "level": 3
+      },
+      {
+        "id": "slugify-text-str-str",
+        "text": "`slugify(text: str) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/text.md",
+    "counterparts": {
+      "fa": "api/text",
+      "en": "api/text",
+      "prs-af": "api/text"
+    },
+    "counterpartSlug": "api/text"
+  },
+  {
+    "id": "tg-api-validators",
+    "slug": "api/validators",
+    "lang": "tg",
+    "category": "api",
+    "title": "Модули санҷиши эътибор (parsikit.validators)",
+    "summary": "Алгоритмҳои расмии тафтиши чексам ва шинохти додаҳои ҳувиятӣ.",
+    "content": "# Модули санҷиши эътибор (parsikit.validators)\n\nАлгоритмҳои расмии тафтиши чексам ва шинохти додаҳои ҳувиятӣ.\n\n---\n\n## Тавобеъ\n\n### `is_valid_national_code(code: str) -> bool`\nСанҷиши дурустии рақами миллӣ бар асоси алгоритми расмии Модуло 11.\n\n### `is_valid_card_number(card: str) -> bool`\nСанҷиши эътибори корти бонкии 16-рақама бо алгоритми Лун (Luhn).\n\n### `detect_bank_from_card(card: str) -> Optional[str]`\nМуайян кардани номи бонки интишоркунанда аз рӯи 6 рақами аввал.\n\n### `mask_card(card: str) -> str`\nНиқоббандии амни корти бонкӣ (мисол: `6037-9911-****-4455`).\n",
+    "headings": [
+      {
+        "id": "модули-санҷиши-эътибор-parsikit-validators",
+        "text": "Модули санҷиши эътибор (parsikit.validators)",
+        "level": 1
+      },
+      {
+        "id": "тавобеъ",
+        "text": "Тавобеъ",
+        "level": 2
+      },
+      {
+        "id": "is_valid_national_code-code-str-bool",
+        "text": "`is_valid_national_code(code: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "is_valid_card_number-card-str-bool",
+        "text": "`is_valid_card_number(card: str) -> bool`",
+        "level": 3
+      },
+      {
+        "id": "detect_bank_from_card-card-str-optional-str",
+        "text": "`detect_bank_from_card(card: str) -> Optional[str]`",
+        "level": 3
+      },
+      {
+        "id": "mask_card-card-str-str",
+        "text": "`mask_card(card: str) -> str`",
+        "level": 3
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/api/validators.md",
+    "counterparts": {
+      "fa": "api/validators",
+      "en": "api/validators",
+      "prs-af": "api/validators"
+    },
+    "counterpartSlug": "api/validators"
+  },
+  {
+    "id": "tg-faq",
+    "slug": "faq",
+    "lang": "tg",
+    "category": "getting-started",
+    "title": "Саволҳои маъмул (FAQ)",
+    "summary": "Дар ин саҳифа посух ба саволҳои асосӣ пешниҳод мегардад.",
+    "content": "# Саволҳои маъмул (FAQ)\n\nДар ин саҳифа посух ба саволҳои асосӣ пешниҳод мегардад.\n\n---\n\n## 1. Оё ParsiKit ба китобхонаҳои беруна ниёз дорад?\n\nНе. ParsiKit бар пояи принсипи **бе вобастагӣ (Zero Dependencies)** сохта шудааст ва 100% бо Python-и холис кор мекунад.\n\n---\n\n## 2. Бо кадом нусхаҳои Python мутобиқ аст?\n\nАз Python 3.10 ва нусхаҳои навтар (3.11, 3.12, 3.13) комилан пуштибонӣ мешавад.\n\n---\n\n## 3. Тақвими шамсӣ чӣ тавр ҳисоб карда мешавад?\n\nҲисоботҳо бар асоси даври 33-солаи нуҷумии ҳиҷрии шамсӣ анҷом дода мешаванд, ки дақиқтарин модели тақвимӣ мебошад.\n",
+    "headings": [
+      {
+        "id": "саволҳои-маъмул-faq",
+        "text": "Саволҳои маъмул (FAQ)",
+        "level": 1
+      },
+      {
+        "id": "1-оё-parsikit-ба-китобхонаҳои-беруна-ниёз-дорад",
+        "text": "1. Оё ParsiKit ба китобхонаҳои беруна ниёз дорад?",
+        "level": 2
+      },
+      {
+        "id": "2-бо-кадом-нусхаҳои-python-мутобиқ-аст",
+        "text": "2. Бо кадом нусхаҳои Python мутобиқ аст?",
+        "level": 2
+      },
+      {
+        "id": "3-тақвими-шамсӣ-чӣ-тавр-ҳисоб-карда-мешавад",
+        "text": "3. Тақвими шамсӣ чӣ тавр ҳисоб карда мешавад?",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/faq.md",
+    "counterparts": {
+      "fa": "faq",
+      "en": "faq",
+      "prs-af": "faq"
+    },
+    "counterpartSlug": "faq"
+  },
+  {
+    "id": "tg-guides-forms_and_security",
+    "slug": "guides/forms_and_security",
+    "lang": "tg",
+    "category": "guides",
+    "title": "Роҳнамои амнияти додаҳо ва санҷиши шаклҳо",
+    "summary": "Усулҳои амнияти маълумот ва ниқоббандии додаҳои ҳассос.",
+    "content": "# Роҳнамои амнияти додаҳо ва санҷиши шаклҳо\n\nУсулҳои амнияти маълумот ва ниқоббандии додаҳои ҳассос.\n\n---\n\n## 1. Ниқоббандии кортҳо ва телефонҳо\n\n```python\nimport parsikit\n\nraw_card = \"6037991122334455\"\nsafe_card = parsikit.mask_card(raw_card)\nprint(f\"Корти амн: {safe_card}\")\n```\n\n---\n\n## 2. Истифода дар FastAPI\n\n```python\nfrom parsikit.models import NationalCode\nfrom parsikit.exceptions import InvalidNationalCodeError\n\ndef validate_user(code: str):\n    try:\n        nc = NationalCode(code)\n        return nc.clean\n    except InvalidNationalCodeError:\n        raise ValueError(\"Рақами воридшуда беэътибор аст.\")\n```\n",
+    "headings": [
+      {
+        "id": "роҳнамои-амнияти-додаҳо-ва-санҷиши-шаклҳо",
+        "text": "Роҳнамои амнияти додаҳо ва санҷиши шаклҳо",
+        "level": 1
+      },
+      {
+        "id": "1-ниқоббандии-кортҳо-ва-телефонҳо",
+        "text": "1. Ниқоббандии кортҳо ва телефонҳо",
+        "level": 2
+      },
+      {
+        "id": "2-истифода-дар-fastapi",
+        "text": "2. Истифода дар FastAPI",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/guides/forms_and_security.md",
+    "counterparts": {
+      "fa": "guides/forms_and_security",
+      "en": "guides/forms_and_security",
+      "prs-af": "guides/forms_and_security"
+    },
+    "counterpartSlug": "guides/forms_and_security"
+  },
+  {
+    "id": "tg-index",
+    "slug": "index",
+    "lang": "tg",
+    "category": "getting-started",
+    "title": "Роҳнамои расмии китобхонаи ParsiKit",
+    "summary": "Ба маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи ParsiKit хуш омадед.",
+    "content": "# Роҳнамои расмии китобхонаи ParsiKit\n\nБа маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи **ParsiKit** хуш омадед.\n\nParsiKit як китобхонаи мустақил, боэътимод ва сабук дар забони Python (3.10+) мебошад, ки бидуни ниёз ба вобастагиҳои беруна (Zero Dependencies), маҷмӯаи васеи абзорҳоро барои коркард ва поксозии матн, санҷиши рақамҳои миллӣ ва кортҳои бонкӣ, тақвими шамсӣ ва ҳисоботи молӣ пешниҳод менамояд.\n\n---\n\n## Бахшҳои асосии ҳуҷҷатҳо\n\n- [Роҳнамои насб ва омодасозӣ](installation.md) — тарзи насб бо pip, poetry ва uv\n- [Оғози зуд дар 5 дақиқа](quickstart.md) — мисолҳои амалӣ ва оғоз бо функсияҳои асосӣ\n- [Саволҳои маъмул (FAQ)](faq.md) — ҷавоб ба саволҳо оид ба иҷозатнома ва имкониятҳо\n- [Бартараф кардани хатогиҳо](troubleshooting.md) — ҳалли мушкилоти эҳтимолӣ\n\n---\n\n## Омӯзишҳои қадам ба қадам\n\n- [Поксозии матн ва нимафосилаҳо](tutorials/text_processing.md) — стандартикунонии ҳуруф ва фосилаҳо\n- [Санҷиши эътибори рақамҳо ва кортҳо](tutorials/validation.md) — алгоритми Модуло 11 ва алгоритми Лун\n- [Тақвими нуҷумии ҳиҷрии шамсӣ](tutorials/datetime.md) — табдили дақиқи санаҳо ва ҳисоби соли кабиса\n- [Табдили ададҳо ба калимаҳо](tutorials/numbers_and_currency.md) — хониши лафзии рақамҳо ва ҳисобҳои молӣ\n\n---\n\n## Феҳристи тавобеъ ва модулҳо (API Reference)\n\n- [Мундариҷаи куллии API](api/index.md) — феҳристи тамоми модулҳо ва классҳо\n- [Модули коркарди матн (parsikit.text)](api/text.md) — тавобеи поксозӣ ва омодасозии матн\n- [Модули тафтиши эътибор (parsikit.validators)](api/validators.md) — санҷиши чексам ва чеки рақамҳо\n- [Модули тақвим ва замон (parsikit.datetime)](api/datetime.md) — табдили санаҳои мелодӣ ва шамсӣ\n- [Моделҳои объектгаро (parsikit.models)](api/models.md) — моделҳои маълумотӣ бо санҷиши худкор\n\n---\n\n## Мушаххасоти техникӣ\n\n- **Нусхаи ҷорӣ:** 3.3.1\n- **Талаботи Python:** Python >= 3.10\n- **Иҷозатнома:** MIT License\n- **Муаллиф ва роҳбари лоиҳа:** Алӣ Комронӣ (MRThugh)\n",
+    "headings": [
+      {
+        "id": "роҳнамои-расмии-китобхонаи-parsikit",
+        "text": "Роҳнамои расмии китобхонаи ParsiKit",
+        "level": 1
+      },
+      {
+        "id": "бахшҳои-асосии-ҳуҷҷатҳо",
+        "text": "Бахшҳои асосии ҳуҷҷатҳо",
+        "level": 2
+      },
+      {
+        "id": "омӯзишҳои-қадам-ба-қадам",
+        "text": "Омӯзишҳои қадам ба қадам",
+        "level": 2
+      },
+      {
+        "id": "феҳристи-тавобеъ-ва-модулҳо-api-reference",
+        "text": "Феҳристи тавобеъ ва модулҳо (API Reference)",
+        "level": 2
+      },
+      {
+        "id": "мушаххасоти-техникӣ",
+        "text": "Мушаххасоти техникӣ",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/index.md",
+    "counterparts": {
+      "fa": "index",
+      "en": "index",
+      "prs-af": "index"
+    },
+    "counterpartSlug": "index"
+  },
+  {
+    "id": "tg-installation",
+    "slug": "installation",
+    "lang": "tg",
+    "category": "getting-started",
+    "title": "Роҳнамои насб ва бакорандозии ParsiKit",
+    "summary": "Китобхонаи ParsiKit комилан бо забони холиси Python (Pure Python) навишта шудааст ва ҳеҷ гуна вобастагӣ ба китобхонаҳои берунаи C надорад. Аз ин рӯ, он дар ҳама гуна системаи омил (Linux, macOS, Windo",
+    "content": "# Роҳнамои насб ва бакорандозии ParsiKit\n\nКитобхонаи ParsiKit комилан бо забони холиси Python (Pure Python) навишта шудааст ва ҳеҷ гуна вобастагӣ ба китобхонаҳои берунаи C надорад. Аз ин рӯ, он дар ҳама гуна системаи омил (Linux, macOS, Windows) дар як лаҳза насб мегардад.\n\n---\n\n## Талаботи система\n\n- Забони Python **3.10** ё болотар (Python 3.10, 3.11, 3.12, 3.13)\n- Бе ниёз ба компилятор ё абзорҳои изофӣ\n\n---\n\n## 1. Насби мустақим тавассути pip\n\nОсонтарин роҳ барои насби нусхаи расмӣ аз PyPI:\n\n```bash\npip install parsikit\n```\n\nЁ бо истифода аз абзорҳои муосир:\n\n```bash\n# Бо Poetry\npoetry add parsikit\n\n# Бо uv\nuv add parsikit\n```\n\n---\n\n## 2. Насб аз манбаи лоиҳа (GitHub)\n\nБарои санҷиши нусхаи рушд аз GitHub:\n\n```bash\ngit clone https://github.com/MRThugh/ParsiKit.git\ncd ParsiKit\npip install .\n```\n\n---\n\n## 3. Санҷиши насб дар Python\n\nБарои итминон аз насби дуруст дар терминали худ санҷед:\n\n```python\nimport parsikit\n\nprint(parsikit.__version__)\n# Натиҷа бояд '3.3.1' бошад\n```\n",
+    "headings": [
+      {
+        "id": "роҳнамои-насб-ва-бакорандозии-parsikit",
+        "text": "Роҳнамои насб ва бакорандозии ParsiKit",
+        "level": 1
+      },
+      {
+        "id": "талаботи-система",
+        "text": "Талаботи система",
+        "level": 2
+      },
+      {
+        "id": "1-насби-мустақим-тавассути-pip",
+        "text": "1. Насби мустақим тавассути pip",
+        "level": 2
+      },
+      {
+        "id": "бо-poetry",
+        "text": "Бо Poetry",
+        "level": 1
+      },
+      {
+        "id": "бо-uv",
+        "text": "Бо uv",
+        "level": 1
+      },
+      {
+        "id": "2-насб-аз-манбаи-лоиҳа-github",
+        "text": "2. Насб аз манбаи лоиҳа (GitHub)",
+        "level": 2
+      },
+      {
+        "id": "3-санҷиши-насб-дар-python",
+        "text": "3. Санҷиши насб дар Python",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-бояд-3-3-1-бошад",
+        "text": "Натиҷа бояд '3.3.1' бошад",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/installation.md",
+    "counterparts": {
+      "fa": "installation",
+      "en": "installation",
+      "prs-af": "installation"
+    },
+    "counterpartSlug": "installation"
+  },
+  {
+    "id": "tg-quickstart",
+    "slug": "quickstart",
+    "lang": "tg",
+    "category": "getting-started",
+    "title": "Оғози зуд бо ParsiKit (Quickstart)",
+    "summary": "Дар ин бахш бо мисолҳои сода ва муҳимтарини коркарди ParsiKit шинос мешавем.",
+    "content": "# Оғози зуд бо ParsiKit (Quickstart)\n\nДар ин бахш бо мисолҳои сода ва муҳимтарини коркарди ParsiKit шинос мешавем.\n\n---\n\n## 1. Поксозии матн ва нимафосилаҳо\n\n```python\nimport parsikit\n\ndirty_text = \"ي كافيه كتاب ها رو برداري\"\nclean_text = parsikit.standardize_persian(dirty_text)\n\nprint(clean_text)\n# Натиҷа: 'ی کافیه کتاب‌ها رو برداری'\n```\n\n---\n\n## 2. Санҷиши рақами миллӣ (National Code)\n\n```python\nimport parsikit\n\n# Тарзи функсионалӣ:\nis_ok = parsikit.is_valid_national_code(\"0010123458\")\nprint(is_ok)  # True\n\n# Тарзи объектгаро:\nnc = parsikit.NationalCode(\"0010123458\")\nprint(nc.formatted)  # '001-012345-8'\nprint(nc.masked)     # '001-****45-8'\n```\n\n---\n\n## 3. Санҷиши корти бонкӣ бо алгоритми Лун\n\n```python\nimport parsikit\n\ncard = \"6037991122334455\"\nprint(parsikit.is_valid_card_number(card))   # True\nprint(parsikit.detect_bank_from_card(card))  # 'بانک ملی ایران'\nprint(parsikit.mask_card(card))              # '6037-9911-****-4455'\n```\n\n---\n\n## 4. Тақвими ҳиҷрии шамсӣ\n\n```python\nimport parsikit\n\n# Табдил додани таърихи мелодӣ ба ҳиҷрии шамсӣ\nshamsi = parsikit.gregorian_to_jalali(2026, 10, 21)\nprint(shamsi)\n# Натиҷа: (1405, 7, 29) -> 29 меҳри 1405\n\n# Ҳисоби соли кабиса\nprint(parsikit.is_jalali_leap(1403))  # True\nprint(parsikit.is_jalali_leap(1404))  # False\n```\n\n---\n\n## 5. Табдили рақамҳо ба калимаҳо\n\n```python\nimport parsikit\n\namount = 3500000\nwords = parsikit.number_to_persian_words(amount)\nprint(words)\n# Натиҷа: 'سه میلیون و پانصد هزار'\n```\n",
+    "headings": [
+      {
+        "id": "оғози-зуд-бо-parsikit-quickstart",
+        "text": "Оғози зуд бо ParsiKit (Quickstart)",
+        "level": 1
+      },
+      {
+        "id": "1-поксозии-матн-ва-нимафосилаҳо",
+        "text": "1. Поксозии матн ва нимафосилаҳо",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-ی-کافیه-کتاب-ها-رو-برداری",
+        "text": "Натиҷа: 'ی کافیه کتاب‌ها رو برداری'",
+        "level": 1
+      },
+      {
+        "id": "2-санҷиши-рақами-миллӣ-national-code",
+        "text": "2. Санҷиши рақами миллӣ (National Code)",
+        "level": 2
+      },
+      {
+        "id": "тарзи-функсионалӣ",
+        "text": "Тарзи функсионалӣ:",
+        "level": 1
+      },
+      {
+        "id": "тарзи-объектгаро",
+        "text": "Тарзи объектгаро:",
+        "level": 1
+      },
+      {
+        "id": "3-санҷиши-корти-бонкӣ-бо-алгоритми-лун",
+        "text": "3. Санҷиши корти бонкӣ бо алгоритми Лун",
+        "level": 2
+      },
+      {
+        "id": "4-тақвими-ҳиҷрии-шамсӣ",
+        "text": "4. Тақвими ҳиҷрии шамсӣ",
+        "level": 2
+      },
+      {
+        "id": "табдил-додани-таърихи-мелодӣ-ба-ҳиҷрии-шамсӣ",
+        "text": "Табдил додани таърихи мелодӣ ба ҳиҷрии шамсӣ",
+        "level": 1
+      },
+      {
+        "id": "натиҷа-1405-7-29-29-меҳри-1405",
+        "text": "Натиҷа: (1405, 7, 29) -> 29 меҳри 1405",
+        "level": 1
+      },
+      {
+        "id": "ҳисоби-соли-кабиса",
+        "text": "Ҳисоби соли кабиса",
+        "level": 1
+      },
+      {
+        "id": "5-табдили-рақамҳо-ба-калимаҳо",
+        "text": "5. Табдили рақамҳо ба калимаҳо",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-سه-میلیون-و-پانصد-هزار",
+        "text": "Натиҷа: 'سه میلیون و پانصد هزار'",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/quickstart.md",
+    "counterparts": {
+      "fa": "quickstart",
+      "en": "quickstart",
+      "prs-af": "quickstart"
+    },
+    "counterpartSlug": "quickstart"
+  },
+  {
+    "id": "tg-troubleshooting",
+    "slug": "troubleshooting",
+    "lang": "tg",
+    "category": "getting-started",
+    "title": "Бартараф кардани хатогиҳо ва мушкилоти умумӣ",
+    "summary": "Роҳнамои кӯтоҳ барои ҳалли хатогиҳои маъмул ҳангоми истифодаи ParsiKit.",
+    "content": "# Бартараф кардани хатогиҳо ва мушкилоти умумӣ\n\nРоҳнамои кӯтоҳ барои ҳалли хатогиҳои маъмул ҳангоми истифодаи ParsiKit.\n\n---\n\n## 1. Хатогии `InvalidNationalCodeError`\n\nИн хато ҳангоми нодуруст будани чексами рақами миллӣ рух медиҳад:\n\n- Рақами воридшуда бояд дақиқан 10 рақам бошад.\n- Рақамҳо набояд 10 рақами якхела (масалан `1111111111`) бошанд.\n- Аз блоки `try ... except` истифода баред:\n\n```python\nfrom parsikit.exceptions import InvalidNationalCodeError\nfrom parsikit.models import NationalCode\n\ntry:\n    code = NationalCode(\"1234567890\")\nexcept InvalidNationalCodeError as e:\n    print(f\"Хатои санҷиш: {e}\")\n```\n\n---\n\n## 2. Хатогии `InvalidCardNumberError`\n\nИн хато ҳангоми номутобиқатии рақами корти 16-рақама бо алгоритми Лун (Luhn) сар мезанад.\n",
+    "headings": [
+      {
+        "id": "бартараф-кардани-хатогиҳо-ва-мушкилоти-умумӣ",
+        "text": "Бартараф кардани хатогиҳо ва мушкилоти умумӣ",
+        "level": 1
+      },
+      {
+        "id": "1-хатогии-invalidnationalcodeerror",
+        "text": "1. Хатогии `InvalidNationalCodeError`",
+        "level": 2
+      },
+      {
+        "id": "2-хатогии-invalidcardnumbererror",
+        "text": "2. Хатогии `InvalidCardNumberError`",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/troubleshooting.md",
+    "counterparts": {
+      "fa": "troubleshooting",
+      "en": "troubleshooting",
+      "prs-af": "troubleshooting"
+    },
+    "counterpartSlug": "troubleshooting"
+  },
+  {
+    "id": "tg-tutorials-datetime",
+    "slug": "tutorials/datetime",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши тақвими нуҷумии ҳиҷрии шамсӣ",
+    "summary": "Тарзи табдили таърих ва муҳосибаи соли кабиса бо ParsiKit.",
+    "content": "# Омӯзиши тақвими нуҷумии ҳиҷрии шамсӣ\n\nТарзи табдили таърих ва муҳосибаи соли кабиса бо ParsiKit.\n\n---\n\n## 1. Табдили таърихи мелодӣ ба ҳиҷрии шамсӣ\n\n```python\nimport parsikit\n\njy, jm, jd = parsikit.gregorian_to_jalali(2026, 10, 21)\nprint(f\"Сана: {jy}/{jm:02d}/{jd:02d}\")\n# Натиҷа: 1405/07/29\n```\n\n---\n\n## 2. Ҳисоби соли кабиса\n\n```python\nimport parsikit\n\nprint(\"1403 кабиса аст?\", parsikit.is_jalali_leap(1403))  # True\nprint(\"1404 кабиса аст?\", parsikit.is_jalali_leap(1404))  # False\n```\n",
+    "headings": [
+      {
+        "id": "омӯзиши-тақвими-нуҷумии-ҳиҷрии-шамсӣ",
+        "text": "Омӯзиши тақвими нуҷумии ҳиҷрии шамсӣ",
+        "level": 1
+      },
+      {
+        "id": "1-табдили-таърихи-мелодӣ-ба-ҳиҷрии-шамсӣ",
+        "text": "1. Табдили таърихи мелодӣ ба ҳиҷрии шамсӣ",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-1405-07-29",
+        "text": "Натиҷа: 1405/07/29",
+        "level": 1
+      },
+      {
+        "id": "2-ҳисоби-соли-кабиса",
+        "text": "2. Ҳисоби соли кабиса",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/tutorials/datetime.md",
+    "counterparts": {
+      "fa": "tutorials/datetime",
+      "en": "tutorials/datetime",
+      "prs-af": "tutorials/datetime"
+    },
+    "counterpartSlug": "tutorials/datetime"
+  },
+  {
+    "id": "tg-tutorials-numbers_and_currency",
+    "slug": "tutorials/numbers_and_currency",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши табдили ададҳо ба калимаҳо",
+    "summary": "Табдили рақамҳо ба калимаҳои хоно ва муҳосибаи воҳидҳои пулӣ.",
+    "content": "# Омӯзиши табдили ададҳо ба калимаҳо\n\nТабдили рақамҳо ба калимаҳои хоно ва муҳосибаи воҳидҳои пулӣ.\n\n---\n\n## 1. Ададҳо ба калимаҳо\n\n```python\nimport parsikit\n\nwords = parsikit.number_to_persian_words(12450000)\nprint(words)\n# Натиҷа: 'دوازده میلیون و چهارصد و پنجاه هزار'\n```\n\n---\n\n## 2. Тартибдиҳии пулӣ\n\n```python\nimport parsikit\n\nformatted = parsikit.format_currency(3500000, unit=\"сомонӣ\")\nprint(formatted)\n```\n",
+    "headings": [
+      {
+        "id": "омӯзиши-табдили-ададҳо-ба-калимаҳо",
+        "text": "Омӯзиши табдили ададҳо ба калимаҳо",
+        "level": 1
+      },
+      {
+        "id": "1-ададҳо-ба-калимаҳо",
+        "text": "1. Ададҳо ба калимаҳо",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-دوازده-میلیون-و-چهارصد-و-پنجاه-هزار",
+        "text": "Натиҷа: 'دوازده میلیون و چهارصد و پنجاه هزار'",
+        "level": 1
+      },
+      {
+        "id": "2-тартибдиҳии-пулӣ",
+        "text": "2. Тартибдиҳии пулӣ",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/tutorials/numbers_and_currency.md",
+    "counterparts": {
+      "fa": "tutorials/numbers_and_currency",
+      "en": "tutorials/numbers_and_currency",
+      "prs-af": "tutorials/numbers_and_currency"
+    },
+    "counterpartSlug": "tutorials/numbers_and_currency"
+  },
+  {
+    "id": "tg-tutorials-text_processing",
+    "slug": "tutorials/text_processing",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши поксозии матн ва нимафосилаҳо",
+    "summary": "Роҳнамои амалии стандартисозии матнҳо бо ParsiKit.",
+    "content": "# Омӯзиши поксозии матн ва нимафосилаҳо\n\nРоҳнамои амалии стандартисозии матнҳо бо ParsiKit.\n\n---\n\n## 1. Ислоҳи ҳарфҳо\n\n```python\nimport parsikit\n\ndirty = \"اين يك متن аст\"\nclean = parsikit.standardize_persian(dirty)\nprint(clean)\n# Натиҷа: 'این یک متن است'\n```\n\n---\n\n## 2. Ислоҳи нимафосилаҳо\n\n```python\nimport parsikit\n\ntext = \"کتاب ها را می خوانم\"\ncorrected = parsikit.clean_text(text)\nprint(corrected)\n# Натиҷа: 'کتاب‌ها را می‌خوانم'\n```\n",
+    "headings": [
+      {
+        "id": "омӯзиши-поксозии-матн-ва-нимафосилаҳо",
+        "text": "Омӯзиши поксозии матн ва нимафосилаҳо",
+        "level": 1
+      },
+      {
+        "id": "1-ислоҳи-ҳарфҳо",
+        "text": "1. Ислоҳи ҳарфҳо",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-این-یک-متن-است",
+        "text": "Натиҷа: 'این یک متن است'",
+        "level": 1
+      },
+      {
+        "id": "2-ислоҳи-нимафосилаҳо",
+        "text": "2. Ислоҳи нимафосилаҳо",
+        "level": 2
+      },
+      {
+        "id": "натиҷа-کتاب-ها-را-می-خوانم",
+        "text": "Натиҷа: 'کتاب‌ها را می‌خوانم'",
+        "level": 1
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/tutorials/text_processing.md",
+    "counterparts": {
+      "fa": "tutorials/text_processing",
+      "en": "tutorials/text_processing",
+      "prs-af": "tutorials/text_processing"
+    },
+    "counterpartSlug": "tutorials/text_processing"
+  },
+  {
+    "id": "tg-tutorials-validation",
+    "slug": "tutorials/validation",
+    "lang": "tg",
+    "category": "tutorials",
+    "title": "Омӯзиши санҷиши эътибори рақамҳо ва кортҳо",
+    "summary": "Тарзи санҷиши рақамҳои миллӣ ва кортҳои бонкӣ.",
+    "content": "# Омӯзиши санҷиши эътибори рақамҳо ва кортҳо\n\nТарзи санҷиши рақамҳои миллӣ ва кортҳои бонкӣ.\n\n---\n\n## 1. Санҷиш бо алгоритми Модуло 11\n\n```python\nimport parsikit\n\nvalid = parsikit.is_valid_national_code(\"0010123458\")\nprint(f\"Вазъияти эътибор: {valid}\")\n```\n\n---\n\n## 2. Санҷиши корти бонкӣ бо Лун\n\n```python\nimport parsikit\n\ncard = \"6037991122334455\"\nif parsikit.is_valid_card_number(card):\n    bank = parsikit.detect_bank_from_card(card)\n    masked = parsikit.mask_card(card)\n    print(f\"Бонк: {bank} | Корти амн: {masked}\")\n```\n",
+    "headings": [
+      {
+        "id": "омӯзиши-санҷиши-эътибори-рақамҳо-ва-кортҳо",
+        "text": "Омӯзиши санҷиши эътибори рақамҳо ва кортҳо",
+        "level": 1
+      },
+      {
+        "id": "1-санҷиш-бо-алгоритми-модуло-11",
+        "text": "1. Санҷиш бо алгоритми Модуло 11",
+        "level": 2
+      },
+      {
+        "id": "2-санҷиши-корти-бонкӣ-бо-лун",
+        "text": "2. Санҷиши корти бонкӣ бо Лун",
+        "level": 2
+      }
+    ],
+    "filePath": "/app/applet/repo_data/docs/tg/tutorials/validation.md",
+    "counterparts": {
+      "fa": "tutorials/validation",
+      "en": "tutorials/validation",
+      "prs-af": "tutorials/validation"
+    },
+    "counterpartSlug": "tutorials/validation"
   },
   {
     "id": "en-development-architecture",

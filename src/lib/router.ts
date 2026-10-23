@@ -1,40 +1,69 @@
 /**
  * Path-Based Client Router for ParsiKit
- * Supports:
- * - /en, /fa, and /es (Home)
- * - /en/playground, /fa/playground, /es/playground
- * - /en/docs/:slug, /fa/docs/:slug, /es/docs/:slug
- * - /en/architecture, /fa/architecture, /es/architecture
- * - /en/changelog, /fa/changelog, /es/changelog
- * - Legacy hash fallback (/#docs/... -> /en/docs/...)
+ * Supports exactly four official languages:
+ * - /fa (Persian - Iran)
+ * - /en (English)
+ * - /prs-af (Dari - Afghanistan)
+ * - /tg (Tajik - Tajikistan)
+ *
+ * Implements strict migration/redirect handling for deprecated legacy /es/* URLs.
  */
 
+import { type LangPrefix, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
+
 export type PageRoute = 'home' | 'docs' | 'playground' | 'architecture' | 'changelog';
-export type AppLang = 'en' | 'fa' | 'es';
+export type AppLang = LangPrefix;
 
 export interface RouteState {
   lang: AppLang;
   route: PageRoute;
   docSlug?: string;
+  isLegacyRedirect?: boolean;
+  redirectTarget?: string;
 }
 
-export const VALID_LANGS: AppLang[] = ['en', 'fa', 'es'];
+export const VALID_LANGS: AppLang[] = [...SUPPORTED_LANG_PREFIXES];
+
+/**
+ * Checks if a pathname is a deprecated Spanish URL and returns the migrated URL.
+ */
+export function checkLegacyRedirect(pathname: string): string | null {
+  const cleanPath = pathname.replace(/^\/|\/$/g, '');
+  if (cleanPath === 'es') {
+    return '/en';
+  }
+  if (cleanPath.startsWith('es/')) {
+    const afterEs = cleanPath.slice(3); // e.g. "docs/installation" or "playground"
+    return `/en/${afterEs}`;
+  }
+  return null;
+}
 
 export function parseRoutePath(pathname: string): RouteState {
+  const legacyTarget = checkLegacyRedirect(pathname);
+  if (legacyTarget) {
+    const migratedState = parseRoutePath(legacyTarget);
+    return {
+      ...migratedState,
+      isLegacyRedirect: true,
+      redirectTarget: legacyTarget,
+    };
+  }
+
   const path = pathname.replace(/^\/|\/$/g, '');
   if (!path) {
-    return { lang: 'en', route: 'home' };
+    return { lang: DEFAULT_LANG_PREFIX, route: 'home' };
   }
 
   const segments = path.split('/');
   const first = segments[0];
 
-  let lang: AppLang = 'en';
-  if (first === 'fa') lang = 'fa';
-  else if (first === 'es') lang = 'es';
-  else lang = 'en';
+  let lang: AppLang = DEFAULT_LANG_PREFIX;
+  if (VALID_LANGS.includes(first as AppLang)) {
+    lang = first as AppLang;
+  }
 
-  const remaining = (first === 'en' || first === 'fa' || first === 'es') ? segments.slice(1) : segments;
+  const remaining = VALID_LANGS.includes(first as AppLang) ? segments.slice(1) : segments;
 
   if (remaining.length === 0) {
     return { lang, route: 'home' };
@@ -60,7 +89,7 @@ export function parseRoutePath(pathname: string): RouteState {
 
 export function parseCurrentUrl(): RouteState {
   if (typeof window === 'undefined') {
-    return { lang: 'en', route: 'home' };
+    return { lang: DEFAULT_LANG_PREFIX, route: 'home' };
   }
 
   // 1. Check legacy hash (e.g. /#docs/api/validators or /#playground)
@@ -75,11 +104,18 @@ export function parseCurrentUrl(): RouteState {
     }
   }
 
-  // 2. Parse pathname
+  // 2. Check legacy Spanish redirect and update browser history cleanly
+  const legacyTarget = checkLegacyRedirect(window.location.pathname);
+  if (legacyTarget) {
+    window.history.replaceState(null, '', legacyTarget);
+    return parseRoutePath(legacyTarget);
+  }
+
+  // 3. Parse pathname
   const path = window.location.pathname.replace(/^\/|\/$/g, '');
   if (!path) {
     const saved = localStorage.getItem('parsikit_lang') as AppLang | null;
-    const initialLang = saved && VALID_LANGS.includes(saved) ? saved : 'en';
+    const initialLang = saved && VALID_LANGS.includes(saved) ? saved : DEFAULT_LANG_PREFIX;
     return { lang: initialLang, route: 'home' };
   }
 

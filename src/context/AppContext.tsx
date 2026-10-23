@@ -8,11 +8,13 @@ import {
   VALID_LANGS,
 } from '../lib/router';
 import { computePageMetadata, updateDocumentHead } from '../lib/seo';
+import { LOCALES, isRtlPrefix } from '../i18n/config';
 
 interface AppContextType {
   lang: AppLang;
   setLang: (lang: AppLang) => void;
   toggleLang: () => void;
+  isRtl: boolean;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
@@ -51,6 +53,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const isRtl = useMemo(() => isRtlPrefix(lang), [lang]);
+
   // Active doc lookup with multilingual fallbacks
   const activeDoc = useMemo(() => {
     const exactMatch = ALL_DOCS.find((d) => d.lang === lang && d.slug === activeDocSlug);
@@ -67,7 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return ALL_DOCS.find((d) => d.lang === lang) || ALL_DOCS[0] || null;
   }, [lang, activeDocSlug]);
 
-  // Sync document head and SEO metadata
+  // Sync document head, html dir, and SEO metadata
   useEffect(() => {
     const meta = computePageMetadata(lang, route, activeDoc);
     updateDocumentHead(meta, lang);
@@ -132,8 +136,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setLang = (newLang: AppLang) => {
     if (newLang === lang) return;
     let targetDocSlug = activeDocSlug;
-    if (route === 'docs' && activeDoc?.counterpartSlug) {
-      targetDocSlug = activeDoc.counterpartSlug;
+    if (route === 'docs' && activeDoc?.counterparts?.[newLang]) {
+      targetDocSlug = activeDoc.counterparts[newLang]!;
     }
     navigate(route, targetDocSlug, newLang);
   };
@@ -175,6 +179,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         lang,
         setLang,
         toggleLang,
+        isRtl,
         theme,
         setTheme,
         toggleTheme,

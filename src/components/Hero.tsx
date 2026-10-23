@@ -11,18 +11,19 @@ import {
   Coins,
   Cpu,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
-import { fadeUpVariants, MOTION_TRANSITIONS } from '../lib/motion';
+import { fadeUpVariants } from '../lib/motion';
 import { REPO_METADATA } from '../data/repoMetadata';
+import { getTranslations } from '../i18n/translations';
 import { Button } from './ui/Button';
 
 export function Hero() {
-  const { lang, setRoute } = useApp();
+  const { lang, setRoute, isRtl } = useApp();
   const [copiedInstall, setCopiedInstall] = useState(false);
   const [activeTab, setActiveTab] = useState<'text' | 'validation' | 'datetime' | 'currency' | 'models'>('text');
 
-  const isRtl = lang === 'fa';
+  const t = getTranslations(lang);
 
   const copyInstallCommand = async () => {
     try {
@@ -55,7 +56,7 @@ print(slug)
       title: 'validation_algorithms.py',
       code: `import parsikit
 
-# Iranian National Code (Modulo 11 with weight coefficients)
+# Iranian / Afghan National Code & Identity validation (Modulo 11)
 is_valid = parsikit.is_valid_national_code("0010123458")
 print(is_valid)  # Output: True
 
@@ -98,7 +99,7 @@ words = parsikit.number_to_persian_words(3500000)
 print(words)
 # Output: 'سه میلیون و پانصد هزار تومان'
 
-# Persian localized currency with proper grouping
+# Localized currency with proper digit grouping
 formatted = parsikit.format_currency(3500000, unit="toman")
 print(formatted)
 # Output: '۳،۵۰۰،۰۰۰ تومان'`,
@@ -121,16 +122,16 @@ print(mobile.international)  # Output: '+989121234567'
   };
 
   const tabs = [
-    { id: 'text' as const, labelEn: 'Text & ZWNJ', labelFa: 'پردازش متن و نیم‌فاصله', icon: Sparkles },
-    { id: 'validation' as const, labelEn: 'Validations', labelFa: 'اعتبارسنجی ملی و بانکی', icon: ShieldCheck },
-    { id: 'datetime' as const, labelEn: 'Jalali Dates', labelFa: 'تقویم نجومی جلالی', icon: Calendar },
-    { id: 'currency' as const, labelEn: 'Financial', labelFa: 'محاسبات مالی و ارز', icon: Coins },
-    { id: 'models' as const, labelEn: 'Domain Models', labelFa: 'مدل‌های شیءگرا', icon: Cpu },
+    { id: 'text' as const, label: t.playground.tools.text.name, icon: Sparkles },
+    { id: 'validation' as const, label: t.playground.tools.nationalCode.name, icon: ShieldCheck },
+    { id: 'datetime' as const, label: t.playground.tools.calendar.name, icon: Calendar },
+    { id: 'currency' as const, label: t.playground.tools.numberWords.name, icon: Coins },
+    { id: 'models' as const, label: lang === 'en' ? 'Domain Models' : lang === 'tg' ? 'Моделҳои объектгаро' : 'مدل‌های شیءگرا', icon: Cpu },
   ];
 
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28">
-      {/* Iranian geometric lattice subtle backdrop */}
+      {/* Subtle backdrop */}
       <div className="absolute inset-0 bg-iranian-pattern opacity-40 pointer-events-none" />
 
       {/* Subtle Persian turquoise & lapis ambient lighting */}
@@ -158,28 +159,16 @@ print(mobile.international)  # Output: '+989121234567'
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-stone-900 dark:text-white leading-[1.18] mb-5">
-              {isRtl ? (
-                <>
-                  زیرساخت خالص پایتونی برای{' '}
-                  <span className="text-[#126E68] dark:text-[#52C5BE] underline decoration-[#D4A03D]/60 decoration-wavy underline-offset-8">
-                    داده‌های فارسی
-                  </span>
-                </>
-              ) : (
-                <>
-                  Production-Grade Python Infrastructure for{' '}
-                  <span className="text-[#126E68] dark:text-[#52C5BE] underline decoration-[#D4A03D]/60 decoration-wavy underline-offset-8">
-                    Persian Data
-                  </span>
-                </>
-              )}
+              {t.hero.headlinePart1}
+              <span className="text-[#126E68] dark:text-[#52C5BE] underline decoration-[#D4A03D]/60 decoration-wavy underline-offset-8">
+                {t.hero.headlineHighlight}
+              </span>
+              {t.hero.headlinePart2}
             </h1>
 
             {/* Subtitle / Description */}
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8 max-w-xl">
-              {isRtl
-                ? 'کتابخانه‌ای بدون وابستگی برای پاکسازی متون فارسی و نیم‌فاصله‌ها، اعتبارسنجی الگوریتم‌های ملی و بانکی (کد ملی، کارت، شبا)، تقویم شمسی نجومی، تبدیل مبالغ و اعداد به حروف و حفظ محرمانگی داده‌ها.'
-                : 'A zero-dependency library for Persian text standardization and ZWNJ handling, official national checksums (national code, card Luhn, Sheba), astronomical Jalali dates, financial computations, and sensitive data protection.'}
+              {t.hero.description}
             </p>
 
             {/* Pip Install Widget */}
@@ -191,18 +180,18 @@ print(mobile.international)  # Output: '+989121234567'
                 </div>
                 <button
                   onClick={copyInstallCommand}
-                  aria-label={copiedInstall ? (isRtl ? 'کپی شد' : 'Copied') : (isRtl ? 'کپی دستور' : 'Copy command')}
+                  aria-label={copiedInstall ? t.hero.copied : t.hero.copyCmd}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans text-stone-300 hover:text-white bg-white/10 hover:bg-white/15 transition-colors cursor-pointer shrink-0 min-h-[36px]"
                 >
                   {copiedInstall ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400 font-medium">{isRtl ? 'کپی شد' : 'Copied'}</span>
+                      <span className="text-emerald-400 font-medium">{t.hero.copied}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5 opacity-80" />
-                      <span>{isRtl ? 'کپی' : 'Copy'}</span>
+                      <span>{t.hero.copyCmd}</span>
                     </>
                   )}
                 </button>
@@ -216,7 +205,7 @@ print(mobile.international)  # Output: '+989121234567'
                 size="md"
                 onClick={() => setRoute('docs')}
               >
-                <span>{isRtl ? 'مشاهده مستندات جامع' : 'Explore Documentation'}</span>
+                <span>{t.hero.exploreDocs}</span>
                 {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
               </Button>
 
@@ -226,7 +215,7 @@ print(mobile.international)  # Output: '+989121234567'
                 onClick={() => setRoute('playground')}
               >
                 <Terminal className="w-4 h-4 text-[#126E68] dark:text-[#52C5BE]" />
-                <span>{isRtl ? 'محیط آزمایشی زنده' : 'Live Playground'}</span>
+                <span>{t.hero.livePlayground}</span>
               </Button>
 
               <a
@@ -242,7 +231,7 @@ print(mobile.international)  # Output: '+989121234567'
 
             {/* Project Creator Credit */}
             <div className="mt-8 text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
-              <span>{isRtl ? 'توسعه‌داده شده توسط' : 'Architected & maintained by'}</span>
+              <span>{t.hero.createdBy}</span>
               <a
                 href="https://github.com/MRThugh"
                 target="_blank"
@@ -273,7 +262,7 @@ print(mobile.international)  # Output: '+989121234567'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
-                      <span>{isRtl ? tab.labelFa : tab.labelEn}</span>
+                      <span>{tab.label}</span>
                     </button>
                   );
                 })}
@@ -282,7 +271,7 @@ print(mobile.international)  # Output: '+989121234567'
               {/* Code Surface */}
               <div className="p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3 text-xs text-stone-500 dark:text-stone-400">
-                  <span className="font-mono text-stone-700 dark:text-stone-300 font-medium">
+                  <span className="font-mono text-stone-700 dark:text-stone-300 font-medium" dir="ltr">
                     {codeSnippets[activeTab].title}
                   </span>
                   <span className="text-[11px] font-mono text-[#D4A03D]">
@@ -301,13 +290,13 @@ print(mobile.international)  # Output: '+989121234567'
 
                 <div className="mt-3 flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
                   <span>
-                    {isRtl ? 'بدون وابستگی جانبی • اجرای محلی' : 'Pure Python • Zero external C/Rust dependencies'}
+                    {t.hero.purePythonNote}
                   </span>
                   <button
                     onClick={() => setRoute('playground')}
                     className="text-[#126E68] dark:text-[#52C5BE] font-medium hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    <span>{isRtl ? 'تست آنلاین در مرورگر' : 'Run live in browser'}</span>
+                    <span>{t.hero.runInBrowser}</span>
                     <span>→</span>
                   </button>
                 </div>

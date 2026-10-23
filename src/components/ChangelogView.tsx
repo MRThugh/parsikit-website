@@ -1,26 +1,25 @@
 import React from 'react';
-import { History, CheckCircle, PlusCircle, Wrench, Calendar } from 'lucide-react';
+import { Calendar, Wrench, PlusCircle, CheckCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { RELEASES_DATA } from '../data/changelogData';
+import { getTranslations } from '../i18n/translations';
 
 export function ChangelogView() {
-  const { lang } = useApp();
-  const isRtl = lang === 'fa';
+  const { lang, isRtl } = useApp();
+  const t = getTranslations(lang);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       {/* Header */}
       <div className="mb-12">
         <div className="text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
-          {isRtl ? 'تاریخچه تغییرات و نسخه‌ها' : 'Version History & Release Notes'}
+          {t.changelog.title}
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-white tracking-tight mb-4">
-          {isRtl ? 'تغییرات رسمی پارسی‌کیت' : 'ParsiKit Changelog'}
+          {t.changelog.title}
         </h1>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300">
-          {isRtl
-            ? 'تمام تغییرات مهم، اصلاحات امنیتی و قابلیت‌های جدید به تفکیک نسخه بر اساس اصول Semantic Versioning در این صفحه ثبت شده است.'
-            : 'All notable releases, bug fixes, security enhancements, and new features documented following Keep a Changelog.'}
+          {t.changelog.subtitle}
         </p>
       </div>
 
@@ -40,17 +39,17 @@ export function ChangelogView() {
               {/* Header */}
               <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2 pb-4 border-b border-stone-100 dark:border-white/5">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold font-mono text-stone-900 dark:text-white">
+                  <h2 className="text-2xl font-bold font-mono text-stone-900 dark:text-white" dir="ltr">
                     v{release.version}
                   </h2>
                   {isLatest && (
                     <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                      {isRtl ? 'آخرین نسخه پایدار' : 'Latest Release'}
+                      {t.changelog.latestBadge}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-stone-500 font-mono">
+                <div className="flex items-center gap-1.5 text-xs text-stone-500 font-mono" dir="ltr">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{release.date}</span>
                 </div>
@@ -61,7 +60,7 @@ export function ChangelogView() {
                 <div className="mb-6">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-3">
                     <Wrench className="w-3.5 h-3.5" />
-                    <span>{isRtl ? 'اصلاحات و باگ‌فیکس‌ها (Fixed)' : 'Fixed & Resolved'}</span>
+                    <span>{t.changelog.fixed}</span>
                   </div>
                   <ul className="space-y-2 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                     {release.fixed.map((item, iIdx) => (
@@ -79,7 +78,7 @@ export function ChangelogView() {
                 <div className="mb-6">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#126E68] dark:text-[#52C5BE] mb-3">
                     <PlusCircle className="w-3.5 h-3.5" />
-                    <span>{isRtl ? 'قابلیت‌های جدید (Added)' : 'Added Features'}</span>
+                    <span>{t.changelog.added}</span>
                   </div>
                   <ul className="space-y-2 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                     {release.added.map((item, aIdx) => (
@@ -97,7 +96,7 @@ export function ChangelogView() {
                 <div>
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-3">
                     <CheckCircle className="w-3.5 h-3.5" />
-                    <span>{isRtl ? 'تغییرات ساختاری (Changed)' : 'Changed & Improved'}</span>
+                    <span>{t.changelog.changed}</span>
                   </div>
                   <ul className="space-y-2 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                     {release.changed.map((item, cIdx) => (

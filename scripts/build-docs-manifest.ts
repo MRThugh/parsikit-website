@@ -9,7 +9,7 @@ export interface DocHeading {
 }
 
 export type DocCategory = 'getting-started' | 'tutorials' | 'guides' | 'api' | 'development';
-export type AppLang = 'en' | 'fa' | 'es';
+export type AppLang = 'fa' | 'en' | 'prs-af' | 'tg';
 
 export interface DocEntry {
   id: string;
@@ -28,7 +28,7 @@ export interface DocEntry {
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\u0600-\u06FFáéíóúñÁÉÍÓÚÑ]+/g, '-')
+    .replace(/[^\w\u0600-\u06FF\u0400-\u04FF]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
 
@@ -116,38 +116,24 @@ function extractDocs(): DocEntry[] {
   const docs: DocEntry[] = [];
   const baseDir = path.resolve(process.cwd(), 'repo_data/docs');
 
-  // English docs
-  const enDir = path.join(baseDir, 'en');
-  walkDir(enDir, (f, rel) => {
-    if (!f.endsWith('.md')) return;
-    let cat: DocCategory = 'getting-started';
-    if (rel.startsWith('tutorials/')) cat = 'tutorials';
-    else if (rel.startsWith('guides/')) cat = 'guides';
-    else if (rel.startsWith('api/')) cat = 'api';
-    docs.push(parseDocFile(f, 'en', cat, rel));
-  });
+  const langDirs: { dirName: string; lang: AppLang }[] = [
+    { dirName: 'fa', lang: 'fa' },
+    { dirName: 'en', lang: 'en' },
+    { dirName: 'prs-af', lang: 'prs-af' },
+    { dirName: 'tg', lang: 'tg' },
+  ];
 
-  // Persian docs
-  const faDir = path.join(baseDir, 'fa');
-  walkDir(faDir, (f, rel) => {
-    if (!f.endsWith('.md')) return;
-    let cat: DocCategory = 'getting-started';
-    if (rel.startsWith('tutorials/')) cat = 'tutorials';
-    else if (rel.startsWith('guides/')) cat = 'guides';
-    else if (rel.startsWith('api/')) cat = 'api';
-    docs.push(parseDocFile(f, 'fa', cat, rel));
-  });
-
-  // Spanish docs
-  const esDir = path.join(baseDir, 'es');
-  walkDir(esDir, (f, rel) => {
-    if (!f.endsWith('.md')) return;
-    let cat: DocCategory = 'getting-started';
-    if (rel.startsWith('tutorials/')) cat = 'tutorials';
-    else if (rel.startsWith('guides/')) cat = 'guides';
-    else if (rel.startsWith('api/')) cat = 'api';
-    docs.push(parseDocFile(f, 'es', cat, rel));
-  });
+  for (const item of langDirs) {
+    const fullDir = path.join(baseDir, item.dirName);
+    walkDir(fullDir, (f, rel) => {
+      if (!f.endsWith('.md')) return;
+      let cat: DocCategory = 'getting-started';
+      if (rel.startsWith('tutorials/')) cat = 'tutorials';
+      else if (rel.startsWith('guides/')) cat = 'guides';
+      else if (rel.startsWith('api/')) cat = 'api';
+      docs.push(parseDocFile(f, item.lang, cat, rel));
+    });
+  }
 
   // Development docs
   const devDir = path.join(baseDir, 'development');
@@ -156,7 +142,7 @@ function extractDocs(): DocEntry[] {
     docs.push(parseDocFile(f, 'en', 'development', `development/${rel}`));
   });
 
-  // Map multilingual counterparts across en, fa, es
+  // Map multilingual counterparts across fa, en, prs-af, tg
   for (const doc of docs) {
     const counterparts: Partial<Record<AppLang, string>> = {};
     const matchingDocs = docs.filter((d) => d.slug === doc.slug && d.id !== doc.id);
@@ -164,11 +150,12 @@ function extractDocs(): DocEntry[] {
       counterparts[match.lang] = match.slug;
     }
     doc.counterparts = counterparts;
-    // Set default counterpartSlug (prefer fa if en, or en if fa/es)
+
+    // Set default counterpartSlug
     if (doc.lang === 'en') {
-      doc.counterpartSlug = counterparts.fa || counterparts.es;
+      doc.counterpartSlug = counterparts.fa || counterparts['prs-af'] || counterparts.tg;
     } else {
-      doc.counterpartSlug = counterparts.en;
+      doc.counterpartSlug = counterparts.en || counterparts.fa;
     }
   }
 
@@ -312,14 +299,14 @@ export interface DocHeading {
 export interface DocEntry {
   id: string;
   slug: string;
-  lang: 'en' | 'fa' | 'es';
+  lang: 'fa' | 'en' | 'prs-af' | 'tg';
   category: 'getting-started' | 'tutorials' | 'guides' | 'api' | 'development';
   title: string;
   summary: string;
   content: string;
   headings: DocHeading[];
   counterpartSlug?: string;
-  counterparts?: Partial<Record<'en' | 'fa' | 'es', string>>;
+  counterparts?: Partial<Record<'fa' | 'en' | 'prs-af' | 'tg', string>>;
   filePath: string;
 }
 
@@ -329,21 +316,15 @@ export const ALL_DOCS: DocEntry[] = ${JSON.stringify(docs, null, 2)};
 
   // 4. Generate public/sitemap.xml and public/robots.txt
   const siteUrl = 'https://parsikit.dev';
-  const urls: string[] = [
-    `${siteUrl}/`,
-    `${siteUrl}/en`,
-    `${siteUrl}/fa`,
-    `${siteUrl}/es`,
-    `${siteUrl}/en/playground`,
-    `${siteUrl}/fa/playground`,
-    `${siteUrl}/es/playground`,
-    `${siteUrl}/en/architecture`,
-    `${siteUrl}/fa/architecture`,
-    `${siteUrl}/es/architecture`,
-    `${siteUrl}/en/changelog`,
-    `${siteUrl}/fa/changelog`,
-    `${siteUrl}/es/changelog`,
-  ];
+  const langs: AppLang[] = ['fa', 'en', 'prs-af', 'tg'];
+  const urls: string[] = [`${siteUrl}/`];
+
+  for (const l of langs) {
+    urls.push(`${siteUrl}/${l}`);
+    urls.push(`${siteUrl}/${l}/playground`);
+    urls.push(`${siteUrl}/${l}/architecture`);
+    urls.push(`${siteUrl}/${l}/changelog`);
+  }
 
   for (const doc of docs) {
     urls.push(`${siteUrl}/${doc.lang}/docs/${doc.slug}`);

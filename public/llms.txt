@@ -7,7 +7,13 @@
 # Python Requirement: >=3.10
 
 ## Project Description
-ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python library providing Persian data infrastructure. It includes text cleansing and Zero-Width Non-Joiner (ZWNJ) normalization, Iranian national identification checksums (Modulo 11), bank card verification (Luhn algorithm), bank issuer BIN detection, Sheba IBAN verification (ISO 7064 Mod 97-10), astronomical Solar Hijri (Jalali) calendar conversions with 33-year leap cycle support, number-to-words spelling in Persian, currency conversions (Rial/Toman), VAT calculation, PII masking, and thread-safe in-memory caching.
+ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python library providing Persian and domestic data infrastructure. It includes text cleansing and Zero-Width Non-Joiner (ZWNJ) normalization, national identification checksums (Modulo 11), bank card verification (Luhn algorithm), bank issuer BIN detection, Sheba IBAN verification (ISO 7064 Mod 97-10), astronomical Solar Hijri (Jalali) calendar conversions with 33-year leap cycle support, number-to-words spelling in Persian, currency conversions (Rial/Toman), VAT calculation, PII masking, and thread-safe in-memory caching.
+
+## Official Multilingual Documentation
+- English: https://parsikit.dev/en/docs/installation
+- Persian (Iran): https://parsikit.dev/fa/docs/installation
+- Dari (Afghanistan): https://parsikit.dev/prs-af/docs/installation
+- Tajik (Tajikistan): https://parsikit.dev/tg/docs/installation
 
 ## Key Modules and API Summary
 
@@ -16,13 +22,14 @@ ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python librar
 - `to_persian_digits(text: str) -> str`: Converts Latin (0-9) and Arabic digits to Persian digits (۰-۹).
 - `to_latin_digits(text: str) -> str`: Converts Persian/Arabic digits to ASCII Latin (0-9).
 - `remove_diacritics(text: str) -> str`: Strips Arabic/Persian vowels and accents (Tashdid, Tanwin, Fathah, etc.).
+- `slugify(text: str) -> str`: Transliterates Persian text to SEO-friendly ASCII Pinglish slug.
 
 ### 2. `parsikit.validators`
-- `is_valid_national_code(code: str) -> bool`: Verifies Iranian 10-digit National ID using Modulo 11 checksum.
+- `is_valid_national_code(code: str) -> bool`: Verifies 10-digit National ID using Modulo 11 checksum.
 - `is_valid_card(card_number: str) -> bool`: Validates 16-digit debit/credit card numbers using the Luhn algorithm.
-- `is_valid_sheba(sheba_number: str) -> bool`: Validates Iranian IBAN numbers (format IR + 24 digits, ISO 7064 Mod 97-10).
-- `is_valid_postal_code(postal_code: str) -> bool`: Verifies Iranian 10-digit postal codes.
-- `is_valid_mobile(phone_number: str) -> bool`: Validates Iranian mobile numbers against authorized operator prefixes.
+- `is_valid_sheba(sheba_number: str) -> bool`: Validates IBAN numbers (format IR + 24 digits, ISO 7064 Mod 97-10).
+- `is_valid_postal_code(postal_code: str) -> bool`: Verifies 10-digit postal codes.
+- `is_valid_mobile(phone_number: str) -> bool`: Validates mobile numbers against authorized operator prefixes.
 
 ### 3. `parsikit.datetime`
 - `JalaliDate(year, month, day)`: Pythonic Jalali date object with formatting and arithmetic.
@@ -34,7 +41,7 @@ ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python librar
 - `number_to_words(number: int | float) -> str`: Converts digits to Persian words (e.g. 1,000 -> یک هزار).
 - `rial_to_toman(amount: int | float) -> int | float`: Divides Rial amount by 10.
 - `toman_to_rial(amount: int | float) -> int | float`: Multiplies Toman amount by 10.
-- `calculate_vat(amount: int | float, rate: float = 0.10) -> (vat_amount, total_with_vat)`: Iranian VAT calculation.
+- `calculate_vat(amount: int | float, rate: float = 0.10) -> (vat_amount, total_with_vat)`: VAT calculation.
 
 ### 5. `parsikit.security`
 - `mask_card(card: str) -> str`: Masks middle digits of a bank card (e.g., 6037-99**-****-1234).
@@ -53,6 +60,3 @@ pip install parsikit
 ## Documentation & Full Reference
 - Web: https://parsikit.dev
 - Repository: https://github.com/MRThugh/ParsiKit
-- English Docs: https://parsikit.dev/en/docs/installation
-- Persian Docs: https://parsikit.dev/fa/docs/installation
-- Spanish Docs: https://parsikit.dev/es/docs/installation

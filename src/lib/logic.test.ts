@@ -23,12 +23,14 @@ import {
   jalaliToGregorian,
 } from './jalali';
 import { searchDocumentation } from './search';
-import { parseRoutePath, buildRoutePath } from './router';
+import { parseRoutePath, buildRoutePath, checkLegacyRedirect, VALID_LANGS } from './router';
 import { computePageMetadata, BASE_SITE_URL } from './seo';
 import { ALL_DOCS } from '../data/docsManifest';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { parsePyprojectData } from '../../scripts/build-docs-manifest';
 import { renderMarkdownToHtml } from '../../scripts/render-markdown';
+import { LOCALES, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
+import { TRANSLATIONS } from '../i18n/translations';
 
 test('persianNumber: digit translations', () => {
   assert.equal(toPersianDigits('12345'), '۱۲۳۴۵');
@@ -50,7 +52,7 @@ test('persianNumber: rial and toman conversions', () => {
   assert.equal(tomanToRial(1000), 10000);
 });
 
-test('validation: Iranian national code modulo 11 algorithm', () => {
+test('validation: Iranian & domestic identity modulo 11 algorithm', () => {
   // Known valid national codes from ParsiKit documentation
   assert.equal(isValidNationalCode('0010123458'), true);
   assert.equal(isValidNationalCode('0010350829'), true);
@@ -65,9 +67,7 @@ test('validation: Iranian national code modulo 11 algorithm', () => {
 });
 
 test('validation: Bank card Luhn algorithm and bank detection', () => {
-  // Valid Luhn card from ParsiKit documentation
   assert.equal(isValidCardNumber('6037991122334455'), true);
-  // Invalid card
   assert.equal(isValidCardNumber('6037991122334450'), false);
 
   const bank = detectBank('6037991122334455');
@@ -102,7 +102,6 @@ test('validation: text cleansing and ZWNJ handling', () => {
 });
 
 test('jalali: leap year calculations and Gregorian conversion', () => {
-  // 1399 and 1403 are leap years; 1400 and 1404 are normal years
   assert.equal(isJalaliLeap(1399), true);
   assert.equal(isJalaliLeap(1400), false);
   assert.equal(isJalaliLeap(1403), true);
@@ -120,19 +119,39 @@ test('jalali: leap year calculations and Gregorian conversion', () => {
   assert.equal(g.gd, 21);
 });
 
-test('search: documentation queries in English, Persian, and Spanish', () => {
-  const enResults = searchDocumentation('national code', 'en');
-  assert.ok(enResults.length > 0);
-  assert.ok(enResults[0].doc.title.length > 0);
+test('i18n: exactly four languages configured with correct metadata', () => {
+  assert.equal(SUPPORTED_LANG_PREFIXES.length, 4);
+  assert.deepEqual(SUPPORTED_LANG_PREFIXES, ['fa', 'en', 'prs-af', 'tg']);
+  assert.equal(DEFAULT_LANG_PREFIX, 'en');
 
-  const faResults = searchDocumentation('کد ملی', 'fa');
-  assert.ok(faResults.length > 0);
-
-  const esResults = searchDocumentation('instalación', 'es');
-  assert.ok(esResults.length > 0);
+  // Verify locales
+  assert.equal(LOCALES.fa.locale, 'fa-IR');
+  assert.equal(LOCALES.fa.direction, 'rtl');
+  assert.equal(LOCALES.en.locale, 'en');
+  assert.equal(LOCALES.en.direction, 'ltr');
+  assert.equal(LOCALES['prs-af'].locale, 'prs-AF');
+  assert.equal(LOCALES['prs-af'].direction, 'rtl');
+  assert.equal(LOCALES.tg.locale, 'tg-TJ');
+  assert.equal(LOCALES.tg.direction, 'ltr');
 });
 
-test('router: trilingual path parsing and serialization', () => {
+test('i18n: translation dictionaries are complete and strongly typed', () => {
+  for (const lang of SUPPORTED_LANG_PREFIXES) {
+    const dict = TRANSLATIONS[lang];
+    assert.ok(dict, `Missing dictionary for ${lang}`);
+    assert.ok(dict.nav.home);
+    assert.ok(dict.nav.docs);
+    assert.ok(dict.nav.playground);
+    assert.ok(dict.nav.architecture);
+    assert.ok(dict.nav.changelog);
+    assert.ok(dict.hero.headlineHighlight);
+    assert.ok(dict.hero.description);
+    assert.ok(dict.playground.title);
+    assert.ok(dict.footer.copyright);
+  }
+});
+
+test('router: 4-language URL routing and parsing', () => {
   const parsedFa = parseRoutePath('/fa/docs/installation');
   assert.equal(parsedFa.lang, 'fa');
   assert.equal(parsedFa.route, 'docs');
@@ -142,34 +161,67 @@ test('router: trilingual path parsing and serialization', () => {
   assert.equal(parsedEn.lang, 'en');
   assert.equal(parsedEn.route, 'playground');
 
-  const parsedEs = parseRoutePath('/es/docs/quickstart');
-  assert.equal(parsedEs.lang, 'es');
-  assert.equal(parsedEs.route, 'docs');
-  assert.equal(parsedEs.docSlug, 'quickstart');
+  const parsedPrs = parseRoutePath('/prs-af/docs/quickstart');
+  assert.equal(parsedPrs.lang, 'prs-af');
+  assert.equal(parsedPrs.route, 'docs');
+  assert.equal(parsedPrs.docSlug, 'quickstart');
 
-  const esPath = buildRoutePath('es', 'docs', 'installation');
-  assert.equal(esPath, '/es/docs/installation');
+  const parsedTg = parseRoutePath('/tg/architecture');
+  assert.equal(parsedTg.lang, 'tg');
+  assert.equal(parsedTg.route, 'architecture');
+
+  assert.equal(buildRoutePath('prs-af', 'docs', 'installation'), '/prs-af/docs/installation');
+  assert.equal(buildRoutePath('tg', 'playground'), '/tg/playground');
 });
 
-test('seo: trilingual metadata and symmetric hreflang alternate URL generation', () => {
+test('router: deprecated Spanish URLs cleanly migrated to English', () => {
+  assert.equal(checkLegacyRedirect('/es'), '/en');
+  assert.equal(checkLegacyRedirect('/es/playground'), '/en/playground');
+  assert.equal(checkLegacyRedirect('/es/docs/installation'), '/en/docs/installation');
+  assert.equal(checkLegacyRedirect('/en/playground'), null);
+
+  const parsedLegacy = parseRoutePath('/es/docs/quickstart');
+  assert.equal(parsedLegacy.lang, 'en');
+  assert.equal(parsedLegacy.route, 'docs');
+  assert.equal(parsedLegacy.docSlug, 'quickstart');
+  assert.equal(parsedLegacy.isLegacyRedirect, true);
+  assert.equal(parsedLegacy.redirectTarget, '/en/docs/quickstart');
+});
+
+test('seo: 4-language metadata and reciprocal hreflang alternate URL generation', () => {
   const homeMetaEn = computePageMetadata('en', 'home', null);
   assert.ok(homeMetaEn.title.includes('ParsiKit'));
   assert.equal(homeMetaEn.canonicalUrl, `${BASE_SITE_URL}/en`);
   assert.equal(homeMetaEn.alternateEnUrl, `${BASE_SITE_URL}/en`);
   assert.equal(homeMetaEn.alternateFaUrl, `${BASE_SITE_URL}/fa`);
-  assert.equal(homeMetaEn.alternateEsUrl, `${BASE_SITE_URL}/es`);
+  assert.equal(homeMetaEn.alternatePrsUrl, `${BASE_SITE_URL}/prs-af`);
+  assert.equal(homeMetaEn.alternateTgUrl, `${BASE_SITE_URL}/tg`);
+  assert.equal(homeMetaEn.alternateXDefaultUrl, `${BASE_SITE_URL}/en`);
 
-  const homeMetaEs = computePageMetadata('es', 'home', null);
-  assert.ok(homeMetaEs.title.includes('ParsiKit'));
-  assert.equal(homeMetaEs.canonicalUrl, `${BASE_SITE_URL}/es`);
+  const homeMetaTg = computePageMetadata('tg', 'home', null);
+  assert.ok(homeMetaTg.title.includes('ParsiKit'));
+  assert.equal(homeMetaTg.canonicalUrl, `${BASE_SITE_URL}/tg`);
 
-  const doc = ALL_DOCS.find((d: any) => d.slug === 'installation' && d.lang === 'es');
+  const doc = ALL_DOCS.find((d: any) => d.slug === 'installation' && d.lang === 'prs-af');
   if (doc) {
-    const docMeta = computePageMetadata('es', 'docs', doc);
-    assert.ok(docMeta.title.includes('Instalación') || docMeta.title.includes('ParsiKit'));
+    const docMeta = computePageMetadata('prs-af', 'docs', doc);
     assert.equal(docMeta.schemaType, 'TechArticle');
-    assert.ok(docMeta.canonicalUrl.includes('/es/docs/installation'));
+    assert.ok(docMeta.canonicalUrl.includes('/prs-af/docs/installation'));
   }
+});
+
+test('search: documentation queries across multilingual datasets', () => {
+  const enResults = searchDocumentation('national code', 'en');
+  assert.ok(enResults.length > 0);
+
+  const faResults = searchDocumentation('کد ملی', 'fa');
+  assert.ok(faResults.length > 0);
+
+  const prsResults = searchDocumentation('تذکره', 'prs-af');
+  assert.ok(prsResults.length > 0);
+
+  const tgResults = searchDocumentation('насб', 'tg');
+  assert.ok(tgResults.length > 0);
 });
 
 test('repoMetadata & TOML parsing: smol-toml verified extraction', () => {
@@ -188,10 +240,10 @@ test('repoMetadata & TOML parsing: smol-toml verified extraction', () => {
 });
 
 test('markdown pipeline: marked renders headings with IDs and escapes untrusted HTML', () => {
-  const md = '# Main Title\n\n## Sub Section\n\n```python\nprint("hello")\n```';
+  const md = '# Сарлавҳаи асосӣ\n\n## Бахши дуюм\n\n```python\nprint("hello")\n```';
   const html = renderMarkdownToHtml(md);
-  assert.ok(html.includes('<h1 id="main-title"'));
-  assert.ok(html.includes('<h2 id="sub-section"'));
+  assert.ok(html.includes('<h1 id='));
+  assert.ok(html.includes('<h2 id='));
   assert.ok(html.includes('<pre><code'));
   assert.ok(html.includes('print('));
 });

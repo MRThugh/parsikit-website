@@ -5,6 +5,8 @@ import { RELEASES_DATA } from '../src/data/changelogData';
 import { REPO_METADATA } from '../src/data/repoMetadata';
 import { computePageMetadata, BASE_SITE_URL } from '../src/lib/seo';
 import { type PageRoute, type AppLang, buildRoutePath, VALID_LANGS } from '../src/lib/router';
+import { LOCALES } from '../src/i18n/config';
+import { getTranslations } from '../src/i18n/translations';
 import { renderMarkdownToHtml } from './render-markdown';
 
 function renderHtmlTemplate(
@@ -18,12 +20,14 @@ function renderHtmlTemplate(
     : null;
 
   const meta = computePageMetadata(lang, route, activeDoc);
-  const isRtl = lang === 'fa';
+  const loc = LOCALES[lang] || LOCALES.en;
+  const isRtl = loc.direction === 'rtl';
+  const t = getTranslations(lang);
 
   let html = baseHtml;
 
   // Replace html tag attributes
-  html = html.replace(/<html[^>]*>/, `<html lang="${lang}" dir="${isRtl ? 'rtl' : 'ltr'}">`);
+  html = html.replace(/<html[^>]*>/, `<html lang="${loc.locale}" dir="${loc.direction}">`);
 
   // Replace title
   html = html.replace(/<title>.*?<\/title>/, `<title>${meta.title}</title>`);
@@ -40,10 +44,16 @@ function renderHtmlTemplate(
     ? `<link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}" />`
     : '';
   const alternateFaTag = meta.alternateFaUrl
-    ? `<link rel="alternate" hreflang="fa" href="${meta.alternateFaUrl}" />`
+    ? `<link rel="alternate" hreflang="fa-IR" href="${meta.alternateFaUrl}" />\n    <link rel="alternate" hreflang="fa" href="${meta.alternateFaUrl}" />`
     : '';
-  const alternateEsTag = meta.alternateEsUrl
-    ? `<link rel="alternate" hreflang="es" href="${meta.alternateEsUrl}" />`
+  const alternatePrsTag = meta.alternatePrsUrl
+    ? `<link rel="alternate" hreflang="prs-AF" href="${meta.alternatePrsUrl}" />\n    <link rel="alternate" hreflang="prs" href="${meta.alternatePrsUrl}" />`
+    : '';
+  const alternateTgTag = meta.alternateTgUrl
+    ? `<link rel="alternate" hreflang="tg-TJ" href="${meta.alternateTgUrl}" />\n    <link rel="alternate" hreflang="tg" href="${meta.alternateTgUrl}" />`
+    : '';
+  const alternateXDefaultTag = meta.alternateXDefaultUrl
+    ? `<link rel="alternate" hreflang="x-default" href="${meta.alternateXDefaultUrl}" />`
     : '';
 
   // Open Graph & Twitter
@@ -73,7 +83,7 @@ function renderHtmlTemplate(
         '@type': 'TechArticle',
         'headline': meta.title,
         'description': meta.description,
-        'inLanguage': lang,
+        'inLanguage': loc.locale,
         'author': {
           '@type': 'Person',
           'name': 'Ali Kamrani',
@@ -153,7 +163,9 @@ function renderHtmlTemplate(
     canonicalTag,
     alternateEnTag,
     alternateFaTag,
-    alternateEsTag,
+    alternatePrsTag,
+    alternateTgTag,
+    alternateXDefaultTag,
     structuredDataTag,
   ].filter(Boolean).join('\n    ');
 
@@ -161,10 +173,10 @@ function renderHtmlTemplate(
 
   // Localized Navigation Links
   const navLinks = {
-    docs: lang === 'fa' ? 'مستندات' : lang === 'es' ? 'Documentación' : 'Documentation',
-    playground: lang === 'fa' ? 'محیط آزمایشی' : lang === 'es' ? 'Pruebas' : 'Playground',
-    architecture: lang === 'fa' ? 'معماری فنی' : lang === 'es' ? 'Arquitectura' : 'Architecture',
-    changelog: lang === 'fa' ? 'تغییرات' : lang === 'es' ? 'Historial' : 'Changelog',
+    docs: t.nav.docs,
+    playground: t.nav.playground,
+    architecture: t.nav.architecture,
+    changelog: t.nav.changelog,
   };
 
   // Generate semantic HTML inside #root
@@ -185,7 +197,7 @@ function renderHtmlTemplate(
     const tocHtml = activeDoc.headings.length > 0
       ? `<aside class="hidden lg:block w-64 shrink-0 text-sm">
           <div class="sticky top-24 p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-white/50 dark:bg-stone-900/40">
-            <h3 class="font-bold text-xs uppercase tracking-wider text-stone-500 mb-3">${lang === 'fa' ? 'فهرست بخش‌ها' : lang === 'es' ? 'En esta página' : 'On this page'}</h3>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-stone-500 mb-3">${t.docs.onThisPage}</h3>
             <ul class="space-y-1.5 text-stone-600 dark:text-stone-300">
               ${activeDoc.headings.map(h => `<li class="${h.level === 3 ? (isRtl ? 'pr-4' : 'pl-4') : ''}"><a href="#${h.id}" class="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors">${h.text}</a></li>`).join('\n')}
             </ul>
@@ -244,7 +256,6 @@ function renderHtmlTemplate(
         </footer>
       </div>`;
   } else if (route === 'home') {
-    const isEs = lang === 'es';
     rootContent = `
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
@@ -271,7 +282,7 @@ function renderHtmlTemplate(
             <p class="text-lg sm:text-xl text-stone-600 dark:text-stone-300 max-w-3xl mx-auto mb-8 leading-relaxed">
               ${meta.description}
             </p>
-            <div class="inline-flex items-center gap-3 p-4 bg-stone-900 text-stone-100 dark:bg-black/60 rounded-xl font-mono text-sm shadow-lg border border-stone-800">
+            <div class="inline-flex items-center gap-3 p-4 bg-stone-900 text-stone-100 dark:bg-black/60 rounded-xl font-mono text-sm shadow-lg border border-stone-800" dir="ltr">
               <span class="text-amber-400">$</span>
               <span>pip install parsikit</span>
             </div>
@@ -280,37 +291,36 @@ function renderHtmlTemplate(
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 my-16">
             <div class="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40">
               <h2 class="font-bold text-xl mb-3 text-stone-900 dark:text-white">
-                ${isRtl ? 'پاکسازی متن و نیم‌فاصله' : isEs ? 'Normalización de Texto y ZWNJ' : 'Text & ZWNJ Normalization'}
+                ${t.playground.tools.text.name}
               </h2>
               <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
-                ${isRtl ? 'استانداردسازی کاراکترهای عربی به فارسی، اصلاح نیم‌فاصله‌های پنهان و پاکسازی اعراب.' : isEs ? 'Conversión de glifos árabes a persas, corrección de ZWNJ y limpieza de diacríticos.' : 'Arabic to Persian glyph normalization, ZWNJ correction, and text cleaning.'}
+                ${t.playground.tools.text.desc}
               </p>
             </div>
             <div class="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40">
               <h2 class="font-bold text-xl mb-3 text-stone-900 dark:text-white">
-                ${isRtl ? 'اعتبارسنجی ملی و بانکی' : isEs ? 'Validación Nacional y Bancaria' : 'National & Banking Validation'}
+                ${t.playground.tools.nationalCode.name}
               </h2>
               <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
-                ${isRtl ? 'الگوریتم پیمانه ۱۱ کد ملی، الگوریتم لون کارت بانکی و اعتبارسنجی شناسه شبا.' : isEs ? 'Módulo 11 para Código Nacional, algoritmo de Luhn para tarjetas y verificación IBAN Sheba.' : 'Modulo 11 National Code, Luhn bank card algorithm, and ISO 7064 Sheba verification.'}
+                ${t.playground.tools.nationalCode.desc}
               </p>
             </div>
             <div class="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40">
               <h2 class="font-bold text-xl mb-3 text-stone-900 dark:text-white">
-                ${isRtl ? 'تقویم نجومی جلالی' : isEs ? 'Calendario Astronómico Jalalí' : 'Astronomical Jalali Calendar'}
+                ${t.playground.tools.calendar.name}
               </h2>
               <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
-                ${isRtl ? 'تبدیل تاریخ‌های میلادی و جلالی با محاسبات دقیق چرخه ۳۳ ساله کبیسه.' : isEs ? 'Conversión de fechas solares y gregorianas con ciclo bisiesto de 33 años.' : 'Gregorian to Solar Hijri date conversions with accurate 33-year leap cycle support.'}
+                ${t.playground.tools.calendar.desc}
               </p>
             </div>
           </div>
         </main>
 
         <footer class="p-8 border-t border-stone-200 dark:border-white/10 text-center text-sm text-stone-500">
-          <p>ParsiKit — Built by Ali Kamrani (<a href="https://github.com/MRThugh" class="underline">@MRThugh</a>). MIT License.</p>
+          <p>${t.footer.copyright}</p>
         </footer>
       </div>`;
   } else if (route === 'playground') {
-    const isEs = lang === 'es';
     rootContent = `
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
@@ -329,23 +339,22 @@ function renderHtmlTemplate(
           <h1 class="text-3xl font-extrabold mb-4 text-stone-900 dark:text-white">${meta.title}</h1>
           <p class="text-stone-600 dark:text-stone-300 mb-8">${meta.description}</p>
           <div class="p-8 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40">
-            <h2 class="text-xl font-bold mb-4">${isRtl ? 'ابزارهای آزمایشی آنلاین' : isEs ? 'Herramientas de Diagnóstico Interactivas' : 'Interactive Diagnostic Tools'}</h2>
+            <h2 class="text-xl font-bold mb-4">${t.playground.runOnline}</h2>
             <ul class="list-disc ps-6 space-y-2 text-stone-600 dark:text-stone-300 text-sm">
-              <li>${isRtl ? 'پاکسازی نیم‌فاصله و تبدیل کاراکترهای عربی به فارسی' : isEs ? 'Limpieza de ZWNJ y normalización de glifos árabes' : 'ZWNJ text cleansing and Arabic to Persian normalization'}</li>
-              <li>${isRtl ? 'محاسبه چک‌سام کد ملی و تشخیص استان صادرکننده' : isEs ? 'Verificación de Código Nacional y provincia de emisión' : 'National Code Modulo 11 check and province detection'}</li>
-              <li>${isRtl ? 'الگوریتم لان کارت بانکی و تشخیص بانک عامل' : isEs ? 'Algoritmo de Luhn y reconocimiento del banco emisor' : 'Bank card Luhn verification and issuing bank detection'}</li>
-              <li>${isRtl ? 'تبدیل تاریخ میلادی به هجری خورشیدی و محاسبه کبیسه' : isEs ? 'Conversión de fechas solares Jalalí y cálculo de bisiestos' : 'Gregorian to Jalali date conversion and leap year calculation'}</li>
-              <li>${isRtl ? 'تبدیل اعداد و مبالغ ریال به حروف و تومان' : isEs ? 'Conversión de números a palabras en persa y cálculo de divisas' : 'Number to Persian words and Rial to Toman calculation'}</li>
+              <li>${t.playground.tools.text.name} — ${t.playground.tools.text.desc}</li>
+              <li>${t.playground.tools.nationalCode.name} — ${t.playground.tools.nationalCode.desc}</li>
+              <li>${t.playground.tools.bankCard.name} — ${t.playground.tools.bankCard.desc}</li>
+              <li>${t.playground.tools.calendar.name} — ${t.playground.tools.calendar.desc}</li>
+              <li>${t.playground.tools.numberWords.name} — ${t.playground.tools.numberWords.desc}</li>
             </ul>
           </div>
         </main>
 
         <footer class="p-6 border-t border-stone-200 dark:border-white/10 text-center text-sm text-stone-500">
-          <p>ParsiKit — Built by Ali Kamrani (<a href="https://github.com/MRThugh" class="underline">@MRThugh</a>). MIT License.</p>
+          <p>${t.footer.copyright}</p>
         </footer>
       </div>`;
   } else if (route === 'architecture') {
-    const isEs = lang === 'es';
     rootContent = `
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
@@ -380,20 +389,19 @@ function renderHtmlTemplate(
         </main>
 
         <footer class="p-6 border-t border-stone-200 dark:border-white/10 text-center text-sm text-stone-500">
-          <p>ParsiKit — Built by Ali Kamrani (<a href="https://github.com/MRThugh" class="underline">@MRThugh</a>). MIT License.</p>
+          <p>${t.footer.copyright}</p>
         </footer>
       </div>`;
   } else if (route === 'changelog') {
-    const isEs = lang === 'es';
     const releaseListHtml = RELEASES_DATA.map(r => `
       <div class="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40 mb-6">
         <div class="flex items-center justify-between mb-4">
           <span class="text-lg font-bold text-stone-900 dark:text-white">v${r.version}</span>
           <time class="text-xs font-mono text-stone-500">${r.date}</time>
         </div>
-        ${r.fixed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-amber-600 mb-2">Fixed</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.fixed.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
-        ${r.added.length > 0 ? `<h3 class="font-bold text-xs uppercase text-emerald-600 mb-2">Added</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.added.map(a => `<li>${a}</li>`).join('')}</ul>` : ''}
-        ${r.changed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-blue-600 mb-2">Changed</h3><ul class="list-disc ps-5 text-sm space-y-1">${r.changed.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
+        ${r.fixed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-amber-600 mb-2">${t.changelog.fixed}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.fixed.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+        ${r.added.length > 0 ? `<h3 class="font-bold text-xs uppercase text-emerald-600 mb-2">${t.changelog.added}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.added.map(a => `<li>${a}</li>`).join('')}</ul>` : ''}
+        ${r.changed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-blue-600 mb-2">${t.changelog.changed}</h3><ul class="list-disc ps-5 text-sm space-y-1">${r.changed.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
       </div>
     `).join('\n');
 
@@ -420,7 +428,7 @@ function renderHtmlTemplate(
         </main>
 
         <footer class="p-6 border-t border-stone-200 dark:border-white/10 text-center text-sm text-stone-500">
-          <p>ParsiKit — Built by Ali Kamrani (<a href="https://github.com/MRThugh" class="underline">@MRThugh</a>). MIT License.</p>
+          <p>${t.footer.copyright}</p>
         </footer>
       </div>`;
   }
@@ -430,6 +438,28 @@ function renderHtmlTemplate(
   }
 
   return html;
+}
+
+/**
+ * Generates an SEO 301-equivalent redirect HTML page for deprecated Spanish routes.
+ */
+function renderLegacyRedirectHtml(baseHtml: string, targetPath: string): string {
+  const fullTargetUrl = `${BASE_SITE_URL}${targetPath}`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0; url=${fullTargetUrl}" />
+  <link rel="canonical" href="${fullTargetUrl}" />
+  <title>ParsiKit — Page Moved</title>
+  <meta name="robots" content="noindex, follow" />
+  <script>window.location.replace("${fullTargetUrl}");</script>
+</head>
+<body style="font-family: system-ui, sans-serif; padding: 40px; text-align: center;">
+  <h1>Page Moved</h1>
+  <p>The requested page has been relocated to <a href="${fullTargetUrl}">${fullTargetUrl}</a>.</p>
+</body>
+</html>`;
 }
 
 function prerender() {
@@ -442,7 +472,7 @@ function prerender() {
   const baseHtmlPath = path.join(distDir, 'index.html');
   const baseHtml = fs.readFileSync(baseHtmlPath, 'utf-8');
 
-  // Static routes to prerender in all 3 languages
+  // Static routes to prerender across all 4 languages
   const routesToPrerender: { lang: AppLang; route: PageRoute; docSlug?: string }[] = [];
 
   for (const lang of VALID_LANGS) {
@@ -454,7 +484,7 @@ function prerender() {
     );
   }
 
-  // Add all documentation files
+  // Add all documentation files (84 total)
   for (const doc of ALL_DOCS) {
     routesToPrerender.push({
       lang: doc.lang,
@@ -474,6 +504,24 @@ function prerender() {
     fs.writeFileSync(path.join(targetDir, 'index.html'), renderedHtml);
 
     allUrls.push(`${BASE_SITE_URL}${routePath}`);
+  }
+
+  // Pre-render explicit 301 migration redirect pages for legacy Spanish routes
+  const legacySpanishRoutes = [
+    { source: 'es', target: '/en' },
+    { source: 'es/playground', target: '/en/playground' },
+    { source: 'es/architecture', target: '/en/architecture' },
+    { source: 'es/changelog', target: '/en/changelog' },
+    { source: 'es/docs/index', target: '/en/docs/index' },
+    { source: 'es/docs/installation', target: '/en/docs/installation' },
+    { source: 'es/docs/quickstart', target: '/en/docs/quickstart' },
+  ];
+
+  for (const leg of legacySpanishRoutes) {
+    const legDir = path.join(distDir, leg.source);
+    fs.mkdirSync(legDir, { recursive: true });
+    const redirHtml = renderLegacyRedirectHtml(baseHtml, leg.target);
+    fs.writeFileSync(path.join(legDir, 'index.html'), redirHtml);
   }
 
   // Prerender 404.html
