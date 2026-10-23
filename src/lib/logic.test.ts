@@ -29,7 +29,7 @@ import { ALL_DOCS } from '../data/docsManifest';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { parsePyprojectData } from '../../scripts/build-docs-manifest';
 import { renderMarkdownToHtml } from '../../scripts/render-markdown';
-import { escapeHtml, isDangerousScheme, resolveRelativeDocLink } from './markdown';
+import { escapeHtml, isDangerousScheme, isSafeUrl, resolveRelativeDocLink } from './markdown';
 import { LOCALES, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
 import { TRANSLATIONS } from '../i18n/translations';
 
@@ -290,34 +290,123 @@ test('seo: English-only development docs do not emit nonexistent alternate links
   assert.equal(meta.alternateTgUrl, undefined);
 });
 
-test('markdown security: HTML escaping and dangerous URL scheme blocking', () => {
+test('markdown security: strict allowlist and obfuscated protocol blocking', () => {
+  // 1. Basic escaping
   assert.equal(escapeHtml('<script>alert("xss")</script>'), '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
-  assert.equal(isDangerousScheme('javascript:alert(1)'), true);
-  assert.equal(isDangerousScheme('data:text/html,<script>alert(1)</script>'), true);
-  assert.equal(isDangerousScheme('vbscript:msgbox(1)'), true);
-  assert.equal(isDangerousScheme('file:///etc/passwd'), true);
-  assert.equal(isDangerousScheme('https://example.com'), false);
-  assert.equal(isDangerousScheme('/en/docs/installation'), false);
 
-  // Render check
-  const xssHtml = renderMarkdownToHtml('[malicious](javascript:alert(1))');
-  assert.ok(xssHtml.includes('[unsafe link blocked]'));
-  assert.ok(!xssHtml.includes('href="javascript:'));
+  // 2. Dangerous scheme detection
+  assert.equal(isSafeUrl('javascript:alert(1)'), false);
+  assert.equal(isSafeUrl('data:text/html,<script>alert(1)</script>'), false);
+  assert.equal(isSafeUrl('vbscript:msgbox(1)'), false);
+  assert.equal(isSafeUrl('file:///etc/passwd'), false);
+  assert.equal(isSafeUrl('blob:https://example.com/uuid'), false);
 
-  const scriptHtml = renderMarkdownToHtml('<script>alert(1)</script>');
-  assert.ok(!scriptHtml.includes('<script>alert(1)</script>'));
-  assert.ok(scriptHtml.includes('&lt;script&gt;'));
+  // 3. Mixed-case and whitespace/control-char obfuscation
+  assert.equal(isSafeUrl('JaVaScRiPt:alert(1)'), false);
+  assert.equal(isSafeUrl('   javascript:alert(1)'), false);
+  assert.equal(isSafeUrl('\u0000javascript:alert(1)'), false);
+  assert.equal(isSafeUrl('\x01javascript:alert(1)'), false);
+
+  // 4. Entity and percent-encoding obfuscation
+  assert.equal(isSafeUrl('jav&#x61;script:alert(1)'), false);
+  assert.equal(isSafeUrl('&#106;avascript:alert(1)'), false);
+  assert.equal(isSafeUrl('%6a%61%76%61%73%63%72%69%70%74:alert(1)'), false);
+
+  // 5. Allowed safe schemes
+  assert.equal(isSafeUrl('https://example.com'), true);
+  assert.equal(isSafeUrl('http://example.com/api'), true);
+  assert.equal(isSafeUrl('mailto:info@parsikit.dev'), true);
+  assert.equal(isSafeUrl('#setup-heading'), true);
+  assert.equal(isSafeUrl('/en/docs/installation'), true);
+  assert.equal(isSafeUrl('../tutorials/datetime.md'), true);
+
+  // 6. Actual rendered HTML checks
+  const xssLink = renderMarkdownToHtml('[malicious](javascript:alert(1))');
+  assert.ok(xssLink.includes('[unsafe link blocked]'));
+  assert.ok(!xssLink.includes('href="javascript:'));
+
+  const mixedXss = renderMarkdownToHtml('[malicious](JaVaScRiPt:alert(1))');
+  assert.ok(mixedXss.includes('[unsafe link blocked]'));
+
+  const obfuscatedXss = renderMarkdownToHtml('[malicious](jav&#x61;script:alert(1))');
+  assert.ok(obfuscatedXss.includes('[unsafe link blocked]'));
+
+  const maliciousImg = renderMarkdownToHtml('![bad image](javascript:alert(1))');
+  assert.ok(maliciousImg.includes('[unsafe image blocked]'));
+
+  const rawHtmlScript = renderMarkdownToHtml('<script>alert("pwn")</script>');
+  assert.ok(!rawHtmlScript.includes('<script>'));
+  assert.ok(rawHtmlScript.includes('&lt;script&gt;'));
+
+  const rawHtmlEvent = renderMarkdownToHtml('<img src="x" onerror="alert(1)">');
+  assert.ok(!rawHtmlEvent.includes('<img src="x" onerror="alert(1)">'));
+  assert.ok(rawHtmlEvent.includes('&lt;img'));
+
+  // 7. Legitimate HTML inside code block and inline code remains safe and readable
+  const codeBlockHtml = renderMarkdownToHtml('```html\n<div class="sample">Hello World</div>\n```');
+  assert.ok(codeBlockHtml.includes('&lt;div class=&quot;sample&quot;&gt;Hello World&lt;/div&gt;'));
+  assert.ok(codeBlockHtml.includes('<pre dir="ltr"'));
+
+  const inlineCodeHtml = renderMarkdownToHtml('Use `<span class="badge">` in HTML');
+  assert.ok(inlineCodeHtml.includes('&lt;span class=&quot;badge&quot;&gt;'));
+
+  // 8. Safe external HTTPS link with rel="noopener noreferrer" and target="_blank"
+  const safeExt = renderMarkdownToHtml('[Official Repo](https://github.com/MRThugh/ParsiKit)');
+  assert.ok(safeExt.includes('href="https://github.com/MRThugh/ParsiKit"'));
+  assert.ok(safeExt.includes('rel="noopener noreferrer"'));
+  assert.ok(safeExt.includes('target="_blank"'));
 });
 
-test('markdown links: directory-relative link resolution in docs', () => {
-  assert.equal(resolveRelativeDocLink('api/index', 'validators.md'), 'api/validators');
+test('markdown links: directory-relative link resolution with query, fragment & traversal protection', () => {
+  // Case: text.md and ./text.md from api/index
   assert.equal(resolveRelativeDocLink('api/index', 'text.md'), 'api/text');
-  assert.equal(resolveRelativeDocLink('api/index', '../tutorials/datetime.md'), 'tutorials/datetime');
-  assert.equal(resolveRelativeDocLink('index', 'installation.md'), 'installation');
-  assert.equal(resolveRelativeDocLink('guides/web_backends', '../api/models.md#pydantic'), 'api/models#pydantic');
+  assert.equal(resolveRelativeDocLink('api/index', './text.md'), 'api/text');
+  assert.equal(resolveRelativeDocLink('api/index', 'text.md', 'en'), '/en/docs/api/text');
+  assert.equal(resolveRelativeDocLink('api/index', './text.md', 'fa'), '/fa/docs/api/text');
 
-  const rendered = renderMarkdownToHtml('[Validators](validators.md)', 'api/index', 'en');
-  assert.ok(rendered.includes('href="/en/docs/api/validators"'));
+  // Case: ../guide.md from api/index
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md'), 'guide');
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md', 'prs-af'), '/prs-af/docs/guide');
+
+  // Case: ../guide.md?mode=basic
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md?mode=basic'), 'guide?mode=basic');
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md?mode=basic', 'tg'), '/tg/docs/guide?mode=basic');
+
+  // Case: ../guide.md#setup
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md#setup'), 'guide#setup');
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md#setup', 'en'), '/en/docs/guide#setup');
+
+  // Case: ../guide.md?mode=basic#setup
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md?mode=basic#setup'), 'guide?mode=basic#setup');
+  assert.equal(resolveRelativeDocLink('api/index', '../guide.md?mode=basic#setup', 'fa'), '/fa/docs/guide?mode=basic#setup');
+
+  // Case: deeply nested relative link (e.g. from tutorials/advanced/topic, ../../api/validators.md)
+  assert.equal(resolveRelativeDocLink('tutorials/advanced/topic', '../../api/validators.md'), 'api/validators');
+  assert.equal(resolveRelativeDocLink('tutorials/advanced/topic', '../../api/validators.md', 'en'), '/en/docs/api/validators');
+
+  // Case: root-relative documentation link
+  assert.equal(resolveRelativeDocLink('api/index', '/docs/installation'), 'installation');
+  assert.equal(resolveRelativeDocLink('api/index', '/fa/docs/installation', 'fa'), '/fa/docs/installation');
+
+  // Case: external HTTPS URL is preserved
+  assert.equal(resolveRelativeDocLink('api/index', 'https://example.com/docs'), 'https://example.com/docs');
+
+  // Case: missing destination document still resolves to intended target route
+  assert.equal(resolveRelativeDocLink('api/index', 'missing-destination.md', 'en'), '/en/docs/api/missing-destination');
+
+  // Case: traversal attempt outside the allowed documentation root is rejected (returns null)
+  assert.equal(resolveRelativeDocLink('api/index', '../../../etc/passwd'), null);
+  assert.equal(resolveRelativeDocLink('index', '../outside.md'), null);
+  assert.equal(resolveRelativeDocLink('index', '../../escape.md', 'en'), null);
+
+  // Render check with query and hash
+  const renderedWithQuery = renderMarkdownToHtml('[Setup](../guide.md?mode=basic#setup)', 'api/index', 'prs-af');
+  assert.ok(renderedWithQuery.includes('href="/prs-af/docs/guide?mode=basic#setup"'));
+
+  // Traversal attack blocked in rendered HTML
+  const renderedAttack = renderMarkdownToHtml('[Hack](../../../../etc/passwd)', 'api/index', 'en');
+  assert.ok(renderedAttack.includes('[unsafe link blocked]'));
+  assert.ok(!renderedAttack.includes('passwd'));
 });
 
 test('router & 404: not-found route detection and noindex SEO metadata', () => {

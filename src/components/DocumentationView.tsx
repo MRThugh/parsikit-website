@@ -12,14 +12,26 @@ import {
   Layers,
   Share2,
   Check,
+  AlertTriangle,
+  HelpCircle,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ALL_DOCS } from '../data/docsManifest';
 import { getTranslations } from '../i18n/translations';
 import { renderMarkdownToHtml } from '../lib/markdown';
+import { LOCALES } from '../i18n/config';
 
 export function DocumentationView() {
-  const { lang, activeDocSlug, setActiveDocSlug, navigateToDoc, toggleLang, isRtl } = useApp();
+  const {
+    lang,
+    activeDocSlug,
+    setActiveDocSlug,
+    navigateToDoc,
+    toggleLang,
+    isRtl,
+    activeDoc,
+    docResolution,
+  } = useApp();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [activeHeadingId, setActiveHeadingId] = useState<string>('');
@@ -27,12 +39,14 @@ export function DocumentationView() {
 
   const t = getTranslations(lang);
 
-  // Find active document for current language
-  const currentDoc =
-    ALL_DOCS.find((d) => d.lang === lang && d.slug === activeDocSlug) ||
-    ALL_DOCS.find((d) => d.slug === activeDocSlug) ||
-    ALL_DOCS.find((d) => d.lang === lang) ||
-    ALL_DOCS[0];
+  // Current doc: use activeDoc from context or resolved doc
+  const currentDoc = activeDoc || docResolution?.doc || ALL_DOCS[0];
+
+  const isFallback =
+    Boolean(docResolution && docResolution.status === 'fallback' && docResolution.resolvedLang && docResolution.resolvedLang !== lang);
+
+  const contentLang = (isFallback && docResolution?.resolvedLang) ? docResolution.resolvedLang : lang;
+  const contentLoc = LOCALES[contentLang] || LOCALES.en;
 
   // Track reading progress & heading on scroll
   useEffect(() => {
@@ -135,11 +149,15 @@ export function DocumentationView() {
       return;
     }
 
-    // Internal document link with optional hash anchor
+    // Internal document link with optional hash anchor and query
     e.preventDefault();
     const hashIdx = href.indexOf('#');
-    const pathPart = hashIdx !== -1 ? href.slice(0, hashIdx) : href;
+    const pathAndQuery = hashIdx !== -1 ? href.slice(0, hashIdx) : href;
     const hashPart = hashIdx !== -1 ? href.slice(hashIdx + 1) : '';
+
+    const queryIdx = pathAndQuery.indexOf('?');
+    const pathPart = queryIdx !== -1 ? pathAndQuery.slice(0, queryIdx) : pathAndQuery;
+    const queryPart = queryIdx !== -1 ? pathAndQuery.slice(queryIdx + 1) : '';
 
     const cleanSlug = pathPart
       .replace(/^\//, '')
@@ -147,7 +165,7 @@ export function DocumentationView() {
       .replace(/^(fa|en|prs-af|tg)\/docs\//, '')
       .replace(/\.md$/, '');
 
-    navigateToDoc(cleanSlug);
+    navigateToDoc(cleanSlug, lang, { query: queryPart, hash: hashPart });
     if (hashPart) {
       setTimeout(() => scrollToHeading(hashPart), 50);
     }
@@ -275,9 +293,41 @@ export function DocumentationView() {
               </div>
             </div>
 
-            {/* Document Markdown Body */}
+            {/* Explicit Missing-Translation / Fallback Notice Banner */}
+            {isFallback && (
+              <div
+                className="mb-8 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex items-start gap-3"
+                role="status"
+              >
+                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold">
+                    {lang === 'fa'
+                      ? 'ترجمه فارسی این سند موجود نیست'
+                      : lang === 'prs-af'
+                      ? 'ترجمه دری این سند موجود نمی‌باشد'
+                      : lang === 'tg'
+                      ? 'Тарҷумаи тоҷикии ин ҳуҷҷат мавҷуд нест'
+                      : 'Translation unavailable in requested language'}
+                  </p>
+                  <p className="text-amber-800 dark:text-amber-300/90 leading-relaxed text-xs">
+                    {lang === 'fa'
+                      ? `این سند فنی تخصصی در حال حاضر به زبان اصلی (${contentLoc.nameNative}) نمایش داده می‌شود و ساختار متن بر اساس زبان اصلی تنظیم شده است.`
+                      : lang === 'prs-af'
+                      ? `این سند تخنیکی فعلاً به لسان اصلی (${contentLoc.nameNative}) نمایش داده می‌شود.`
+                      : lang === 'tg'
+                      ? `Ин санади техникӣ ҳоло бо забони аслӣ (${contentLoc.nameNative}) намоиш дода мешавад.`
+                      : `This document is currently displayed in ${contentLoc.nameEnglish} (${contentLoc.nameNative}).`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Document Markdown Body with Accurate Language and Direction */}
             <article
               onClick={handleArticleClick}
+              dir={contentLoc.direction}
+              lang={contentLoc.locale}
               className="prose prose-stone dark:prose-invert max-w-none prose-headings:scroll-mt-24 markdown-body"
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
             />

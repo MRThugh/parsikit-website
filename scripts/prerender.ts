@@ -472,7 +472,9 @@ function renderHtmlTemplate(
 }
 
 /**
- * Generates an SEO 301-equivalent redirect HTML page for deprecated Spanish routes.
+ * Generates an SEO HTML fallback redirect page for deprecated Spanish routes.
+ * Uses client-side meta http-equiv="refresh" and window.location.replace while preserving query and hash.
+ * NOTE: This is an HTML fallback for static hosting (e.g. GitHub Pages) and is NOT a server-side HTTP 301 response.
  */
 function renderLegacyRedirectHtml(baseHtml: string, targetPath: string): string {
   const fullTargetUrl = `${BASE_SITE_URL}${targetPath}`;
@@ -482,13 +484,21 @@ function renderLegacyRedirectHtml(baseHtml: string, targetPath: string): string 
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="0; url=${fullTargetUrl}" />
   <link rel="canonical" href="${fullTargetUrl}" />
-  <title>ParsiKit — Page Moved</title>
+  <title>ParsiKit — Page Relocated</title>
   <meta name="robots" content="noindex, follow" />
-  <script>window.location.replace("${fullTargetUrl}");</script>
+  <script>
+    (function() {
+      var target = "${fullTargetUrl}";
+      var search = window.location.search || "";
+      var hash = window.location.hash || "";
+      window.location.replace(target + search + hash);
+    })();
+  </script>
 </head>
 <body style="font-family: system-ui, sans-serif; padding: 40px; text-align: center;">
-  <h1>Page Moved</h1>
+  <h1>Page Relocated</h1>
   <p>The requested page has been relocated to <a href="${fullTargetUrl}">${fullTargetUrl}</a>.</p>
+  <p style="font-size: 0.85em; color: #666;">HTML redirect fallback verified (client-side meta-refresh + window.location.replace). Hosting platform limitation: GitHub Pages does not support native server-side HTTP 301 headers.</p>
 </body>
 </html>`;
 }
@@ -639,7 +649,7 @@ Sitemap: ${BASE_SITE_URL}/sitemap.xml
   fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
   fs.writeFileSync(path.resolve(process.cwd(), 'public/robots.txt'), robotsTxt);
 
-  console.log(`Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} Spanish 301 redirects, and sitemap!`);
+  console.log(`Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} legacy Spanish HTML fallback redirect stubs (client-side meta-refresh + window.location.replace), and sitemap!`);
 }
 
 prerender();

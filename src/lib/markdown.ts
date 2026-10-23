@@ -9,14 +9,78 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Strict protocol allowlist and URL security validator.
+ * Only permits: http:, https:, mailto:, in-page anchors, and internal relative paths.
+ * Rejects javascript:, data:, vbscript:, file:, blob:, and any obfuscated or entity-encoded forms.
+ */
+export function isSafeUrl(rawUrl: string): boolean {
+  if (!rawUrl || typeof rawUrl !== 'string') return false;
+
+  // 1. Strip ASCII control characters and whitespace
+  const sanitized = rawUrl.replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '');
+  if (!sanitized) return false;
+
+  // 2. Decode entities and percent encodings to uncover obfuscated schemes
+  let decoded = sanitized;
+  decoded = decoded
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)));
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch {}
+  const normalized = decoded.replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '').toLowerCase();
+
+  // Deny dangerous scheme strings anywhere in normalized form
+  if (
+    normalized.startsWith('javascript:') ||
+    normalized.startsWith('data:') ||
+    normalized.startsWith('vbscript:') ||
+    normalized.startsWith('file:') ||
+    normalized.startsWith('blob:') ||
+    normalized.startsWith('intent:') ||
+    normalized.includes('javascript:')
+  ) {
+    return false;
+  }
+
+  // 3. Anchor-only links are safe if they contain no HTML or quotes
+  if (sanitized.startsWith('#')) {
+    return !/[<>"']/.test(sanitized);
+  }
+
+  // 4. Scheme validation: if URL contains a scheme delimiter ':'
+  const firstColon = sanitized.indexOf(':');
+  const firstSlash = sanitized.indexOf('/');
+  const firstQuestion = sanitized.indexOf('?');
+  const firstHash = sanitized.indexOf('#');
+
+  const hasScheme =
+    firstColon !== -1 &&
+    (firstSlash === -1 || firstColon < firstSlash) &&
+    (firstQuestion === -1 || firstColon < firstQuestion) &&
+    (firstHash === -1 || firstColon < firstHash);
+
+  if (hasScheme) {
+    try {
+      const parsed = new URL(sanitized);
+      const protocol = parsed.protocol.toLowerCase();
+      return ['http:', 'https:', 'mailto:'].includes(protocol);
+    } catch {
+      return false;
+    }
+  }
+
+  // 5. Internal relative or root-relative path: reject raw HTML and attribute breaks
+  if (/[<>"']/.test(sanitized)) {
+    return false;
+  }
+
+  return true;
+}
+
 export function isDangerousScheme(url: string): boolean {
-  const trimmed = url.trim().toLowerCase();
-  return (
-    trimmed.startsWith('javascript:') ||
-    trimmed.startsWith('data:') ||
-    trimmed.startsWith('vbscript:') ||
-    trimmed.startsWith('file:')
-  );
+  return !isSafeUrl(url);
 }
 
 function slugify(text: string): string {
@@ -28,59 +92,98 @@ function slugify(text: string): string {
 
 /**
  * Resolves relative documentation links relative to the source document's directory.
- * E.g.:
- * - In 'api/index', 'validators.md' -> 'api/validators'
- * - In 'api/index', '../tutorials/datetime.md' -> 'tutorials/datetime'
- * - In 'index', 'installation.md' -> 'installation'
+ * Preserves query parameters, URL fragments, and ensures paths do not escape the doc root.
+ * Returns null if the link is malicious or attempts path traversal outside the doc root.
  */
-export function resolveRelativeDocLink(baseSlug: string | undefined, href: string): string {
+export function resolveRelativeDocLink(
+  baseSlug: string | undefined,
+  href: string,
+  lang?: string
+): string | null {
+  if (!isSafeUrl(href)) {
+    return null;
+  }
+
+  // Handle external URLs
   if (
     href.startsWith('http://') ||
     href.startsWith('https://') ||
-    href.startsWith('mailto:') ||
-    href.startsWith('#')
+    href.startsWith('mailto:')
   ) {
     return href;
   }
 
-  // Split path and fragment
+  // Handle in-page anchors
+  if (href.startsWith('#')) {
+    return href;
+  }
+
+  // Parse path, query, and fragment cleanly
   const hashIdx = href.indexOf('#');
-  let pathPart = hashIdx !== -1 ? href.slice(0, hashIdx) : href;
+  const pathAndQuery = hashIdx !== -1 ? href.slice(0, hashIdx) : href;
   const hashPart = hashIdx !== -1 ? href.slice(hashIdx) : '';
 
-  if (!pathPart) return hashPart;
+  const queryIdx = pathAndQuery.indexOf('?');
+  let rawPath = queryIdx !== -1 ? pathAndQuery.slice(0, queryIdx) : pathAndQuery;
+  const queryPart = queryIdx !== -1 ? pathAndQuery.slice(queryIdx) : '';
 
-  // Clean trailing .md
-  pathPart = pathPart.replace(/\.md$/, '');
-
-  // Root-relative link
-  if (pathPart.startsWith('/')) {
-    return pathPart.replace(/^\/docs\//, '') + hashPart;
+  // Clean trailing .md extension
+  if (rawPath.endsWith('.md')) {
+    rawPath = rawPath.slice(0, -3);
   }
 
-  if (!baseSlug) {
-    return pathPart.replace(/^\.\//, '') + hashPart;
-  }
+  let resolvedSlug: string;
 
-  // Split base slug into directory segments
-  const baseParts = baseSlug.split('/');
-  baseParts.pop(); // remove file name, retain directory
-
-  const hrefSegments = pathPart.split('/');
-  for (const seg of hrefSegments) {
-    if (seg === '.' || seg === '') {
-      continue;
-    } else if (seg === '..') {
-      if (baseParts.length > 0) {
-        baseParts.pop();
+  // Handle root-relative link (e.g. /docs/installation or /fa/docs/installation)
+  if (rawPath.startsWith('/')) {
+    let clean = rawPath.replace(/^\/+/, '');
+    for (const l of ['fa', 'en', 'prs-af', 'tg']) {
+      if (clean.startsWith(`${l}/docs/`)) {
+        clean = clean.slice(`${l}/docs/`.length);
+        break;
       }
-    } else {
-      baseParts.push(seg);
     }
+    if (clean.startsWith('docs/')) {
+      clean = clean.slice(5);
+    }
+    const parts = clean.split('/').filter(Boolean);
+    // Check for traversal in root-relative
+    if (parts.some((p) => p === '..')) {
+      return null;
+    }
+    resolvedSlug = parts.join('/') || 'index';
+  } else {
+    // Relative link: resolve against baseSlug's directory
+    const dirParts = baseSlug ? baseSlug.split('/') : [];
+    if (dirParts.length > 0) {
+      dirParts.pop(); // remove file name, retain directory
+    }
+
+    const segments = rawPath.split('/');
+    const targetParts = [...dirParts];
+
+    for (const seg of segments) {
+      if (seg === '.' || seg === '') {
+        continue;
+      } else if (seg === '..') {
+        if (targetParts.length === 0) {
+          // Traversal escaped documentation namespace!
+          return null;
+        }
+        targetParts.pop();
+      } else {
+        targetParts.push(seg);
+      }
+    }
+
+    resolvedSlug = targetParts.join('/') || 'index';
   }
 
-  const resolved = baseParts.join('/');
-  return resolved + hashPart;
+  const suffix = `${queryPart}${hashPart}`;
+  if (lang) {
+    return `/${lang}/docs/${resolvedSlug}${suffix}`;
+  }
+  return `${resolvedSlug}${suffix}`;
 }
 
 /**
@@ -102,39 +205,42 @@ function createSecureRenderer(baseSlug?: string, lang?: string) {
     return `<h${depth} id="${id}" class="scroll-mt-24 group">${text} <a href="#${id}" class="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-stone-600 transition-opacity" aria-label="Link to section">#</a></h${depth}>\n`;
   };
 
-  // 3. Safe link with protocol validation & directory-aware relative resolution
+  // 3. Safe link with protocol allowlist & directory-aware relative resolution
   renderer.link = function ({ href, title, tokens }) {
     const text = this.parser.parseInline(tokens);
     const rawHref = href || '#';
 
-    // Reject dangerous URI schemes
-    if (isDangerousScheme(rawHref)) {
+    if (!isSafeUrl(rawHref)) {
       return `<span class="text-red-500 font-mono text-xs">[unsafe link blocked]</span>`;
     }
 
-    const isExternal = rawHref.startsWith('http://') || rawHref.startsWith('https://') || rawHref.startsWith('mailto:');
+    const isExternal =
+      rawHref.startsWith('http://') ||
+      rawHref.startsWith('https://') ||
+      rawHref.startsWith('mailto:');
+
     if (isExternal) {
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
       return `<a href="${escapeHtml(rawHref)}"${titleAttr} rel="noopener noreferrer" target="_blank" class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
     }
 
-    // Anchor-only link
     if (rawHref.startsWith('#')) {
       return `<a href="${escapeHtml(rawHref)}" class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
     }
 
-    // Internal document link: resolve relative to baseSlug
-    const resolvedDocSlug = resolveRelativeDocLink(baseSlug, rawHref);
-    const targetUrl = lang ? `/${lang}/docs/${resolvedDocSlug}` : resolvedDocSlug;
-    const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+    const resolved = resolveRelativeDocLink(baseSlug, rawHref, lang);
+    if (!resolved) {
+      return `<span class="text-red-500 font-mono text-xs">[unsafe link blocked]</span>`;
+    }
 
-    return `<a href="${escapeHtml(targetUrl)}"${titleAttr} class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
+    const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+    return `<a href="${escapeHtml(resolved)}"${titleAttr} class="text-[#126E68] dark:text-[#52C5BE] underline hover:opacity-80 transition-opacity">${text}</a>`;
   };
 
   // 4. Safe image renderer with scheme validation
   renderer.image = function ({ href, title, text }) {
     const rawHref = href || '';
-    if (isDangerousScheme(rawHref)) {
+    if (!isSafeUrl(rawHref)) {
       return `<span class="text-red-500 font-mono text-xs">[unsafe image blocked]</span>`;
     }
     const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
@@ -143,10 +249,15 @@ function createSecureRenderer(baseSlug?: string, lang?: string) {
   };
 
   // 5. Code block with LTR direction and escaping
-  renderer.code = function ({ text, lang }) {
-    const language = lang || 'text';
+  renderer.code = function ({ text, lang: codeLang }) {
+    const language = codeLang || 'text';
     const escaped = escapeHtml(text);
     return `<pre dir="ltr" class="p-4 rounded-xl bg-stone-900 text-stone-100 overflow-x-auto text-sm my-4 font-mono text-left"><code class="language-${escapeHtml(language)}">${escaped}</code></pre>\n`;
+  };
+
+  // 6. Inline code with escaping
+  renderer.codespan = function ({ text }) {
+    return `<code class="font-mono text-xs px-1.5 py-0.5 rounded bg-stone-100 dark:bg-white/10 text-[#126E68] dark:text-[#52C5BE]" dir="ltr">${escapeHtml(text)}</code>`;
   };
 
   return renderer;

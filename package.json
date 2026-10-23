@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/lib/logic.test.ts src/lib/router.test.ts"
+    "test": "tsx --test src/lib/logic.test.ts src/lib/router.test.ts scripts/validate-production.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

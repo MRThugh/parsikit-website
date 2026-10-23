@@ -57,13 +57,27 @@ ParsiKit strictly supports exactly four user-facing languages:
    - Schema.org JSON-LD structured data (`SoftwareApplication`, `TechArticle`, and `WebSite`).
    - Auto-generated `sitemap.xml` with Google-standard `<xhtml:link rel="alternate" .../>` annotations and `robots.txt`.
 
-4. **Legacy Spanish Route Migration**
-   - Complete 301 migration handling for all legacy `/es/*` URLs.
-   - Generates 34 static HTML redirect stubs (`meta http-equiv="refresh"`, `<link rel="canonical">`, `window.location.replace`, and `<meta name="robots" content="noindex, follow">`).
-   - Server-level rules declared in `public/_redirects`.
+4. **Missing-Translation & Locale Resolution Policy**
+   - Core API, guides, tutorials, and getting-started documents exist in full 4-language parity (22 documents in each language).
+   - Technical architecture and audit documents under `development/` are maintained exclusively in English.
+   - When a document is requested in a locale where translation is not available (such as `development/*` in Persian, Dari, or Tajik):
+     - The router marks the document with explicit `fallback` status.
+     - The page renders with an accessible notice banner informing the user that official translation is unavailable in their requested language and displaying the original English content.
+     - The content article strictly sets `dir="ltr"` and `lang="en-US"`, preserving correct punctuation, code layout, and typography without mislabeling English as RTL.
+   - Unknown document slugs or unsupported locale prefixes immediately render a localized, accessible 404 page with `noindex` directives.
+
+5. **Markdown Security & Link Resolution Architecture**
+   - **Protocol Allowlist**: Links are verified against a strict protocol allowlist permitting only `http:`, `https:`, `mailto:`, in-page anchors (`#`), and internal relative documentation paths. Dangerous schemes (`javascript:`, `data:`, `vbscript:`, `file:`, `blob:`) and entity-obfuscated or control-character bypasses are strictly blocked.
+   - **HTML Sanitization**: All raw HTML tags within Markdown documents are escaped prior to DOM insertion, preventing XSS and attribute injection while preserving legitimate code snippets and inline code blocks.
+   - **Directory-Relative Resolution**: Links in Markdown (e.g. `../tutorials/datetime.md?mode=basic#setup`) are resolved against the directory of the current document, preserving query parameters and anchors, while blocking path traversals that escape the documentation root namespace.
+
+6. **Legacy Spanish Route Migration & Hosting Limitations**
+   - 34 static HTML redirect stubs are generated in `dist/es/*` utilizing client-side `<meta http-equiv="refresh">` and `window.location.replace` while preserving URL query parameters and fragments.
+   - Stubs declare `<link rel="canonical">` pointing to the canonical English counterpart and `<meta name="robots" content="noindex, follow">`.
+   - **Hosting Platform Limitation**: The deployment target is GitHub Pages, which serves static assets and does not support server-side HTTP 301 headers. Consequently, redirect stubs are labeled as *verified client-side HTML redirect fallbacks*. Server-level rules (`public/_redirects`) are maintained for reverse-proxy and edge-compatible hosts (Cloudflare Pages, Netlify).
    - Spanish is completely removed from active locales, sitemaps, and navigation.
 
-5. **Accessibility & Purposeful Motion**
+7. **Accessibility & Purposeful Motion**
    - WCAG 2.2 AA compliant contrast and minimum 44×44px touch targets.
    - Full `prefers-reduced-motion` compliance across all animations using Motion for React (`motion/react` v12).
    - Keyboard accessible modals (`Cmd+K` documentation search) with Arrow Key navigation.

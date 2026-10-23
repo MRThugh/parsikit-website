@@ -3,8 +3,10 @@ import { ALL_DOCS, type DocEntry } from '../data/docsManifest';
 import {
   type PageRoute,
   type AppLang,
+  type DocResolution,
   parseCurrentUrl,
   buildRoutePath,
+  resolveDocument,
   VALID_LANGS,
 } from '../lib/router';
 import { computePageMetadata, updateDocumentHead } from '../lib/seo';
@@ -23,8 +25,9 @@ interface AppContextType {
   activeDocSlug: string;
   setActiveDocSlug: (slug: string) => void;
   activeDoc: DocEntry | null;
-  navigateToDoc: (slug: string, targetLang?: AppLang) => void;
-  navigate: (route: PageRoute, docSlug?: string, targetLang?: AppLang) => void;
+  docResolution: DocResolution | null;
+  navigateToDoc: (slug: string, targetLang?: AppLang, options?: { query?: string; hash?: string }) => void;
+  navigate: (route: PageRoute, docSlug?: string, targetLang?: AppLang, options?: { query?: string; hash?: string }) => void;
   isSearchOpen: boolean;
   setIsSearchOpen: (open: boolean) => void;
   openSearch: () => void;
@@ -55,23 +58,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const isRtl = useMemo(() => isRtlPrefix(lang), [lang]);
 
-  // Active doc lookup with multilingual fallbacks
-  const activeDoc = useMemo(() => {
+  // Active doc lookup with explicit existence and missing-translation semantics
+  const docResolution = useMemo<DocResolution | null>(() => {
     if (route !== 'docs') return null;
-
-    const exactMatch = ALL_DOCS.find((d) => d.lang === lang && d.slug === activeDocSlug);
-    if (exactMatch) return exactMatch;
-
-    // Check if another lang has this slug and has a counterpart
-    const otherLangDoc = ALL_DOCS.find((d) => d.slug === activeDocSlug);
-    if (otherLangDoc?.counterpartSlug) {
-      const counterpart = ALL_DOCS.find((d) => d.lang === lang && d.slug === otherLangDoc.counterpartSlug);
-      if (counterpart) return counterpart;
-    }
-
-    // Fallback to first doc in current lang or installation
-    return ALL_DOCS.find((d) => d.lang === lang && d.slug === 'installation') || ALL_DOCS.find((d) => d.lang === lang) || null;
+    return resolveDocument(lang, activeDocSlug);
   }, [lang, activeDocSlug, route]);
+
+  const activeDoc = useMemo<DocEntry | null>(() => {
+    if (route !== 'docs') return null;
+    return docResolution?.doc || null;
+  }, [route, docResolution]);
 
   // Sync document head, html dir, and SEO metadata
   useEffect(() => {
@@ -104,21 +100,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Programmatic navigation
-  const navigate = (newRoute: PageRoute, docSlug?: string, targetLang?: AppLang) => {
+  // Programmatic navigation with query string & hash support
+  const navigate = (
+    newRoute: PageRoute,
+    docSlug?: string,
+    targetLang?: AppLang,
+    options?: { query?: string; hash?: string }
+  ) => {
     const effectiveLang = targetLang || lang;
-    const newPath = buildRoutePath(effectiveLang, newRoute, docSlug);
+    const effectiveSlug = docSlug || (newRoute === 'docs' ? activeDocSlug : undefined);
 
-    if (window.location.pathname !== newPath) {
+    // Validate doc existence if navigating to docs
+    let finalRoute = newRoute;
+    if (newRoute === 'docs' && effectiveSlug) {
+      const res = resolveDocument(effectiveLang, effectiveSlug);
+      if (res.status === 'not-found') {
+        finalRoute = 'not-found';
+      }
+    }
+
+    const newPath = buildRoutePath(effectiveLang, finalRoute, effectiveSlug, options);
+
+    if (typeof window !== 'undefined' && window.location.pathname + window.location.search + window.location.hash !== newPath) {
       window.history.pushState(null, '', newPath);
     }
 
     if (targetLang && targetLang !== lang) {
       setLangState(targetLang);
     }
-    setRouteState(newRoute);
-    if (docSlug) {
-      setActiveDocSlugState(docSlug);
+    setRouteState(finalRoute);
+    if (effectiveSlug) {
+      setActiveDocSlugState(effectiveSlug);
     }
   };
 
@@ -130,9 +142,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     navigate('docs', slug, lang);
   };
 
-  const navigateToDoc = (slug: string, targetLang?: AppLang) => {
-    navigate('docs', slug, targetLang || lang);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const navigateToDoc = (slug: string, targetLang?: AppLang, options?: { query?: string; hash?: string }) => {
+    navigate('docs', slug, targetLang || lang, options);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const setLang = (newLang: AppLang) => {
@@ -142,7 +156,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (activeDoc?.counterparts?.[newLang]) {
         targetDocSlug = activeDoc.counterparts[newLang]!;
       } else {
-        targetDocSlug = 'installation';
+        // Translation not available in newLang; preserve slug so user sees the fallback banner
+        targetDocSlug = activeDocSlug;
       }
     }
     navigate(route, targetDocSlug, newLang);
@@ -194,6 +209,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeDocSlug,
         setActiveDocSlug,
         activeDoc,
+        docResolution,
         navigateToDoc,
         navigate,
         isSearchOpen,
