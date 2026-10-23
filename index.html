@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ParsiKit — Persian Data Infrastructure</title>
+    <meta name="description" content="Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani." />
+    
+    <!-- Anti-flash inline theme initializer -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('parsikit_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ParsiKit — Persian Data Infrastructure" />
+    <meta property="og:description" content="Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani." />
+    <meta property="og:image" content="/parsikit-logo.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ParsiKit — Persian Data Infrastructure" />
+    <meta name="twitter:description" content="Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani." />
+    <meta name="twitter:image" content="/parsikit-logo.png" />
+
+    <!-- Official Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Google Fonts: Vazirmatn for Persian typography & Plus Jakarta Sans for Latin -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://github.com/MRThugh/ParsiKit#software",
+          "name": "ParsiKit",
+          "description": "A production-grade pure Python library for Persian data infrastructure.",
+          "softwareVersion": "3.3.1",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Cross-platform",
+          "programmingLanguage": "Python",
+          "license": "https://opensource.org/licenses/MIT",
+          "author": {
+            "@type": "Person",
+            "name": "Ali Kamrani",
+            "url": "https://github.com/MRThugh"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://parsikit.dev/#website",
+          "name": "ParsiKit Official Website",
+          "url": "https://parsikit.dev",
+          "publisher": {
+            "@type": "Person",
+            "name": "Ali Kamrani",
+            "url": "https://github.com/MRThugh"
+          }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body class="bg-[#FAF7F2] text-[#141B19] dark:bg-[#0E1413] dark:text-[#E8ECEB] antialiased selection:bg-[#126E68]/20 dark:selection:bg-[#126E68]/40 selection:text-[#126E68] dark:selection:text-[#52C5BE] min-h-screen transition-colors duration-150">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

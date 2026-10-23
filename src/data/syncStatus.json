@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/MRThugh/ParsiKit",
+  "author": "Ali Kamrani",
+  "localVersion": "3.3.1",
+  "pythonRequirement": ">=3.10",
+  "license": "MIT",
+  "isUpstreamReachable": false,
+  "upstreamLatestTag": "v3.3.1",
+  "lastSyncedAt": "2026-10-23T12:38:36.861Z",
+  "totalDocsFound": 56
+}

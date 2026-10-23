@@ -1,0 +1,58 @@
+name: Validate Repository Sync & Website Integrity
+
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Run daily at 00:00 UTC to verify alignment with upstream repo
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Sync, Lint, Test & Prerender Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Website Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify Upstream Alignment & Documentation Extraction
+        run: |
+          npm run sync:upstream
+          npm run sync:docs
+
+      - name: Check for Uncommitted Manifest Drift
+        run: |
+          git diff --exit-code src/data/ || (echo "Documentation manifest is out of sync with repo_data/! Run 'npm run sync:docs' and commit the result." && exit 1)
+
+      - name: Typecheck and Strict Lint
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Build & Prerender Static Distribution
+        run: npm run build
+
+      - name: Validate Sitemap, Robots & Multilingual Prerendered Outputs
+        run: |
+          test -f dist/sitemap.xml || (echo "Missing dist/sitemap.xml" && exit 1)
+          test -f dist/robots.txt || (echo "Missing dist/robots.txt" && exit 1)
+          test -f dist/404.html || (echo "Missing dist/404.html" && exit 1)
+          test -f dist/en/index.html || (echo "Missing dist/en/index.html" && exit 1)
+          test -f dist/fa/index.html || (echo "Missing dist/fa/index.html" && exit 1)
+          test -f dist/es/index.html || (echo "Missing dist/es/index.html" && exit 1)
+          echo "All static prerendered files verified!"

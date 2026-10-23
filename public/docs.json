@@ -1,0 +1,442 @@
+[
+  {
+    "slug": "api/cache",
+    "lang": "en",
+    "category": "api",
+    "title": "Cache API (`parsikit.cache`)",
+    "summary": "High-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.",
+    "url": "https://parsikit.dev/en/docs/api/cache"
+  },
+  {
+    "slug": "api/datetime",
+    "lang": "en",
+    "category": "api",
+    "title": "Datetime API (`parsikit.datetime`)",
+    "summary": "Converts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.",
+    "url": "https://parsikit.dev/en/docs/api/datetime"
+  },
+  {
+    "slug": "api/dev_and_gui",
+    "lang": "en",
+    "category": "api",
+    "title": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "Persian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports :fa / :p format specifiers.",
+    "url": "https://parsikit.dev/en/docs/api/dev_and_gui"
+  },
+  {
+    "slug": "api/index",
+    "lang": "en",
+    "category": "api",
+    "title": "ParsiKit API Reference (English)",
+    "summary": "Complete reference for all public modules and functions in ParsiKit:",
+    "url": "https://parsikit.dev/en/docs/api/index"
+  },
+  {
+    "slug": "api/models",
+    "lang": "en",
+    "category": "api",
+    "title": "Domain Models API (`parsikit.models`)",
+    "summary": "Object-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.",
+    "url": "https://parsikit.dev/en/docs/api/models"
+  },
+  {
+    "slug": "api/number_and_currency",
+    "lang": "en",
+    "category": "api",
+    "title": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
+    "summary": "Replaces English digits (0-9) with Persian digits (۰-۹).",
+    "url": "https://parsikit.dev/en/docs/api/number_and_currency"
+  },
+  {
+    "slug": "api/reshaper",
+    "lang": "en",
+    "category": "api",
+    "title": "Reshaper API (`parsikit.reshaper`)",
+    "summary": "Lightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.",
+    "url": "https://parsikit.dev/en/docs/api/reshaper"
+  },
+  {
+    "slug": "api/text",
+    "lang": "en",
+    "category": "api",
+    "title": "Text Processing API (`parsikit.text`)",
+    "summary": "High-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.",
+    "url": "https://parsikit.dev/en/docs/api/text"
+  },
+  {
+    "slug": "api/validators",
+    "lang": "en",
+    "category": "api",
+    "title": "Validators API (`parsikit.validators`)",
+    "summary": "Validates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when strict=True.",
+    "url": "https://parsikit.dev/en/docs/api/validators"
+  },
+  {
+    "slug": "faq",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "Frequently Asked Questions (FAQ)",
+    "summary": "ParsiKit supports Python 3.10 and newer (including 3.10, 3.11, 3.12, and 3.13).",
+    "url": "https://parsikit.dev/en/docs/faq"
+  },
+  {
+    "slug": "guides/forms_and_security",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Form Validation & Sensitive Data Security",
+    "summary": "Handling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application ",
+    "url": "https://parsikit.dev/en/docs/guides/forms_and_security"
+  },
+  {
+    "slug": "guides/gui_integration",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Desktop GUI & Graphics Integration",
+    "summary": "Rendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and righ",
+    "url": "https://parsikit.dev/en/docs/guides/gui_integration"
+  },
+  {
+    "slug": "guides/web_backends",
+    "lang": "en",
+    "category": "guides",
+    "title": "Guide: Web Backends (FastAPI & Django Integration)",
+    "summary": "This guide shows how to integrate ParsiKit into production web backends.",
+    "url": "https://parsikit.dev/en/docs/guides/web_backends"
+  },
+  {
+    "slug": "index",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "ParsiKit Official Documentation (v3.3.1)",
+    "summary": "Welcome to the official documentation for ParsiKit!",
+    "url": "https://parsikit.dev/en/docs/index"
+  },
+  {
+    "slug": "installation",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "Installation Guide",
+    "summary": "ParsiKit requires Python 3.10 or higher. It has no external dependencies.",
+    "url": "https://parsikit.dev/en/docs/installation"
+  },
+  {
+    "slug": "quickstart",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "ParsiKit Quickstart Guide",
+    "summary": "Get up and running with ParsiKit in less than 5 minutes.",
+    "url": "https://parsikit.dev/en/docs/quickstart"
+  },
+  {
+    "slug": "troubleshooting",
+    "lang": "en",
+    "category": "getting-started",
+    "title": "Troubleshooting Guide (English)",
+    "summary": "Solutions to common issues encountered when using ParsiKit.",
+    "url": "https://parsikit.dev/en/docs/troubleshooting"
+  },
+  {
+    "slug": "tutorials/datetime",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
+    "summary": "The Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.",
+    "url": "https://parsikit.dev/en/docs/tutorials/datetime"
+  },
+  {
+    "slug": "tutorials/models",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Object-Oriented Domain Models",
+    "summary": "ParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.",
+    "url": "https://parsikit.dev/en/docs/tutorials/models"
+  },
+  {
+    "slug": "tutorials/numbers_and_currency",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Persian Numbers & Financial Calculations",
+    "summary": "This tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.",
+    "url": "https://parsikit.dev/en/docs/tutorials/numbers_and_currency"
+  },
+  {
+    "slug": "tutorials/text_processing",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: Persian Text Processing & Standardization",
+    "summary": "Handling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.",
+    "url": "https://parsikit.dev/en/docs/tutorials/text_processing"
+  },
+  {
+    "slug": "tutorials/validation",
+    "lang": "en",
+    "category": "tutorials",
+    "title": "Tutorial: National Identifiers & Format Validation",
+    "summary": "ParsiKit provides validation engines for all major Iranian public identification standards.",
+    "url": "https://parsikit.dev/en/docs/tutorials/validation"
+  },
+  {
+    "slug": "api/cache",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع ماژول کش (`parsikit.cache`)",
+    "summary": "زیرساخت کشینگ حافظه‌ای با کارایی بالا و ایمن در برابر چندریسمانی (Thread-safe) برای محاسبات پرهزینه عددی و زبانی.",
+    "url": "https://parsikit.dev/fa/docs/api/cache"
+  },
+  {
+    "slug": "api/datetime",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع توابع تاریخ جلالی و زمان نسبی (`parsikit.datetime`)",
+    "summary": "ماژول parsikit.datetime ابزارهای دقیق محاسبات تقویم هجری شمسی (جلالی) و تبدیل آن به گاه‌شماری میلادی را بدون نیاز به وابستگی خارجی فراهم می‌سازد.",
+    "url": "https://parsikit.dev/fa/docs/api/datetime"
+  },
+  {
+    "slug": "api/dev_and_gui",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع ابزارهای توسعه و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
+    "summary": "ابزارهای ویژه برای عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش صحیح متن فارسی در رابط‌های گرافیکی (GUI).",
+    "url": "https://parsikit.dev/fa/docs/api/dev_and_gui"
+  },
+  {
+    "slug": "api/index",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع کامل توابع و ماژول‌های پارسی‌کیت (API Reference)",
+    "summary": "کتابخانه پارسی‌کیت (ParsiKit) از ماژول‌های زیر تشکیل شده است:",
+    "url": "https://parsikit.dev/fa/docs/api/index"
+  },
+  {
+    "slug": "api/models",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع مدل‌های شیءگرا (`parsikit.models`)",
+    "summary": "ماژول parsikit.models اشیای دامنه (Domain Value Objects) را به روش شیءگرای ناب پیاده‌سازی می‌کند. تمام این مدل‌ها ویژگی‌های زیر را دارا هستند:",
+    "url": "https://parsikit.dev/fa/docs/api/models"
+  },
+  {
+    "slug": "api/number_and_currency",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع توابع اعداد و محاسبات ارزی (`parsikit.number`, `parsikit.currency`)",
+    "summary": "این ماژول‌ها امکان تبدیل ارقام، نوشتن اعداد به حروف، تبدیل واحدهای ریال و تومان، مالیات ارزش افزوده و محاسبات بانکی را در اختیار قرار می‌دهند.",
+    "url": "https://parsikit.dev/fa/docs/api/number_and_currency"
+  },
+  {
+    "slug": "api/reshaper",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
+    "summary": "ابزار سبک و بدون وابستگی برای چسباندن حروف فارسی (Shaping) و معکوس‌سازی جهت متن (BiDi) جهت نمایش صحیح در موتورهای گرافیکی و بازی‌ها.",
+    "url": "https://parsikit.dev/fa/docs/api/reshaper"
+  },
+  {
+    "slug": "api/text",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع توابع پردازش متن (`parsikit.text`)",
+    "summary": "ماژول parsikit.text هسته اصلی ابزارهای استانداردسازی، پالایش، اصلاح نیم‌فاصله، تصحیح کیبورد و مرتب‌سازی متنی در پارسی‌کیت است.",
+    "url": "https://parsikit.dev/fa/docs/api/text"
+  },
+  {
+    "slug": "api/validators",
+    "lang": "fa",
+    "category": "api",
+    "title": "مرجع توابع اعتبارسنجی و تطبیق الگو (`parsikit.validators`)",
+    "summary": "ماژول parsikit.validators موتور اعتبارسنجی قوانین و استانداردهای هویتی، پستی، مخابراتی، بانکی و خودرویی کشور ایران است.",
+    "url": "https://parsikit.dev/fa/docs/api/validators"
+  },
+  {
+    "slug": "faq",
+    "lang": "fa",
+    "category": "getting-started",
+    "title": "پرسش‌های متداول (FAQ) — پارسی‌کیت",
+    "summary": "پاسخ به سوالات پرتکرار پیرامون کتابخانه پارسی‌کیت (ParsiKit).",
+    "url": "https://parsikit.dev/fa/docs/faq"
+  },
+  {
+    "slug": "guides/forms_and_security",
+    "lang": "fa",
+    "category": "guides",
+    "title": "راهنمای امنیت، حریم خصوصی و مدیریت داده‌های حساس",
+    "summary": "هنگام کار با اطلاعات هویتی و مالی کاربران (کد ملی، شماره کارت، شماره شبا و شماره موبایل)، رعایت نکات امنیتی از نان شب واجب‌تر است!",
+    "url": "https://parsikit.dev/fa/docs/guides/forms_and_security"
+  },
+  {
+    "slug": "guides/gui_integration",
+    "lang": "fa",
+    "category": "guides",
+    "title": "راهنمای اتصال پارسی‌کیت به رابط‌های گرافیکی (GUI)",
+    "summary": "پارسی‌کیت ماژول اختصاصی parsikit.gui را برای قالب‌بندی همزمان هنگام تایپ در فریم‌ورک‌های رابط کاربری دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.",
+    "url": "https://parsikit.dev/fa/docs/guides/gui_integration"
+  },
+  {
+    "slug": "guides/web_backends",
+    "lang": "fa",
+    "category": "guides",
+    "title": "راهنمای استفاده از پارسی‌کیت در وب‌سرویس‌ها (FastAPI و Django)",
+    "summary": "پارسی‌کیت به لطف قابلیت duck-typing و پشتیبانی بومی از Pydantic، بهترین گزینه برای تمیزکاری و اعتبارسنجی ورودی‌ها در APIهای پایتونی است.",
+    "url": "https://parsikit.dev/fa/docs/guides/web_backends"
+  },
+  {
+    "slug": "index",
+    "lang": "fa",
+    "category": "getting-started",
+    "title": "مستندات رسمی پارسی‌کیت (ParsiKit) نسخه ۳.۳.۱",
+    "summary": "سلام توسعه‌دهنده عزیز! به مستندات رسمی کتابخانه پارسی‌کیت (ParsiKit) خوش اومدی.",
+    "url": "https://parsikit.dev/fa/docs/index"
+  },
+  {
+    "slug": "installation",
+    "lang": "fa",
+    "category": "getting-started",
+    "title": "راهنمای نصب و راه‌اندازی پارسی‌کیت",
+    "summary": "پارسی‌کیت کاملاً با زبان پایتون خالص (Pure Python) نوشته شده و هیچ وابستگی به کتابخانه‌های سنگین خارجی مانند C-extensions ندارد. بنابراین روی هر سیستم‌عاملی (لینوکس، ویندوز، مک‌او‌اس) به راحتی و در کس",
+    "url": "https://parsikit.dev/fa/docs/installation"
+  },
+  {
+    "slug": "quickstart",
+    "lang": "fa",
+    "category": "getting-started",
+    "title": "شروع سریع با پارسی‌کیت (Quickstart)",
+    "summary": "بیا با چند مثال ساده و پرکاربرد شروع کنیم تا ببینی پارسی‌کیت چقدر کارهای روزمره پایتون رو راحت‌تر می‌کنه!",
+    "url": "https://parsikit.dev/fa/docs/quickstart"
+  },
+  {
+    "slug": "troubleshooting",
+    "lang": "fa",
+    "category": "getting-started",
+    "title": "راهنمای عیب‌یابی (Troubleshooting) پارسی‌کیت",
+    "summary": "این راهنما رایج‌ترین پرسش‌ها و خطاهایی که توسعه‌دهندگان ممکن است هنگام کار با کتابخانه پارسی‌کیت با آن‌ها مواجه شوند را به همراه راه‌حل‌های قطعی توضیح می‌دهد.",
+    "url": "https://parsikit.dev/fa/docs/troubleshooting"
+  },
+  {
+    "slug": "tutorials/datetime",
+    "lang": "fa",
+    "category": "tutorials",
+    "title": "آموزش تقویم شمسی (جلالی) و زمان نسبی در پارسی‌کیت",
+    "summary": "ماژول parsikit.datetime تبدیل تاریخ میلادی و شمسی را بدون نیاز به هیچ پکیج سنگینی به صورت صفر-وابستگی (Zero-Dependency) با الگوریتم دقیق ۳۳ ساله جلالی در اختیارت قرار می‌ده.",
+    "url": "https://parsikit.dev/fa/docs/tutorials/datetime"
+  },
+  {
+    "slug": "tutorials/models",
+    "lang": "fa",
+    "category": "tutorials",
+    "title": "آموزش مدل‌های شیءگرا در پارسی‌کیت (Domain Models)",
+    "summary": "در کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا (OOP Domain Models) در ماژول parsikit.models فراهم کرده تا توسعه‌دهنده‌ها بتونن با موجودیت‌های دیتایی به راحتی کار کنند.",
+    "url": "https://parsikit.dev/fa/docs/tutorials/models"
+  },
+  {
+    "slug": "tutorials/numbers_and_currency",
+    "lang": "fa",
+    "category": "tutorials",
+    "title": "آموزش کار با اعداد، مبالغ مالی، تومان و ریال در پارسی‌کیت",
+    "summary": "یکی از جذاب‌ترین بخش‌های پارسی‌کیت، ابزارهای مالی و تبدیل ارقام و کلمات است.",
+    "url": "https://parsikit.dev/fa/docs/tutorials/numbers_and_currency"
+  },
+  {
+    "slug": "tutorials/text_processing",
+    "lang": "fa",
+    "category": "tutorials",
+    "title": "آموزش جامع پردازش و تمیزکاری متن فارسی در پارسی‌کیت",
+    "summary": "پردازش متن فارسی چالش‌های منحصر‌به‌فردی داره: اعراب‌ها، حروف کیبورد عربی، نیم‌فاصله‌ها و نگارش انگلیسی در کیبورد فارسی. پارسی‌کیت مجموعه‌ای از توابع کارآمد برای حل این دغدغه‌ها در اختیارت می‌ذاره.",
+    "url": "https://parsikit.dev/fa/docs/tutorials/text_processing"
+  },
+  {
+    "slug": "tutorials/validation",
+    "lang": "fa",
+    "category": "tutorials",
+    "title": "آموزش اعتبارسنجی داده‌های هویتی، بانکی و ارتباطی ایران",
+    "summary": "توی هر سامانه‌ای که توی ایران کار می‌کنه، اعتبارسنجی ورودی‌های کاربر (مثل کد ملی، کارت بانکی، شماره شبا، موبایل و پلاک) پای ثابت توسعه است. پارسی‌کیت الگوریتم‌های رسمی تمام این موارد رو به صورت پیش‌فر",
+    "url": "https://parsikit.dev/fa/docs/tutorials/validation"
+  },
+  {
+    "slug": "api/index",
+    "lang": "es",
+    "category": "api",
+    "title": "Referencia de la API de ParsiKit",
+    "summary": "Resumen de los módulos de nivel superior disponibles en ParsiKit.",
+    "url": "https://parsikit.dev/es/docs/api/index"
+  },
+  {
+    "slug": "features",
+    "lang": "es",
+    "category": "getting-started",
+    "title": "Características de ParsiKit",
+    "summary": "ParsiKit fue diseñado para resolver problemas endémicos del procesamiento computacional del idioma persa en entornos de producción.",
+    "url": "https://parsikit.dev/es/docs/features"
+  },
+  {
+    "slug": "index",
+    "lang": "es",
+    "category": "getting-started",
+    "title": "Documentación de ParsiKit",
+    "summary": "Bienvenido a la documentación oficial de ParsiKit en español.",
+    "url": "https://parsikit.dev/es/docs/index"
+  },
+  {
+    "slug": "installation",
+    "lang": "es",
+    "category": "getting-started",
+    "title": "Guía de Instalación",
+    "summary": "ParsiKit requiere Python 3.10 o superior. Es una biblioteca pura en Python sin dependencias externas de tiempo de ejecución.",
+    "url": "https://parsikit.dev/es/docs/installation"
+  },
+  {
+    "slug": "quickstart",
+    "lang": "es",
+    "category": "getting-started",
+    "title": "Guía de Inicio Rápido",
+    "summary": "Comienza a utilizar ParsiKit en tu aplicación Python en menos de cinco minutos.",
+    "url": "https://parsikit.dev/es/docs/quickstart"
+  },
+  {
+    "slug": "development/architecture",
+    "lang": "en",
+    "category": "development",
+    "title": "ParsiKit Architecture & Technical Design",
+    "summary": "Project Owner: Ali Kamrani (MRThugh)",
+    "url": "https://parsikit.dev/en/docs/development/architecture"
+  },
+  {
+    "slug": "development/audit-3.3.1",
+    "lang": "en",
+    "category": "development",
+    "title": "ParsiKit v3.3.1 — Phase Zero Baseline Audit Report",
+    "summary": "Author & Project Owner: Ali Kamrani (MRThugh)",
+    "url": "https://parsikit.dev/en/docs/development/audit-3.3.1"
+  },
+  {
+    "slug": "development/contributing",
+    "lang": "en",
+    "category": "development",
+    "title": "Contributing to ParsiKit",
+    "summary": "Project Owner: Ali Kamrani (MRThugh)",
+    "url": "https://parsikit.dev/en/docs/development/contributing"
+  },
+  {
+    "slug": "development/final-release-audit-3.3.1",
+    "lang": "en",
+    "category": "development",
+    "title": "ParsiKit v3.3.1 — Final Release Audit, Packaging & Quality Report",
+    "summary": "Package Name: parsikit",
+    "url": "https://parsikit.dev/en/docs/development/final-release-audit-3.3.1"
+  },
+  {
+    "slug": "development/release-process",
+    "lang": "en",
+    "category": "development",
+    "title": "ParsiKit Release Process",
+    "summary": "Author & Maintainer: Ali Kamrani (MRThugh)",
+    "url": "https://parsikit.dev/en/docs/development/release-process"
+  },
+  {
+    "slug": "development/testing",
+    "lang": "en",
+    "category": "development",
+    "title": "ParsiKit Testing Guide",
+    "summary": "Target Version: 3.3.1",
+    "url": "https://parsikit.dev/en/docs/development/testing"
+  }
+]

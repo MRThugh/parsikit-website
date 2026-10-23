@@ -1,0 +1,6 @@
+{
+  "name": "ParsiKit — Persian Data Infrastructure",
+  "description": "Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
