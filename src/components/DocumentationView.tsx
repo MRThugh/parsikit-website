@@ -112,8 +112,8 @@ export function DocumentationView() {
 
   // Render markdown with complete GFM syntax, tables, and link transformations
   const renderedHtml = useMemo(
-    () => renderMarkdownToHtml(currentDoc.content),
-    [currentDoc.content]
+    () => renderMarkdownToHtml(currentDoc.content, currentDoc.slug, lang),
+    [currentDoc.content, currentDoc.slug, lang]
   );
 
   const handleArticleClick = (e: React.MouseEvent<HTMLElement>) => {
@@ -122,19 +122,35 @@ export function DocumentationView() {
     const href = target.getAttribute('href');
     if (!href) return;
 
-    // External links or in-page anchor links use default browser behavior
-    if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {
+    // External links use standard browser navigation
+    if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:')) {
       return;
     }
 
-    // Relative markdown link -> SPA navigation
+    // In-page hash anchor link
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const headingId = href.slice(1);
+      scrollToHeading(headingId);
+      return;
+    }
+
+    // Internal document link with optional hash anchor
     e.preventDefault();
-    const cleanSlug = href
+    const hashIdx = href.indexOf('#');
+    const pathPart = hashIdx !== -1 ? href.slice(0, hashIdx) : href;
+    const hashPart = hashIdx !== -1 ? href.slice(hashIdx + 1) : '';
+
+    const cleanSlug = pathPart
       .replace(/^\//, '')
       .replace(/^docs\//, '')
       .replace(/^(fa|en|prs-af|tg)\/docs\//, '')
       .replace(/\.md$/, '');
+
     navigateToDoc(cleanSlug);
+    if (hashPart) {
+      setTimeout(() => scrollToHeading(hashPart), 50);
+    }
   };
 
   return (

@@ -36,3 +36,23 @@ test('seo: computePageMetadata generates canonical and hreflang URLs for 4 langu
   assert.equal(docMeta.canonicalUrl, 'https://parsikit.dev/en/docs/api/validators');
   assert.equal(docMeta.schemaType, 'TechArticle');
 });
+
+test('router: 404 not-found route handling and URL generation', () => {
+  assert.equal(buildRoutePath('en', 'not-found'), '/en/404');
+  assert.equal(buildRoutePath('fa', 'not-found'), '/fa/404');
+  assert.equal(buildRoutePath('prs-af', 'not-found'), '/prs-af/404');
+  assert.equal(buildRoutePath('tg', 'not-found'), '/tg/404');
+
+  const parsed404 = parseRoutePath('/fa/404');
+  assert.equal(parsed404.route, 'not-found');
+  assert.equal(parsed404.lang, 'fa');
+
+  const parsedUnknown = parseRoutePath('/fa/random-invalid-route');
+  assert.equal(parsedUnknown.route, 'not-found');
+  assert.equal(parsedUnknown.lang, 'fa');
+
+  const parsedMissingDoc = parseRoutePath('/tg/docs/missing-doc-xyz');
+  assert.equal(parsedMissingDoc.route, 'not-found');
+  assert.equal(parsedMissingDoc.lang, 'tg');
+  assert.equal(parsedMissingDoc.docSlug, 'missing-doc-xyz');
+});

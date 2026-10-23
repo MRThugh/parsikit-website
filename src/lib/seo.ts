@@ -20,6 +20,7 @@ export interface SeoMetadata {
   alternateXDefaultUrl?: string;
   schemaType: 'SoftwareApplication' | 'TechArticle' | 'WebSite';
   headline?: string;
+  robots?: string;
 }
 
 export function computePageMetadata(
@@ -136,7 +137,24 @@ export function computePageMetadata(
       title = 'Changelog & Release Notes — ParsiKit';
       description = 'Full version history, security fixes, and feature additions across ParsiKit releases according to Semantic Versioning.';
     }
+  } else if (route === 'not-found') {
+    schemaType = 'WebSite';
+    if (lang === 'fa') {
+      title = '۴۰۴ — صفحه مورد نظر یافت نشد | پارسی‌کیت';
+      description = 'متأسفانه صفحه یا سند مورد نظر شما در وب‌سایت پارسی‌کیت یافت نشد.';
+    } else if (lang === 'prs-af') {
+      title = '۴۰۴ — صفحه دریافت نشد | پارسی‌کیت';
+      description = 'متأسفانه صفحه یا سند رهنمای مورد نظر شما در وبسایت پارسی‌کیت دریافت نگردید.';
+    } else if (lang === 'tg') {
+      title = '404 — Саҳифа ёфт нашуд | ParsiKit';
+      description = 'Мутаассифона саҳифа ё ҳуҷҷати дархостшуда дар вебгоҳи ParsiKit ёфт нашуд.';
+    } else {
+      title = '404 — Page Not Found | ParsiKit';
+      description = 'The requested documentation or page could not be found on ParsiKit.';
+    }
   }
+
+  const robots = route === 'not-found' ? 'noindex, follow' : undefined;
 
   return {
     title,
@@ -149,6 +167,7 @@ export function computePageMetadata(
     alternateXDefaultUrl,
     schemaType,
     headline: activeDoc ? activeDoc.title : undefined,
+    robots,
   };
 }
 
@@ -168,6 +187,19 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
     document.head.appendChild(descTag);
   }
   descTag.setAttribute('content', meta.description);
+
+  // Meta robots
+  let robotsTag = document.querySelector('meta[name="robots"]');
+  if (meta.robots) {
+    if (!robotsTag) {
+      robotsTag = document.createElement('meta');
+      robotsTag.setAttribute('name', 'robots');
+      document.head.appendChild(robotsTag);
+    }
+    robotsTag.setAttribute('content', meta.robots);
+  } else if (robotsTag) {
+    robotsTag.setAttribute('content', 'index, follow');
+  }
 
   // Open Graph
   const ogTitle = document.querySelector('meta[property="og:title"]');

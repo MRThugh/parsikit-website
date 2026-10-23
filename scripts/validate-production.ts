@@ -99,6 +99,32 @@ function validateProduction() {
   }
   console.log('✅ robots.txt verified.');
 
+  // 6. Audit 404 Pages (dist/404.html and localized 404 pages with noindex)
+  const top404Path = path.join(distDir, '404.html');
+  if (!fs.existsSync(top404Path)) {
+    throw new Error('Missing top-level 404.html in dist!');
+  }
+  const top404Content = fs.readFileSync(top404Path, 'utf-8');
+  if (!top404Content.includes('noindex')) {
+    throw new Error('404.html does not contain noindex meta tag!');
+  }
+
+  for (const lang of VALID_LANGS) {
+    const lang404Path = path.join(distDir, lang, '404', 'index.html');
+    if (!fs.existsSync(lang404Path)) {
+      throw new Error(`Missing localized 404 page for ${lang} at ${lang}/404/index.html!`);
+    }
+    const lang404Content = fs.readFileSync(lang404Path, 'utf-8');
+    if (!lang404Content.includes('noindex')) {
+      throw new Error(`Localized 404 page for ${lang} does not contain noindex tag!`);
+    }
+  }
+
+  if (sitemapContent.includes('/404')) {
+    throw new Error('404 URLs must not be present in sitemap.xml!');
+  }
+  console.log('✅ 404 pages verified (dist/404.html, localized pages with noindex, excluded from sitemap).');
+
   console.log('🎉 Production Quality, SEO & Spanish Migration Audit PASSED with 100% compliance!');
 }
 

@@ -10,8 +10,9 @@
  */
 
 import { type LangPrefix, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
+import { ALL_DOCS } from '../data/docsManifest';
 
-export type PageRoute = 'home' | 'docs' | 'playground' | 'architecture' | 'changelog';
+export type PageRoute = 'home' | 'docs' | 'playground' | 'architecture' | 'changelog' | 'not-found';
 export type AppLang = LangPrefix;
 
 export interface RouteState {
@@ -58,33 +59,71 @@ export function parseRoutePath(pathname: string): RouteState {
   const segments = path.split('/');
   const first = segments[0];
 
-  let lang: AppLang = DEFAULT_LANG_PREFIX;
+  // Case 1: First segment is one of the 4 supported languages
   if (VALID_LANGS.includes(first as AppLang)) {
-    lang = first as AppLang;
+    const lang = first as AppLang;
+    const remaining = segments.slice(1);
+
+    if (remaining.length === 0) {
+      return { lang, route: 'home' };
+    }
+
+    const section = remaining[0];
+    if (section === 'playground') {
+      if (remaining.length > 1) return { lang, route: 'not-found' };
+      return { lang, route: 'playground' };
+    }
+    if (section === 'architecture') {
+      if (remaining.length > 1) return { lang, route: 'not-found' };
+      return { lang, route: 'architecture' };
+    }
+    if (section === 'changelog') {
+      if (remaining.length > 1) return { lang, route: 'not-found' };
+      return { lang, route: 'changelog' };
+    }
+    if (section === 'docs') {
+      const slug = remaining.slice(1).join('/') || 'index';
+      const docExists = ALL_DOCS.some((d) => d.slug === slug);
+      if (!docExists) {
+        return { lang, route: 'not-found', docSlug: slug };
+      }
+      return { lang, route: 'docs', docSlug: slug };
+    }
+    if (section === '404') {
+      return { lang, route: 'not-found' };
+    }
+
+    return { lang, route: 'not-found' };
   }
 
-  const remaining = VALID_LANGS.includes(first as AppLang) ? segments.slice(1) : segments;
-
-  if (remaining.length === 0) {
-    return { lang, route: 'home' };
+  // Case 2: First segment is NOT a supported language
+  const defaultLang = DEFAULT_LANG_PREFIX;
+  if (first === 'playground') {
+    if (segments.length > 1) return { lang: defaultLang, route: 'not-found' };
+    return { lang: defaultLang, route: 'playground' };
+  }
+  if (first === 'architecture') {
+    if (segments.length > 1) return { lang: defaultLang, route: 'not-found' };
+    return { lang: defaultLang, route: 'architecture' };
+  }
+  if (first === 'changelog') {
+    if (segments.length > 1) return { lang: defaultLang, route: 'not-found' };
+    return { lang: defaultLang, route: 'changelog' };
+  }
+  if (first === 'docs') {
+    const slug = segments.slice(1).join('/') || 'index';
+    const docExists = ALL_DOCS.some((d) => d.slug === slug);
+    if (!docExists) {
+      return { lang: defaultLang, route: 'not-found', docSlug: slug };
+    }
+    return { lang: defaultLang, route: 'docs', docSlug: slug };
+  }
+  if (first === '404') {
+    return { lang: defaultLang, route: 'not-found' };
   }
 
-  const section = remaining[0];
-  if (section === 'playground') {
-    return { lang, route: 'playground' };
-  }
-  if (section === 'architecture') {
-    return { lang, route: 'architecture' };
-  }
-  if (section === 'changelog') {
-    return { lang, route: 'changelog' };
-  }
-  if (section === 'docs') {
-    const slug = remaining.slice(1).join('/') || 'index';
-    return { lang, route: 'docs', docSlug: slug };
-  }
-
-  return { lang, route: 'home' };
+  // Any other route or unknown language prefix (e.g. /de, /fr, /random)
+  return { lang: defaultLang, route: 'not-found' };
 }
 
 export function parseCurrentUrl(): RouteState {
@@ -100,6 +139,10 @@ export function parseCurrentUrl(): RouteState {
     if (hash === 'changelog') return { lang: 'en', route: 'changelog' };
     if (hash.startsWith('docs/')) {
       const slug = hash.replace(/^docs\//, '');
+      const docExists = ALL_DOCS.some((d) => d.slug === slug);
+      if (!docExists) {
+        return { lang: 'en', route: 'not-found', docSlug: slug };
+      }
       return { lang: 'en', route: 'docs', docSlug: slug };
     }
   }
@@ -129,6 +172,9 @@ export function buildRoutePath(lang: AppLang, route: PageRoute, docSlug?: string
   if (route === 'docs') {
     const cleanSlug = docSlug || 'index';
     return `/${lang}/docs/${cleanSlug}`;
+  }
+  if (route === 'not-found') {
+    return `/${lang}/404`;
   }
   return `/${lang}/${route}`;
 }

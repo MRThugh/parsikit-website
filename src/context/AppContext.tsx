@@ -57,6 +57,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Active doc lookup with multilingual fallbacks
   const activeDoc = useMemo(() => {
+    if (route !== 'docs') return null;
+
     const exactMatch = ALL_DOCS.find((d) => d.lang === lang && d.slug === activeDocSlug);
     if (exactMatch) return exactMatch;
 
@@ -67,9 +69,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (counterpart) return counterpart;
     }
 
-    // Fallback to first doc in current lang or global first
-    return ALL_DOCS.find((d) => d.lang === lang) || ALL_DOCS[0] || null;
-  }, [lang, activeDocSlug]);
+    // Fallback to first doc in current lang or installation
+    return ALL_DOCS.find((d) => d.lang === lang && d.slug === 'installation') || ALL_DOCS.find((d) => d.lang === lang) || null;
+  }, [lang, activeDocSlug, route]);
 
   // Sync document head, html dir, and SEO metadata
   useEffect(() => {

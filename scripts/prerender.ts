@@ -158,9 +158,11 @@ function renderHtmlTemplate(
   }
 
   const structuredDataTag = `<script type="application/ld+json">\n    ${JSON.stringify({ '@context': 'https://schema.org', '@graph': schemaGraph }, null, 2)}\n    </script>`;
+  const robotsTag = meta.robots ? `<meta name="robots" content="${meta.robots}" />` : '';
 
   const headInjections = [
     canonicalTag,
+    robotsTag,
     alternateEnTag,
     alternateFaTag,
     alternatePrsTag,
@@ -182,7 +184,7 @@ function renderHtmlTemplate(
   // Generate semantic HTML inside #root
   let rootContent = '';
   if (activeDoc) {
-    const renderedBody = renderMarkdownToHtml(activeDoc.content);
+    const renderedBody = renderMarkdownToHtml(activeDoc.content, activeDoc.slug, lang);
     
     // Sidebar items for current language
     const currentLangDocs = ALL_DOCS.filter((d) => d.lang === lang);
@@ -431,6 +433,35 @@ function renderHtmlTemplate(
           <p>${t.footer.copyright}</p>
         </footer>
       </div>`;
+  } else if (route === 'not-found') {
+    rootContent = `
+      <div class="min-h-screen flex flex-col">
+        <header class="p-6 border-b border-stone-200 dark:border-white/10">
+          <nav class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <div class="flex gap-6 text-sm font-medium">
+              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="/${lang}/playground">${navLinks.playground}</a>
+              <a href="/${lang}/architecture">${navLinks.architecture}</a>
+              <a href="/${lang}/changelog">${navLinks.changelog}</a>
+            </div>
+          </nav>
+        </header>
+
+        <main class="max-w-xl mx-auto px-4 py-20 flex-1 flex flex-col items-center justify-center text-center">
+          <span class="font-mono text-7xl font-extrabold text-[#126E68] dark:text-[#52C5BE] mb-4">404</span>
+          <h1 class="text-3xl font-extrabold text-stone-900 dark:text-white mb-4">${meta.title}</h1>
+          <p class="text-stone-600 dark:text-stone-300 text-base mb-8">${meta.description}</p>
+          <div class="flex flex-wrap gap-4 justify-center">
+            <a href="/${lang}" class="px-6 py-3 rounded-xl bg-[#126E68] text-white font-medium hover:bg-[#0E5853] transition-colors">Return Home</a>
+            <a href="/${lang}/docs/installation" class="px-6 py-3 rounded-xl border border-stone-300 dark:border-white/20 font-medium hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">Browse Documentation</a>
+          </div>
+        </main>
+
+        <footer class="p-6 border-t border-stone-200 dark:border-white/10 text-center text-sm text-stone-500">
+          <p>${t.footer.copyright}</p>
+        </footer>
+      </div>`;
   }
 
   if (rootContent) {
@@ -532,9 +563,17 @@ function prerender() {
     fs.writeFileSync(path.join(legDir, 'index.html'), redirHtml);
   }
 
-  // Prerender 404.html
-  const notFoundHtml = renderHtmlTemplate(baseHtml, 'en', 'home');
+  // Prerender semantic 404.html for GitHub Pages fallback
+  const notFoundHtml = renderHtmlTemplate(baseHtml, 'en', 'not-found');
   fs.writeFileSync(path.join(distDir, '404.html'), notFoundHtml);
+
+  // Prerender localized 404 pages for each supported language
+  for (const lang of VALID_LANGS) {
+    const lang404Dir = path.join(distDir, lang, '404');
+    fs.mkdirSync(lang404Dir, { recursive: true });
+    const lang404Html = renderHtmlTemplate(baseHtml, lang, 'not-found');
+    fs.writeFileSync(path.join(lang404Dir, 'index.html'), lang404Html);
+  }
 
   // Generate verified sitemap.xml with xhtml:link alternates (excluding Spanish and non-existent pages)
   const sitemapEntries = routesToPrerender.map((r) => {

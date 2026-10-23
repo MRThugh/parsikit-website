@@ -29,6 +29,9 @@ const ArchitectureView = lazy(() =>
 const ChangelogView = lazy(() =>
   import('./components/ChangelogView').then((m) => ({ default: m.ChangelogView }))
 );
+const NotFoundView = lazy(() =>
+  import('./components/NotFoundView').then((m) => ({ default: m.NotFoundView }))
+);
 
 function ViewLoader() {
   return (
@@ -209,6 +212,7 @@ function MainContent() {
           {route === 'docs' && <DocumentationView />}
           {route === 'architecture' && <ArchitectureView />}
           {route === 'changelog' && <ChangelogView />}
+          {route === 'not-found' && <NotFoundView />}
         </Suspense>
       </main>
 

@@ -29,6 +29,7 @@ import { ALL_DOCS } from '../data/docsManifest';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { parsePyprojectData } from '../../scripts/build-docs-manifest';
 import { renderMarkdownToHtml } from '../../scripts/render-markdown';
+import { escapeHtml, isDangerousScheme, resolveRelativeDocLink } from './markdown';
 import { LOCALES, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
 import { TRANSLATIONS } from '../i18n/translations';
 
@@ -287,5 +288,56 @@ test('seo: English-only development docs do not emit nonexistent alternate links
   assert.equal(meta.alternateFaUrl, undefined);
   assert.equal(meta.alternatePrsUrl, undefined);
   assert.equal(meta.alternateTgUrl, undefined);
+});
+
+test('markdown security: HTML escaping and dangerous URL scheme blocking', () => {
+  assert.equal(escapeHtml('<script>alert("xss")</script>'), '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+  assert.equal(isDangerousScheme('javascript:alert(1)'), true);
+  assert.equal(isDangerousScheme('data:text/html,<script>alert(1)</script>'), true);
+  assert.equal(isDangerousScheme('vbscript:msgbox(1)'), true);
+  assert.equal(isDangerousScheme('file:///etc/passwd'), true);
+  assert.equal(isDangerousScheme('https://example.com'), false);
+  assert.equal(isDangerousScheme('/en/docs/installation'), false);
+
+  // Render check
+  const xssHtml = renderMarkdownToHtml('[malicious](javascript:alert(1))');
+  assert.ok(xssHtml.includes('[unsafe link blocked]'));
+  assert.ok(!xssHtml.includes('href="javascript:'));
+
+  const scriptHtml = renderMarkdownToHtml('<script>alert(1)</script>');
+  assert.ok(!scriptHtml.includes('<script>alert(1)</script>'));
+  assert.ok(scriptHtml.includes('&lt;script&gt;'));
+});
+
+test('markdown links: directory-relative link resolution in docs', () => {
+  assert.equal(resolveRelativeDocLink('api/index', 'validators.md'), 'api/validators');
+  assert.equal(resolveRelativeDocLink('api/index', 'text.md'), 'api/text');
+  assert.equal(resolveRelativeDocLink('api/index', '../tutorials/datetime.md'), 'tutorials/datetime');
+  assert.equal(resolveRelativeDocLink('index', 'installation.md'), 'installation');
+  assert.equal(resolveRelativeDocLink('guides/web_backends', '../api/models.md#pydantic'), 'api/models#pydantic');
+
+  const rendered = renderMarkdownToHtml('[Validators](validators.md)', 'api/index', 'en');
+  assert.ok(rendered.includes('href="/en/docs/api/validators"'));
+});
+
+test('router & 404: not-found route detection and noindex SEO metadata', () => {
+  const invalidSection = parseRoutePath('/en/non-existent-section');
+  assert.equal(invalidSection.route, 'not-found');
+  assert.equal(invalidSection.lang, 'en');
+
+  const invalidSlug = parseRoutePath('/en/docs/invalid-doc-slug-xyz');
+  assert.equal(invalidSlug.route, 'not-found');
+  assert.equal(invalidSlug.docSlug, 'invalid-doc-slug-xyz');
+
+  const invalidLang = parseRoutePath('/de/about');
+  assert.equal(invalidLang.route, 'not-found');
+
+  const metaNotFound = computePageMetadata('en', 'not-found', null);
+  assert.equal(metaNotFound.robots, 'noindex, follow');
+  assert.ok(metaNotFound.title.includes('404'));
+
+  const metaNotFoundFa = computePageMetadata('fa', 'not-found', null);
+  assert.equal(metaNotFoundFa.robots, 'noindex, follow');
+  assert.ok(metaNotFoundFa.title.includes('۴۰۴'));
 });
 
