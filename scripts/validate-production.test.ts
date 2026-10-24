@@ -103,9 +103,6 @@ Sitemap: ${BASE_SITE_URL}/sitemap.xml
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${BASE_SITE_URL}/</loc>
-  </url>
-  <url>
     <loc>${BASE_SITE_URL}/en</loc>
   </url>
   <url>
@@ -654,7 +651,6 @@ test('validator scenario 24: dynamically discovers and audits deep pages without
     // Update sitemap to include both new valid pages
     const updatedSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${BASE_SITE_URL}/</loc></url>
   <url><loc>${BASE_SITE_URL}/en</loc></url>
   <url><loc>${BASE_SITE_URL}/fa</loc></url>
   <url><loc>${BASE_SITE_URL}/en/tutorials/advanced-security</loc></url>
@@ -671,3 +667,91 @@ test('validator scenario 24: dynamically discovers and audits deep pages without
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+// Scenario 25: Duplicate JSON-LD blocks in HTML
+test('validator scenario 25: detects duplicate JSON-LD structured data blocks', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc25-'));
+  try {
+    createBaseValidDist(tmpDir);
+    const dupJsonLdHtml = `<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <title>ParsiKit — Test</title>
+  <meta name="description" content="Test" />
+  <link rel="canonical" href="${BASE_SITE_URL}/en" />
+  <link rel="alternate" hreflang="en" href="${BASE_SITE_URL}/en" />
+  <link rel="alternate" hreflang="fa" href="${BASE_SITE_URL}/fa" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication"}</script>
+</head>
+<body><h1>Test</h1></body>
+</html>`;
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), dupJsonLdHtml);
+
+    const report = validateDistArtifacts(tmpDir);
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes('Duplicate JSON-LD structured data blocks found in en/index.html')));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 26: Non-canonical URL in sitemap.xml
+test('validator scenario 26: detects non-canonical URL in sitemap.xml', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc26-'));
+  try {
+    createBaseValidDist(tmpDir);
+    // Add a non-canonical root entry whose page points to /en
+    const sitemapWithNonCanonical = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${BASE_SITE_URL}/</loc></url>
+  <url><loc>${BASE_SITE_URL}/en</loc></url>
+  <url><loc>${BASE_SITE_URL}/fa</loc></url>
+</urlset>`;
+    fs.writeFileSync(path.join(tmpDir, 'sitemap.xml'), sitemapWithNonCanonical);
+
+    const report = validateDistArtifacts(tmpDir);
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes(`Non-canonical URL in sitemap.xml: ${BASE_SITE_URL}/ points to page whose canonical is declared as ${BASE_SITE_URL}/en`)));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 27: Web manifest name or short_name empty
+test('validator scenario 27: detects empty name in site.webmanifest', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc27-'));
+  try {
+    createBaseValidDist(tmpDir);
+    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify({ name: '', short_name: '' }));
+
+    const report = validateDistArtifacts(tmpDir);
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes('site.webmanifest name must be non-empty')));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 28: Web manifest icon missing from dist
+test('validator scenario 28: detects missing icon declared in site.webmanifest', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc28-'));
+  try {
+    createBaseValidDist(tmpDir);
+    fs.writeFileSync(
+      path.join(tmpDir, 'site.webmanifest'),
+      JSON.stringify({
+        name: 'ParsiKit',
+        short_name: 'ParsiKit',
+        icons: [{ src: '/missing-icon-999.png', sizes: '192x192' }],
+      })
+    );
+
+    const report = validateDistArtifacts(tmpDir);
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes('site.webmanifest icon not found in dist: /missing-icon-999.png')));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+

@@ -40,6 +40,11 @@ function renderHtmlTemplate(
 
   // Canonical & Alternates
   const canonicalTag = `<link rel="canonical" href="${meta.canonicalUrl}" />`;
+  let hasCanonicalInBase = false;
+  if (html.includes('<link rel="canonical"')) {
+    html = html.replace(/<link rel="canonical" href=".*?" \/>/, canonicalTag);
+    hasCanonicalInBase = true;
+  }
   const alternateEnTag = meta.alternateEnUrl
     ? `<link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}" />`
     : '';
@@ -65,6 +70,16 @@ function renderHtmlTemplate(
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${meta.description.replace(/"/g, '&quot;')}" />`
   );
+  if (html.includes('<meta property="og:url"')) {
+    html = html.replace(
+      /<meta property="og:url" content=".*?" \/>/,
+      `<meta property="og:url" content="${meta.canonicalUrl}" />`
+    );
+  }
+  html = html.replace(
+    /<meta property="og:image" content=".*?" \/>/,
+    `<meta property="og:image" content="${BASE_SITE_URL}/parsikit-logo.png" />`
+  );
   html = html.replace(
     /<meta name="twitter:title" content=".*?" \/>/,
     `<meta name="twitter:title" content="${meta.title.replace(/"/g, '&quot;')}" />`
@@ -72,6 +87,10 @@ function renderHtmlTemplate(
   html = html.replace(
     /<meta name="twitter:description" content=".*?" \/>/,
     `<meta name="twitter:description" content="${meta.description.replace(/"/g, '&quot;')}" />`
+  );
+  html = html.replace(
+    /<meta name="twitter:image" content=".*?" \/>/,
+    `<meta name="twitter:image" content="${BASE_SITE_URL}/parsikit-logo.png" />`
   );
 
   // Dynamic Schema.org JSON-LD
@@ -157,11 +176,15 @@ function renderHtmlTemplate(
     ];
   }
 
+  // Remove any existing JSON-LD from baseHtml to prevent duplicate structured data blocks
+  html = html.replace(/<!-- Structured Data \(JSON-LD\) -->\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+  html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+
   const structuredDataTag = `<script type="application/ld+json">\n    ${JSON.stringify({ '@context': 'https://schema.org', '@graph': schemaGraph }, null, 2)}\n    </script>`;
   const robotsTag = meta.robots ? `<meta name="robots" content="${meta.robots}" />` : '';
 
   const headInjections = [
-    canonicalTag,
+    hasCanonicalInBase ? '' : canonicalTag,
     robotsTag,
     alternateEnTag,
     alternateFaTag,
@@ -626,19 +649,6 @@ ${alternates.join('\n')}
 
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>${BASE_SITE_URL}/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${BASE_SITE_URL}/en"/>
-    <xhtml:link rel="alternate" hreflang="fa" href="${BASE_SITE_URL}/fa"/>
-    <xhtml:link rel="alternate" hreflang="fa-IR" href="${BASE_SITE_URL}/fa"/>
-    <xhtml:link rel="alternate" hreflang="prs" href="${BASE_SITE_URL}/prs-af"/>
-    <xhtml:link rel="alternate" hreflang="prs-AF" href="${BASE_SITE_URL}/prs-af"/>
-    <xhtml:link rel="alternate" hreflang="tg" href="${BASE_SITE_URL}/tg"/>
-    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${BASE_SITE_URL}/tg"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_SITE_URL}/en"/>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
 ${sitemapEntries.join('\n')}
 </urlset>`;
 

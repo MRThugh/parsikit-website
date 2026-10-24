@@ -427,10 +427,11 @@ export function InteractivePlayground() {
           <div className="max-w-2xl mx-auto flex flex-col gap-6">
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label htmlFor="cal-year-input" className="block text-xs font-medium text-stone-500 mb-1">
                   {t.playground.tools.calendar.yearLabel}
                 </label>
                 <input
+                  id="cal-year-input"
                   type="number"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -439,10 +440,11 @@ export function InteractivePlayground() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label htmlFor="cal-month-input" className="block text-xs font-medium text-stone-500 mb-1">
                   {t.playground.tools.calendar.monthLabel}
                 </label>
                 <input
+                  id="cal-month-input"
                   type="number"
                   min={1}
                   max={12}
@@ -453,10 +455,11 @@ export function InteractivePlayground() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label htmlFor="cal-day-input" className="block text-xs font-medium text-stone-500 mb-1">
                   {t.playground.tools.calendar.dayLabel}
                 </label>
                 <input
+                  id="cal-day-input"
                   type="number"
                   min={1}
                   max={31}

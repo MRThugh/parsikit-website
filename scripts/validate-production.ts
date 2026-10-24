@@ -362,6 +362,37 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
       report.errors.push(`Active indexable page ${relPath} incorrectly declares noindex robots directive`);
     }
 
+    // Validate Structured Data JSON-LD
+    const jsonLdMatches = Array.from(html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g));
+    if (jsonLdMatches.length > 1) {
+      report.errors.push(`Duplicate JSON-LD structured data blocks found in ${relPath} (${jsonLdMatches.length} blocks found)`);
+    } else if (jsonLdMatches.length === 1) {
+      try {
+        const parsed = JSON.parse(jsonLdMatches[0][1]);
+        if (parsed['@context'] !== 'https://schema.org') {
+          report.errors.push(`JSON-LD @context in ${relPath} must be 'https://schema.org', found '${parsed['@context']}'`);
+        }
+      } catch (err: any) {
+        report.errors.push(`Malformed JSON-LD syntax in ${relPath}: ${err.message}`);
+      }
+    }
+
+    // Validate Social Media Images (og:image & twitter:image)
+    const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)" \/>/);
+    if (ogImageMatch) {
+      const imgUrl = ogImageMatch[1];
+      if (!imgUrl.startsWith('https://')) {
+        report.errors.push(`og:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
+      }
+    }
+    const twImageMatch = html.match(/<meta name="twitter:image" content="(.*?)" \/>/);
+    if (twImageMatch) {
+      const imgUrl = twImageMatch[1];
+      if (!imgUrl.startsWith('https://')) {
+        report.errors.push(`twitter:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
+      }
+    }
+
     // Validate Alternate Hreflang Declarations
     const alternateMatches = Array.from(html.matchAll(/<link rel="alternate" hreflang="(.*?)" href="(.*?)" \/>/g));
     const alternates: Record<string, string> = {};
@@ -517,6 +548,13 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
       const expectedDistPath = relPath ? path.join(distDir, relPath, 'index.html') : path.join(distDir, 'index.html');
       if (!fs.existsSync(expectedDistPath)) {
         report.errors.push(`Sitemap URL has no matching generated HTML file in dist: ${loc} (checked ${expectedDistPath})`);
+      } else {
+        // Strict Canonical Check: Every sitemap URL must match the canonical URL of the corresponding page
+        const html = fs.readFileSync(expectedDistPath, 'utf-8');
+        const canonicalMatch = html.match(/<link rel="canonical" href="(.*?)" \/>/);
+        if (canonicalMatch && canonicalMatch[1] !== loc) {
+          report.errors.push(`Non-canonical URL in sitemap.xml: ${loc} points to page whose canonical is declared as ${canonicalMatch[1]}`);
+        }
       }
     }
   }
@@ -529,6 +567,31 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
     const robotsContent = fs.readFileSync(robotsPath, 'utf-8');
     if (!robotsContent.includes(`Sitemap: ${BASE_SITE_URL}/sitemap.xml`)) {
       report.errors.push('robots.txt does not declare correct sitemap URL!');
+    }
+  }
+
+  // 6. Audit site.webmanifest
+  const manifestPath = path.join(distDir, 'site.webmanifest');
+  if (fs.existsSync(manifestPath)) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      if (!manifest.name || !manifest.name.trim()) {
+        report.errors.push('site.webmanifest name must be non-empty');
+      }
+      if (!manifest.short_name || !manifest.short_name.trim()) {
+        report.errors.push('site.webmanifest short_name must be non-empty');
+      }
+      if (Array.isArray(manifest.icons)) {
+        for (const icon of manifest.icons) {
+          const iconRel = icon.src.replace(/^\//, '');
+          const iconFullPath = path.join(distDir, iconRel);
+          if (!fs.existsSync(iconFullPath)) {
+            report.errors.push(`site.webmanifest icon not found in dist: ${icon.src}`);
+          }
+        }
+      }
+    } catch (err: any) {
+      report.errors.push(`Malformed site.webmanifest: ${err.message}`);
     }
   }
 

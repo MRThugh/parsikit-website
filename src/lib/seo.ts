@@ -211,6 +211,19 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute('content', meta.canonicalUrl);
 
+  const ogImage = document.querySelector('meta[property="og:image"]');
+  if (ogImage) ogImage.setAttribute('content', `${BASE_SITE_URL}/parsikit-logo.png`);
+
+  // Twitter
+  const twTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twTitle) twTitle.setAttribute('content', meta.title);
+
+  const twDesc = document.querySelector('meta[name="twitter:description"]');
+  if (twDesc) twDesc.setAttribute('content', meta.description);
+
+  const twImage = document.querySelector('meta[name="twitter:image"]');
+  if (twImage) twImage.setAttribute('content', `${BASE_SITE_URL}/parsikit-logo.png`);
+
   // Canonical link
   let canonicalTag = document.querySelector('link[rel="canonical"]');
   if (!canonicalTag) {
