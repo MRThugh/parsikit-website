@@ -82,7 +82,7 @@ export function Header() {
             aria-label="ParsiKit Home"
           >
             <img
-              src="/parsikit-logo.png"
+              src={`${import.meta.env.BASE_URL}parsikit-logo.png`}
               alt="ParsiKit Logo"
               className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-sm"
               width="36"

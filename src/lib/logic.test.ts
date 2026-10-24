@@ -190,24 +190,32 @@ test('router: deprecated Spanish URLs cleanly migrated to English', () => {
 });
 
 test('seo: 4-language metadata and reciprocal hreflang alternate URL generation', () => {
-  const homeMetaEn = computePageMetadata('en', 'home', null);
-  assert.ok(homeMetaEn.title.includes('ParsiKit'));
-  assert.equal(homeMetaEn.canonicalUrl, `${BASE_SITE_URL}/en`);
-  assert.equal(homeMetaEn.alternateEnUrl, `${BASE_SITE_URL}/en`);
-  assert.equal(homeMetaEn.alternateFaUrl, `${BASE_SITE_URL}/fa`);
-  assert.equal(homeMetaEn.alternatePrsUrl, `${BASE_SITE_URL}/prs-af`);
-  assert.equal(homeMetaEn.alternateTgUrl, `${BASE_SITE_URL}/tg`);
-  assert.equal(homeMetaEn.alternateXDefaultUrl, `${BASE_SITE_URL}/en`);
+  // 1. Without verified origin: no misleading canonicals or alternates
+  const unconfiguredMeta = computePageMetadata('en', 'home', null);
+  assert.ok(unconfiguredMeta.title.includes('ParsiKit'));
+  assert.equal(unconfiguredMeta.canonicalUrl, undefined);
+  assert.equal(unconfiguredMeta.alternateEnUrl, undefined);
 
-  const homeMetaTg = computePageMetadata('tg', 'home', null);
+  // 2. With verified origin: generates verified canonical and hreflang URLs
+  const testOrigin = 'https://verified-site.example.org';
+  const homeMetaEn = computePageMetadata('en', 'home', null, testOrigin);
+  assert.ok(homeMetaEn.title.includes('ParsiKit'));
+  assert.equal(homeMetaEn.canonicalUrl, `${testOrigin}/en`);
+  assert.equal(homeMetaEn.alternateEnUrl, `${testOrigin}/en`);
+  assert.equal(homeMetaEn.alternateFaUrl, `${testOrigin}/fa`);
+  assert.equal(homeMetaEn.alternatePrsUrl, `${testOrigin}/prs-af`);
+  assert.equal(homeMetaEn.alternateTgUrl, `${testOrigin}/tg`);
+  assert.equal(homeMetaEn.alternateXDefaultUrl, `${testOrigin}/en`);
+
+  const homeMetaTg = computePageMetadata('tg', 'home', null, testOrigin);
   assert.ok(homeMetaTg.title.includes('ParsiKit'));
-  assert.equal(homeMetaTg.canonicalUrl, `${BASE_SITE_URL}/tg`);
+  assert.equal(homeMetaTg.canonicalUrl, `${testOrigin}/tg`);
 
   const doc = ALL_DOCS.find((d: any) => d.slug === 'installation' && d.lang === 'prs-af');
   if (doc) {
-    const docMeta = computePageMetadata('prs-af', 'docs', doc);
+    const docMeta = computePageMetadata('prs-af', 'docs', doc, testOrigin);
     assert.equal(docMeta.schemaType, 'TechArticle');
-    assert.ok(docMeta.canonicalUrl.includes('/prs-af/docs/installation'));
+    assert.ok(docMeta.canonicalUrl?.includes('/prs-af/docs/installation'));
   }
 });
 
@@ -283,8 +291,9 @@ test('docs parity: exactly 22 docs in all 4 languages (88 total + 6 dev = 94 tot
 test('seo: English-only development docs do not emit nonexistent alternate links', () => {
   const devDoc = ALL_DOCS.find((d: any) => d.slug === 'development/architecture');
   assert.ok(devDoc);
-  const meta = computePageMetadata('en', 'docs', devDoc);
-  assert.equal(meta.alternateEnUrl, `${BASE_SITE_URL}/en/docs/development/architecture`);
+  const testOrigin = 'https://verified-site.example.org';
+  const meta = computePageMetadata('en', 'docs', devDoc, testOrigin);
+  assert.equal(meta.alternateEnUrl, `${testOrigin}/en/docs/development/architecture`);
   assert.equal(meta.alternateFaUrl, undefined);
   assert.equal(meta.alternatePrsUrl, undefined);
   assert.equal(meta.alternateTgUrl, undefined);

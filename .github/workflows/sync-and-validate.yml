@@ -49,18 +49,19 @@ jobs:
 
       - name: Validate Sitemap, Robots & Multilingual Prerendered Outputs
         run: |
-          test -f dist/sitemap.xml || (echo "Missing dist/sitemap.xml" && exit 1)
           test -f dist/robots.txt || (echo "Missing dist/robots.txt" && exit 1)
           test -f dist/404.html || (echo "Missing dist/404.html" && exit 1)
           test -f dist/en/index.html || (echo "Missing dist/en/index.html" && exit 1)
           test -f dist/fa/index.html || (echo "Missing dist/fa/index.html" && exit 1)
           test -f dist/prs-af/index.html || (echo "Missing dist/prs-af/index.html" && exit 1)
           test -f dist/tg/index.html || (echo "Missing dist/tg/index.html" && exit 1)
-          # Verify Spanish is NOT present as an active canonical route in sitemap
-          if grep -q "<loc>https://parsikit.dev/es</loc>" dist/sitemap.xml; then
-            echo "Error: Active Spanish locale found in sitemap.xml" && exit 1
+          # If sitemap was generated (when SITE_URL configured), verify Spanish is not present
+          if [ -f dist/sitemap.xml ]; then
+            if grep -q "/es" dist/sitemap.xml; then
+              echo "Error: Active Spanish locale found in sitemap.xml" && exit 1
+            fi
           fi
           # Verify legacy Spanish redirect stub exists and uses meta-refresh / window.location.replace
           test -f dist/es/index.html || (echo "Missing dist/es/index.html redirect stub" && exit 1)
           grep -q "http-equiv=\"refresh\"" dist/es/index.html || (echo "dist/es/index.html must be a redirect stub" && exit 1)
-          echo "All 4 active locales, sitemap exclusion, and legacy Spanish redirect verified!"
+          echo "All 4 active locales, robots, and legacy Spanish redirect verified!"

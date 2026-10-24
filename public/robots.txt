@@ -1,4 +1,3 @@
 # ParsiKit robots.txt
 User-agent: *
 Allow: /
-Sitemap: https://parsikit.dev/sitemap.xml

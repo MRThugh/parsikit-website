@@ -3,11 +3,17 @@ import path from 'node:path';
 import { ALL_DOCS, type DocEntry } from '../src/data/docsManifest';
 import { RELEASES_DATA } from '../src/data/changelogData';
 import { REPO_METADATA } from '../src/data/repoMetadata';
-import { computePageMetadata, BASE_SITE_URL } from '../src/lib/seo';
+import { computePageMetadata } from '../src/lib/seo';
 import { type PageRoute, type AppLang, buildRoutePath, VALID_LANGS } from '../src/lib/router';
 import { LOCALES } from '../src/i18n/config';
 import { getTranslations } from '../src/i18n/translations';
 import { renderMarkdownToHtml } from './render-markdown';
+import {
+  getVerifiedSiteUrl,
+  getDeploymentBasePath,
+  OFFICIAL_REPO_URL,
+  OFFICIAL_AUTHOR,
+} from '../src/config/site';
 
 function renderHtmlTemplate(
   baseHtml: string,
@@ -19,6 +25,8 @@ function renderHtmlTemplate(
     ? ALL_DOCS.find((d) => d.lang === lang && d.slug === docSlug) || null
     : null;
 
+  const siteUrl = getVerifiedSiteUrl();
+  const basePath = getDeploymentBasePath();
   const meta = computePageMetadata(lang, route, activeDoc);
   const loc = LOCALES[lang] || LOCALES.en;
   const isRtl = loc.direction === 'rtl';
@@ -38,13 +46,19 @@ function renderHtmlTemplate(
     `<meta name="description" content="${meta.description.replace(/"/g, '&quot;')}" />`
   );
 
-  // Canonical & Alternates
-  const canonicalTag = `<link rel="canonical" href="${meta.canonicalUrl}" />`;
-  let hasCanonicalInBase = false;
-  if (html.includes('<link rel="canonical"')) {
-    html = html.replace(/<link rel="canonical" href=".*?" \/>/, canonicalTag);
-    hasCanonicalInBase = true;
+  // Canonical Tag: Strictly ONLY rendered if a verified origin is configured
+  let canonicalTag = '';
+  if (meta.canonicalUrl) {
+    canonicalTag = `<link rel="canonical" href="${meta.canonicalUrl}" />`;
+    if (html.includes('<link rel="canonical"')) {
+      html = html.replace(/<link rel="canonical" href=".*?" \/>/, canonicalTag);
+    }
+  } else {
+    // Strip any unverified canonical tag that might exist in baseHtml
+    html = html.replace(/<link rel="canonical"[^>]*\/>\s*/g, '');
   }
+
+  // Alternate Hreflang Tags: Strictly ONLY rendered if a verified origin is configured
   const alternateEnTag = meta.alternateEnUrl
     ? `<link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}" />`
     : '';
@@ -70,15 +84,25 @@ function renderHtmlTemplate(
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${meta.description.replace(/"/g, '&quot;')}" />`
   );
-  if (html.includes('<meta property="og:url"')) {
-    html = html.replace(
-      /<meta property="og:url" content=".*?" \/>/,
-      `<meta property="og:url" content="${meta.canonicalUrl}" />`
-    );
+
+  // og:url is strictly ONLY set if a verified canonicalUrl is present
+  if (meta.ogUrl) {
+    if (html.includes('<meta property="og:url"')) {
+      html = html.replace(
+        /<meta property="og:url" content=".*?" \/>/,
+        `<meta property="og:url" content="${meta.ogUrl}" />`
+      );
+    } else {
+      html = html.replace('</head>', `    <meta property="og:url" content="${meta.ogUrl}" />\n  </head>`);
+    }
+  } else {
+    html = html.replace(/<meta property="og:url"[^>]*\/>\s*/g, '');
   }
+
+  const logoImgSrc = meta.ogImage || `${basePath}/parsikit-logo.png`;
   html = html.replace(
     /<meta property="og:image" content=".*?" \/>/,
-    `<meta property="og:image" content="${BASE_SITE_URL}/parsikit-logo.png" />`
+    `<meta property="og:image" content="${logoImgSrc}" />`
   );
   html = html.replace(
     /<meta name="twitter:title" content=".*?" \/>/,
@@ -90,101 +114,110 @@ function renderHtmlTemplate(
   );
   html = html.replace(
     /<meta name="twitter:image" content=".*?" \/>/,
-    `<meta name="twitter:image" content="${BASE_SITE_URL}/parsikit-logo.png" />`
+    `<meta name="twitter:image" content="${logoImgSrc}" />`
   );
 
   // Dynamic Schema.org JSON-LD
   let schemaGraph: any[] = [];
   if (meta.schemaType === 'TechArticle' && activeDoc) {
-    schemaGraph = [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'TechArticle',
-        'headline': meta.title,
-        'description': meta.description,
-        'inLanguage': loc.locale,
-        'author': {
-          '@type': 'Person',
-          'name': 'Ali Kamrani',
-          'url': 'https://github.com/MRThugh'
-        },
-        'publisher': {
-          '@type': 'Organization',
-          'name': 'ParsiKit',
-          'url': BASE_SITE_URL
-        },
-        'mainEntityOfPage': meta.canonicalUrl
+    const articleNode: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: meta.title,
+      description: meta.description,
+      inLanguage: loc.locale,
+      author: {
+        '@type': 'Person',
+        name: OFFICIAL_AUTHOR,
+        url: 'https://github.com/MRThugh',
       },
-      {
+      publisher: {
+        '@type': 'Organization',
+        name: 'ParsiKit',
+      },
+    };
+
+    if (siteUrl && meta.canonicalUrl) {
+      articleNode.publisher.url = siteUrl;
+      articleNode.mainEntityOfPage = meta.canonicalUrl;
+      schemaGraph.push(articleNode);
+      schemaGraph.push({
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
-        'itemListElement': [
+        itemListElement: [
           {
             '@type': 'ListItem',
-            'position': 1,
-            'name': 'Home',
-            'item': `${BASE_SITE_URL}/${lang}`
+            position: 1,
+            name: 'Home',
+            item: `${siteUrl}${basePath}/${lang}`,
           },
           {
             '@type': 'ListItem',
-            'position': 2,
-            'name': 'Docs',
-            'item': `${BASE_SITE_URL}/${lang}/docs/installation`
+            position: 2,
+            name: 'Docs',
+            item: `${siteUrl}${basePath}/${lang}/docs/installation`,
           },
           {
             '@type': 'ListItem',
-            'position': 3,
-            'name': activeDoc.title,
-            'item': meta.canonicalUrl
-          }
-        ]
-      }
-    ];
+            position: 3,
+            name: activeDoc.title,
+            item: meta.canonicalUrl,
+          },
+        ],
+      });
+    } else {
+      schemaGraph.push(articleNode);
+    }
   } else {
-    schemaGraph = [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
-        'name': 'ParsiKit',
-        'description': meta.description,
-        'applicationCategory': 'DeveloperApplication',
-        'operatingSystem': 'Cross-platform',
-        'softwareVersion': REPO_METADATA.version,
-        'license': 'https://opensource.org/licenses/MIT',
-        'author': {
-          '@type': 'Person',
-          'name': 'Ali Kamrani',
-          'url': 'https://github.com/MRThugh'
-        },
-        'offers': {
-          '@type': 'Offer',
-          'price': '0',
-          'priceCurrency': 'USD'
-        }
+    const appNode: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'ParsiKit',
+      description: meta.description,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Cross-platform',
+      softwareVersion: REPO_METADATA.version,
+      license: 'https://opensource.org/licenses/MIT',
+      author: {
+        '@type': 'Person',
+        name: OFFICIAL_AUTHOR,
+        url: 'https://github.com/MRThugh',
       },
-      {
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+    };
+    schemaGraph.push(appNode);
+
+    if (siteUrl) {
+      schemaGraph.push({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        'name': 'ParsiKit Official Website',
-        'url': BASE_SITE_URL,
-        'publisher': {
+        name: 'ParsiKit Official Website',
+        url: `${siteUrl}${basePath}`,
+        publisher: {
           '@type': 'Person',
-          'name': 'Ali Kamrani',
-          'url': 'https://github.com/MRThugh'
-        }
-      }
-    ];
+          name: OFFICIAL_AUTHOR,
+          url: 'https://github.com/MRThugh',
+        },
+      });
+    }
   }
 
   // Remove any existing JSON-LD from baseHtml to prevent duplicate structured data blocks
-  html = html.replace(/<!-- Structured Data \(JSON-LD\) -->\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+  html = html.replace(
+    /<!-- Structured Data \(JSON-LD\) -->\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/,
+    ''
+  );
   html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
 
   const structuredDataTag = `<script type="application/ld+json">\n    ${JSON.stringify({ '@context': 'https://schema.org', '@graph': schemaGraph }, null, 2)}\n    </script>`;
   const robotsTag = meta.robots ? `<meta name="robots" content="${meta.robots}" />` : '';
 
   const headInjections = [
-    hasCanonicalInBase ? '' : canonicalTag,
+    meta.canonicalUrl && !html.includes('<link rel="canonical"') ? canonicalTag : '',
     robotsTag,
     alternateEnTag,
     alternateFaTag,
@@ -192,7 +225,9 @@ function renderHtmlTemplate(
     alternateTgTag,
     alternateXDefaultTag,
     structuredDataTag,
-  ].filter(Boolean).join('\n    ');
+  ]
+    .filter(Boolean)
+    .join('\n    ');
 
   html = html.replace('</head>', `    ${headInjections}\n  </head>`);
 
@@ -208,41 +243,42 @@ function renderHtmlTemplate(
   let rootContent = '';
   if (activeDoc) {
     const renderedBody = renderMarkdownToHtml(activeDoc.content, activeDoc.slug, lang);
-    
+
     // Sidebar items for current language
     const currentLangDocs = ALL_DOCS.filter((d) => d.lang === lang);
     const sidebarHtml = currentLangDocs
       .map((d) => {
         const isCurrent = d.slug === activeDoc.slug;
-        return `<li><a href="/${lang}/docs/${d.slug}" class="${isCurrent ? 'font-bold text-[#126E68] dark:text-[#52C5BE]' : 'hover:underline'}">${d.title}</a></li>`;
+        return `<li><a href="${basePath}/${lang}/docs/${d.slug}" class="${isCurrent ? 'font-bold text-[#126E68] dark:text-[#52C5BE]' : 'hover:underline'}">${d.title}</a></li>`;
       })
       .join('\n');
 
     // In-page Table of Contents
-    const tocHtml = activeDoc.headings.length > 0
-      ? `<aside class="hidden lg:block w-64 shrink-0 text-sm">
-          <div class="sticky top-24 p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-white/50 dark:bg-stone-900/40">
-            <h3 class="font-bold text-xs uppercase tracking-wider text-stone-500 mb-3">${t.docs.onThisPage}</h3>
-            <ul class="space-y-1.5 text-stone-600 dark:text-stone-300">
-              ${activeDoc.headings.map(h => `<li class="${h.level === 3 ? (isRtl ? 'pr-4' : 'pl-4') : ''}"><a href="#${h.id}" class="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors">${h.text}</a></li>`).join('\n')}
-            </ul>
-          </div>
-        </aside>`
-      : '';
+    const tocHtml =
+      activeDoc.headings.length > 0
+        ? `<aside class="hidden lg:block w-64 shrink-0 text-sm">
+            <div class="sticky top-24 p-4 rounded-xl border border-stone-200 dark:border-white/10 bg-white/50 dark:bg-stone-900/40">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-stone-500 mb-3">${t.docs.onThisPage}</h3>
+              <ul class="space-y-1.5 text-stone-600 dark:text-stone-300">
+                ${activeDoc.headings.map((h) => `<li class="${h.level === 3 ? (isRtl ? 'pr-4' : 'pl-4') : ''}"><a href="#${h.id}" class="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors">${h.text}</a></li>`).join('\n')}
+              </ul>
+            </div>
+          </aside>`
+        : '';
 
     rootContent = `
       <div class="min-h-screen flex flex-col">
         <header class="sticky top-0 z-40 w-full border-b border-stone-200/80 dark:border-white/10 bg-[#FAF7F2]/80 dark:bg-[#0E1413]/80 backdrop-blur-md">
           <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-lg flex items-center gap-2 text-stone-900 dark:text-white">
+            <a href="${basePath}/${lang}" class="font-bold text-lg flex items-center gap-2 text-stone-900 dark:text-white">
               <span class="w-8 h-8 rounded-lg bg-[#126E68] text-white flex items-center justify-center font-bold">P</span>
               <span>ParsiKit</span>
             </a>
             <nav class="flex items-center gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation" class="text-[#126E68] dark:text-[#52C5BE]">${navLinks.docs}</a>
-              <a href="/${lang}/playground" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.playground}</a>
-              <a href="/${lang}/architecture" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation" class="text-[#126E68] dark:text-[#52C5BE]">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog" class="hover:text-[#126E68] dark:hover:text-[#52C5BE]">${navLinks.changelog}</a>
               <a href="${REPO_METADATA.repository}" target="_blank" rel="noopener noreferrer" class="hover:text-[#126E68]">GitHub</a>
             </nav>
           </div>
@@ -285,12 +321,12 @@ function renderHtmlTemplate(
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
           <nav class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <a href="${basePath}/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
             <div class="flex gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
-              <a href="/${lang}/playground">${navLinks.playground}</a>
-              <a href="/${lang}/architecture">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog">${navLinks.changelog}</a>
               <a href="${REPO_METADATA.repository}" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
           </nav>
@@ -350,12 +386,12 @@ function renderHtmlTemplate(
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
           <nav class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <a href="${basePath}/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
             <div class="flex gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
-              <a href="/${lang}/playground" class="text-[#126E68]">${navLinks.playground}</a>
-              <a href="/${lang}/architecture">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground" class="text-[#126E68]">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog">${navLinks.changelog}</a>
             </div>
           </nav>
         </header>
@@ -384,12 +420,12 @@ function renderHtmlTemplate(
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
           <nav class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <a href="${basePath}/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
             <div class="flex gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
-              <a href="/${lang}/playground">${navLinks.playground}</a>
-              <a href="/${lang}/architecture" class="text-[#126E68]">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture" class="text-[#126E68]">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog">${navLinks.changelog}</a>
             </div>
           </nav>
         </header>
@@ -418,28 +454,30 @@ function renderHtmlTemplate(
         </footer>
       </div>`;
   } else if (route === 'changelog') {
-    const releaseListHtml = RELEASES_DATA.map(r => `
+    const releaseListHtml = RELEASES_DATA.map(
+      (r) => `
       <div class="p-6 rounded-2xl border border-stone-200 dark:border-white/10 bg-white/60 dark:bg-stone-900/40 mb-6">
         <div class="flex items-center justify-between mb-4">
           <span class="text-lg font-bold text-stone-900 dark:text-white">v${r.version}</span>
           <time class="text-xs font-mono text-stone-500">${r.date}</time>
         </div>
-        ${r.fixed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-amber-600 mb-2">${t.changelog.fixed}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.fixed.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
-        ${r.added.length > 0 ? `<h3 class="font-bold text-xs uppercase text-emerald-600 mb-2">${t.changelog.added}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.added.map(a => `<li>${a}</li>`).join('')}</ul>` : ''}
-        ${r.changed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-blue-600 mb-2">${t.changelog.changed}</h3><ul class="list-disc ps-5 text-sm space-y-1">${r.changed.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
+        ${r.fixed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-amber-600 mb-2">${t.changelog.fixed}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.fixed.map((f) => `<li>${f}</li>`).join('')}</ul>` : ''}
+        ${r.added.length > 0 ? `<h3 class="font-bold text-xs uppercase text-emerald-600 mb-2">${t.changelog.added}</h3><ul class="list-disc ps-5 text-sm space-y-1 mb-4">${r.added.map((a) => `<li>${a}</li>`).join('')}</ul>` : ''}
+        ${r.changed.length > 0 ? `<h3 class="font-bold text-xs uppercase text-blue-600 mb-2">${t.changelog.changed}</h3><ul class="list-disc ps-5 text-sm space-y-1">${r.changed.map((c) => `<li>${c}</li>`).join('')}</ul>` : ''}
       </div>
-    `).join('\n');
+    `
+    ).join('\n');
 
     rootContent = `
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
           <nav class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <a href="${basePath}/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
             <div class="flex gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
-              <a href="/${lang}/playground">${navLinks.playground}</a>
-              <a href="/${lang}/architecture">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog" class="text-[#126E68]">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog" class="text-[#126E68]">${navLinks.changelog}</a>
             </div>
           </nav>
         </header>
@@ -461,12 +499,12 @@ function renderHtmlTemplate(
       <div class="min-h-screen flex flex-col">
         <header class="p-6 border-b border-stone-200 dark:border-white/10">
           <nav class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
+            <a href="${basePath}/${lang}" class="font-bold text-xl text-stone-900 dark:text-white">ParsiKit</a>
             <div class="flex gap-6 text-sm font-medium">
-              <a href="/${lang}/docs/installation">${navLinks.docs}</a>
-              <a href="/${lang}/playground">${navLinks.playground}</a>
-              <a href="/${lang}/architecture">${navLinks.architecture}</a>
-              <a href="/${lang}/changelog">${navLinks.changelog}</a>
+              <a href="${basePath}/${lang}/docs/installation">${navLinks.docs}</a>
+              <a href="${basePath}/${lang}/playground">${navLinks.playground}</a>
+              <a href="${basePath}/${lang}/architecture">${navLinks.architecture}</a>
+              <a href="${basePath}/${lang}/changelog">${navLinks.changelog}</a>
             </div>
           </nav>
         </header>
@@ -476,8 +514,8 @@ function renderHtmlTemplate(
           <h1 class="text-3xl font-extrabold text-stone-900 dark:text-white mb-4">${meta.title}</h1>
           <p class="text-stone-600 dark:text-stone-300 text-base mb-8">${meta.description}</p>
           <div class="flex flex-wrap gap-4 justify-center">
-            <a href="/${lang}" class="px-6 py-3 rounded-xl bg-[#126E68] text-white font-medium hover:bg-[#0E5853] transition-colors">Return Home</a>
-            <a href="/${lang}/docs/installation" class="px-6 py-3 rounded-xl border border-stone-300 dark:border-white/20 font-medium hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">Browse Documentation</a>
+            <a href="${basePath}/${lang}" class="px-6 py-3 rounded-xl bg-[#126E68] text-white font-medium hover:bg-[#0E5853] transition-colors">Return Home</a>
+            <a href="${basePath}/${lang}/docs/installation" class="px-6 py-3 rounded-xl border border-stone-300 dark:border-white/20 font-medium hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">Browse Documentation</a>
           </div>
         </main>
 
@@ -495,18 +533,21 @@ function renderHtmlTemplate(
 }
 
 /**
- * Generates an SEO HTML fallback redirect page for deprecated Spanish routes.
+ * Generates an SEO HTML fallback redirect page for legacy Spanish routes.
  * Uses client-side meta http-equiv="refresh" and window.location.replace while preserving query and hash.
- * NOTE: This is an HTML fallback for static hosting (e.g. GitHub Pages) and is NOT a server-side HTTP 301 response.
  */
 function renderLegacyRedirectHtml(baseHtml: string, targetPath: string): string {
-  const fullTargetUrl = `${BASE_SITE_URL}${targetPath}`;
+  const siteUrl = getVerifiedSiteUrl();
+  const basePath = getDeploymentBasePath();
+  const fullTargetUrl = siteUrl ? `${siteUrl}${basePath}${targetPath}` : `${basePath}${targetPath}`;
+  const canonicalTag = siteUrl ? `<link rel="canonical" href="${fullTargetUrl}" />` : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="0; url=${fullTargetUrl}" />
-  <link rel="canonical" href="${fullTargetUrl}" />
+  ${canonicalTag}
   <title>ParsiKit — Page Relocated</title>
   <meta name="robots" content="noindex, follow" />
   <script>
@@ -533,6 +574,9 @@ function prerender() {
     return;
   }
 
+  const siteUrl = getVerifiedSiteUrl();
+  const basePath = getDeploymentBasePath();
+
   const baseHtmlPath = path.join(distDir, 'index.html');
   const baseHtml = fs.readFileSync(baseHtmlPath, 'utf-8');
 
@@ -548,7 +592,7 @@ function prerender() {
     );
   }
 
-  // Add all documentation files (84 total)
+  // Add all documentation files (94 total)
   for (const doc of ALL_DOCS) {
     routesToPrerender.push({
       lang: doc.lang,
@@ -557,8 +601,6 @@ function prerender() {
     });
   }
 
-  const allUrls: string[] = [`${BASE_SITE_URL}/`];
-
   for (const r of routesToPrerender) {
     const routePath = buildRoutePath(r.lang, r.route, r.docSlug);
     const targetDir = path.join(distDir, routePath.replace(/^\//, ''));
@@ -566,15 +608,13 @@ function prerender() {
 
     const renderedHtml = renderHtmlTemplate(baseHtml, r.lang, r.route, r.docSlug);
     fs.writeFileSync(path.join(targetDir, 'index.html'), renderedHtml);
-
-    allUrls.push(`${BASE_SITE_URL}${routePath}`);
   }
 
-  // Pre-render root index.html with canonical to /en and proper alternates
+  // Pre-render root index.html with localized content to /en
   const rootIndexHtml = renderHtmlTemplate(baseHtml, 'en', 'home');
   fs.writeFileSync(path.join(distDir, 'index.html'), rootIndexHtml);
 
-  // Pre-render explicit 301 migration redirect pages for legacy Spanish routes
+  // Pre-render explicit migration redirect pages for legacy Spanish routes
   const legacySpanishRoutes: { source: string; target: string }[] = [
     { source: 'es', target: '/en' },
     { source: 'es/playground', target: '/en/playground' },
@@ -612,58 +652,90 @@ function prerender() {
     fs.writeFileSync(path.join(lang404Dir, 'index.html'), lang404Html);
   }
 
-  // Generate verified sitemap.xml with xhtml:link alternates (excluding Spanish and non-existent pages)
-  const sitemapEntries = routesToPrerender.map((r) => {
-    const activeDoc = r.docSlug
-      ? ALL_DOCS.find((d) => d.lang === r.lang && d.slug === r.docSlug) || null
-      : null;
-    const meta = computePageMetadata(r.lang, r.route, activeDoc);
-    const alternates: string[] = [];
+  // Generate sitemap.xml ONLY if verified production origin is configured
+  if (siteUrl) {
+    const sitemapEntries = routesToPrerender.map((r) => {
+      const activeDoc = r.docSlug
+        ? ALL_DOCS.find((d) => d.lang === r.lang && d.slug === r.docSlug) || null
+        : null;
+      const meta = computePageMetadata(r.lang, r.route, activeDoc);
+      const alternates: string[] = [];
 
-    if (meta.alternateEnUrl) {
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}"/>`);
-    }
-    if (meta.alternateFaUrl) {
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa" href="${meta.alternateFaUrl}"/>`);
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="fa-IR" href="${meta.alternateFaUrl}"/>`);
-    }
-    if (meta.alternatePrsUrl) {
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs" href="${meta.alternatePrsUrl}"/>`);
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="prs-AF" href="${meta.alternatePrsUrl}"/>`);
-    }
-    if (meta.alternateTgUrl) {
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg" href="${meta.alternateTgUrl}"/>`);
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${meta.alternateTgUrl}"/>`);
-    }
-    if (meta.alternateXDefaultUrl) {
-      alternates.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${meta.alternateXDefaultUrl}"/>`);
-    }
+      if (meta.alternateEnUrl) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="en" href="${meta.alternateEnUrl}"/>`
+        );
+      }
+      if (meta.alternateFaUrl) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="fa" href="${meta.alternateFaUrl}"/>`
+        );
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="fa-IR" href="${meta.alternateFaUrl}"/>`
+        );
+      }
+      if (meta.alternatePrsUrl) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="prs" href="${meta.alternatePrsUrl}"/>`
+        );
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="prs-AF" href="${meta.alternatePrsUrl}"/>`
+        );
+      }
+      if (meta.alternateTgUrl) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="tg" href="${meta.alternateTgUrl}"/>`
+        );
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="tg-TJ" href="${meta.alternateTgUrl}"/>`
+        );
+      }
+      if (meta.alternateXDefaultUrl) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="x-default" href="${meta.alternateXDefaultUrl}"/>`
+        );
+      }
 
-    return `  <url>
+      return `  <url>
     <loc>${meta.canonicalUrl}</loc>
 ${alternates.join('\n')}
     <changefreq>weekly</changefreq>
     <priority>${r.route === 'docs' ? '0.8' : '1.0'}</priority>
   </url>`;
-  });
+    });
 
-  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${sitemapEntries.join('\n')}
 </urlset>`;
 
-  fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
-  fs.writeFileSync(path.resolve(process.cwd(), 'public/sitemap.xml'), sitemapXml);
+    fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
 
-  const robotsTxt = `# ParsiKit robots.txt
+    const robotsTxt = `# ParsiKit robots.txt
 User-agent: *
 Allow: /
-Sitemap: ${BASE_SITE_URL}/sitemap.xml
+Sitemap: ${siteUrl}${basePath}/sitemap.xml
 `;
-  fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
-  fs.writeFileSync(path.resolve(process.cwd(), 'public/robots.txt'), robotsTxt);
+    fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
+    console.log(`Prerender complete: generated sitemap.xml for verified origin ${siteUrl}${basePath}`);
+  } else {
+    // Clean up dist/sitemap.xml if it exists to prevent publishing an unverified sitemap
+    const distSitemap = path.join(distDir, 'sitemap.xml');
+    if (fs.existsSync(distSitemap)) {
+      fs.unlinkSync(distSitemap);
+    }
 
-  console.log(`Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} legacy Spanish HTML fallback redirect stubs (client-side meta-refresh + window.location.replace), and sitemap!`);
+    const robotsTxt = `# ParsiKit robots.txt
+User-agent: *
+Allow: /
+`;
+    fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
+    console.log('Notice: Verified production origin not configured. Domain-dependent production SEO artifacts (sitemap.xml, absolute canonicals) omitted.');
+  }
+
+  console.log(
+    `Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} legacy Spanish HTML fallback redirect stubs (client-side meta-refresh + window.location.replace)!`
+  );
 }
 
 prerender();

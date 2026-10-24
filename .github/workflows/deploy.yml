@@ -52,6 +52,9 @@ jobs:
 
       - name: Build & Prerender Static Site
         run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3

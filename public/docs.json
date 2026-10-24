@@ -5,7 +5,7 @@
     "category": "api",
     "title": "مرجع ماژول کش (`parsikit.cache`)",
     "summary": "زیرساخت کشینگ حافظه‌ای با کارایی بالا و ایمن در برابر چندریسمانی (Thread-safe) برای محاسبات پرهزینه عددی و زبانی.",
-    "url": "https://parsikit.dev/fa/docs/api/cache"
+    "url": "/fa/docs/api/cache"
   },
   {
     "slug": "api/datetime",
@@ -13,7 +13,7 @@
     "category": "api",
     "title": "مرجع توابع تاریخ جلالی و زمان نسبی (`parsikit.datetime`)",
     "summary": "ماژول parsikit.datetime ابزارهای دقیق محاسبات تقویم هجری شمسی (جلالی) و تبدیل آن به گاه‌شماری میلادی را بدون نیاز به وابستگی خارجی فراهم می‌سازد.",
-    "url": "https://parsikit.dev/fa/docs/api/datetime"
+    "url": "/fa/docs/api/datetime"
   },
   {
     "slug": "api/dev_and_gui",
@@ -21,7 +21,7 @@
     "category": "api",
     "title": "مرجع ابزارهای توسعه و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
     "summary": "ابزارهای ویژه برای عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش صحیح متن فارسی در رابط‌های گرافیکی (GUI).",
-    "url": "https://parsikit.dev/fa/docs/api/dev_and_gui"
+    "url": "/fa/docs/api/dev_and_gui"
   },
   {
     "slug": "api/index",
@@ -29,7 +29,7 @@
     "category": "api",
     "title": "مرجع کامل توابع و ماژول‌های پارسی‌کیت (API Reference)",
     "summary": "کتابخانه پارسی‌کیت (ParsiKit) از ماژول‌های زیر تشکیل شده است:",
-    "url": "https://parsikit.dev/fa/docs/api/index"
+    "url": "/fa/docs/api/index"
   },
   {
     "slug": "api/models",
@@ -37,7 +37,7 @@
     "category": "api",
     "title": "مرجع مدل‌های شیءگرا (`parsikit.models`)",
     "summary": "ماژول parsikit.models اشیای دامنه (Domain Value Objects) را به روش شیءگرای ناب پیاده‌سازی می‌کند. تمام این مدل‌ها ویژگی‌های زیر را دارا هستند:",
-    "url": "https://parsikit.dev/fa/docs/api/models"
+    "url": "/fa/docs/api/models"
   },
   {
     "slug": "api/number_and_currency",
@@ -45,7 +45,7 @@
     "category": "api",
     "title": "مرجع توابع اعداد و محاسبات ارزی (`parsikit.number`, `parsikit.currency`)",
     "summary": "این ماژول‌ها امکان تبدیل ارقام، نوشتن اعداد به حروف، تبدیل واحدهای ریال و تومان، مالیات ارزش افزوده و محاسبات بانکی را در اختیار قرار می‌دهند.",
-    "url": "https://parsikit.dev/fa/docs/api/number_and_currency"
+    "url": "/fa/docs/api/number_and_currency"
   },
   {
     "slug": "api/reshaper",
@@ -53,7 +53,7 @@
     "category": "api",
     "title": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
     "summary": "ابزار سبک و بدون وابستگی برای چسباندن حروف فارسی (Shaping) و معکوس‌سازی جهت متن (BiDi) جهت نمایش صحیح در موتورهای گرافیکی و بازی‌ها.",
-    "url": "https://parsikit.dev/fa/docs/api/reshaper"
+    "url": "/fa/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -61,7 +61,7 @@
     "category": "api",
     "title": "مرجع توابع پردازش متن (`parsikit.text`)",
     "summary": "ماژول parsikit.text هسته اصلی ابزارهای استانداردسازی، پالایش، اصلاح نیم‌فاصله، تصحیح کیبورد و مرتب‌سازی متنی در پارسی‌کیت است.",
-    "url": "https://parsikit.dev/fa/docs/api/text"
+    "url": "/fa/docs/api/text"
   },
   {
     "slug": "api/validators",
@@ -69,7 +69,7 @@
     "category": "api",
     "title": "مرجع توابع اعتبارسنجی و تطبیق الگو (`parsikit.validators`)",
     "summary": "ماژول parsikit.validators موتور اعتبارسنجی قوانین و استانداردهای هویتی، پستی، مخابراتی، بانکی و خودرویی کشور ایران است.",
-    "url": "https://parsikit.dev/fa/docs/api/validators"
+    "url": "/fa/docs/api/validators"
   },
   {
     "slug": "faq",
@@ -77,7 +77,7 @@
     "category": "getting-started",
     "title": "پرسش‌های متداول (FAQ) — پارسی‌کیت",
     "summary": "پاسخ به سوالات پرتکرار پیرامون کتابخانه پارسی‌کیت (ParsiKit).",
-    "url": "https://parsikit.dev/fa/docs/faq"
+    "url": "/fa/docs/faq"
   },
   {
     "slug": "guides/forms_and_security",
@@ -85,7 +85,7 @@
     "category": "guides",
     "title": "راهنمای امنیت، حریم خصوصی و مدیریت داده‌های حساس",
     "summary": "هنگام کار با اطلاعات هویتی و مالی کاربران (کد ملی، شماره کارت، شماره شبا و شماره موبایل)، رعایت نکات امنیتی از نان شب واجب‌تر است!",
-    "url": "https://parsikit.dev/fa/docs/guides/forms_and_security"
+    "url": "/fa/docs/guides/forms_and_security"
   },
   {
     "slug": "guides/gui_integration",
@@ -93,7 +93,7 @@
     "category": "guides",
     "title": "راهنمای اتصال پارسی‌کیت به رابط‌های گرافیکی (GUI)",
     "summary": "پارسی‌کیت ماژول اختصاصی parsikit.gui را برای قالب‌بندی همزمان هنگام تایپ در فریم‌ورک‌های رابط کاربری دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.",
-    "url": "https://parsikit.dev/fa/docs/guides/gui_integration"
+    "url": "/fa/docs/guides/gui_integration"
   },
   {
     "slug": "guides/web_backends",
@@ -101,7 +101,7 @@
     "category": "guides",
     "title": "راهنمای استفاده از پارسی‌کیت در وب‌سرویس‌ها (FastAPI و Django)",
     "summary": "پارسی‌کیت به لطف قابلیت duck-typing و پشتیبانی بومی از Pydantic، بهترین گزینه برای تمیزکاری و اعتبارسنجی ورودی‌ها در APIهای پایتونی است.",
-    "url": "https://parsikit.dev/fa/docs/guides/web_backends"
+    "url": "/fa/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -109,7 +109,7 @@
     "category": "getting-started",
     "title": "مستندات رسمی پارسی‌کیت (ParsiKit) نسخه ۳.۳.۱",
     "summary": "سلام توسعه‌دهنده عزیز! به مستندات رسمی کتابخانه پارسی‌کیت (ParsiKit) خوش اومدی.",
-    "url": "https://parsikit.dev/fa/docs/index"
+    "url": "/fa/docs/index"
   },
   {
     "slug": "installation",
@@ -117,7 +117,7 @@
     "category": "getting-started",
     "title": "راهنمای نصب و راه‌اندازی پارسی‌کیت",
     "summary": "پارسی‌کیت کاملاً با زبان پایتون خالص (Pure Python) نوشته شده و هیچ وابستگی به کتابخانه‌های سنگین خارجی مانند C-extensions ندارد. بنابراین روی هر سیستم‌عاملی (لینوکس، ویندوز، مک‌او‌اس) به راحتی و در کس",
-    "url": "https://parsikit.dev/fa/docs/installation"
+    "url": "/fa/docs/installation"
   },
   {
     "slug": "quickstart",
@@ -125,7 +125,7 @@
     "category": "getting-started",
     "title": "شروع سریع با پارسی‌کیت (Quickstart)",
     "summary": "بیا با چند مثال ساده و پرکاربرد شروع کنیم تا ببینی پارسی‌کیت چقدر کارهای روزمره پایتون رو راحت‌تر می‌کنه!",
-    "url": "https://parsikit.dev/fa/docs/quickstart"
+    "url": "/fa/docs/quickstart"
   },
   {
     "slug": "troubleshooting",
@@ -133,7 +133,7 @@
     "category": "getting-started",
     "title": "راهنمای عیب‌یابی (Troubleshooting) پارسی‌کیت",
     "summary": "این راهنما رایج‌ترین پرسش‌ها و خطاهایی که توسعه‌دهندگان ممکن است هنگام کار با کتابخانه پارسی‌کیت با آن‌ها مواجه شوند را به همراه راه‌حل‌های قطعی توضیح می‌دهد.",
-    "url": "https://parsikit.dev/fa/docs/troubleshooting"
+    "url": "/fa/docs/troubleshooting"
   },
   {
     "slug": "tutorials/datetime",
@@ -141,7 +141,7 @@
     "category": "tutorials",
     "title": "آموزش تقویم شمسی (جلالی) و زمان نسبی در پارسی‌کیت",
     "summary": "ماژول parsikit.datetime تبدیل تاریخ میلادی و شمسی را بدون نیاز به هیچ پکیج سنگینی به صورت صفر-وابستگی (Zero-Dependency) با الگوریتم دقیق ۳۳ ساله جلالی در اختیارت قرار می‌ده.",
-    "url": "https://parsikit.dev/fa/docs/tutorials/datetime"
+    "url": "/fa/docs/tutorials/datetime"
   },
   {
     "slug": "tutorials/models",
@@ -149,7 +149,7 @@
     "category": "tutorials",
     "title": "آموزش مدل‌های شیءگرا در پارسی‌کیت (Domain Models)",
     "summary": "در کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا (OOP Domain Models) در ماژول parsikit.models فراهم کرده تا توسعه‌دهنده‌ها بتونن با موجودیت‌های دیتایی به راحتی کار کنند.",
-    "url": "https://parsikit.dev/fa/docs/tutorials/models"
+    "url": "/fa/docs/tutorials/models"
   },
   {
     "slug": "tutorials/numbers_and_currency",
@@ -157,7 +157,7 @@
     "category": "tutorials",
     "title": "آموزش کار با اعداد، مبالغ مالی، تومان و ریال در پارسی‌کیت",
     "summary": "یکی از جذاب‌ترین بخش‌های پارسی‌کیت، ابزارهای مالی و تبدیل ارقام و کلمات است.",
-    "url": "https://parsikit.dev/fa/docs/tutorials/numbers_and_currency"
+    "url": "/fa/docs/tutorials/numbers_and_currency"
   },
   {
     "slug": "tutorials/text_processing",
@@ -165,7 +165,7 @@
     "category": "tutorials",
     "title": "آموزش جامع پردازش و تمیزکاری متن فارسی در پارسی‌کیت",
     "summary": "پردازش متن فارسی چالش‌های منحصر‌به‌فردی داره: اعراب‌ها، حروف کیبورد عربی، نیم‌فاصله‌ها و نگارش انگلیسی در کیبورد فارسی. پارسی‌کیت مجموعه‌ای از توابع کارآمد برای حل این دغدغه‌ها در اختیارت می‌ذاره.",
-    "url": "https://parsikit.dev/fa/docs/tutorials/text_processing"
+    "url": "/fa/docs/tutorials/text_processing"
   },
   {
     "slug": "tutorials/validation",
@@ -173,7 +173,7 @@
     "category": "tutorials",
     "title": "آموزش اعتبارسنجی داده‌های هویتی، بانکی و ارتباطی ایران",
     "summary": "توی هر سامانه‌ای که توی ایران کار می‌کنه، اعتبارسنجی ورودی‌های کاربر (مثل کد ملی، کارت بانکی، شماره شبا، موبایل و پلاک) پای ثابت توسعه است. پارسی‌کیت الگوریتم‌های رسمی تمام این موارد رو به صورت پیش‌فر",
-    "url": "https://parsikit.dev/fa/docs/tutorials/validation"
+    "url": "/fa/docs/tutorials/validation"
   },
   {
     "slug": "api/cache",
@@ -181,7 +181,7 @@
     "category": "api",
     "title": "Cache API (`parsikit.cache`)",
     "summary": "High-performance, thread-safe caching infrastructure for expensive mathematical, linguistic, and calendar computations.",
-    "url": "https://parsikit.dev/en/docs/api/cache"
+    "url": "/en/docs/api/cache"
   },
   {
     "slug": "api/datetime",
@@ -189,7 +189,7 @@
     "category": "api",
     "title": "Datetime API (`parsikit.datetime`)",
     "summary": "Converts a Gregorian date (year, month, day) to the astronomical Solar Hijri (Jalali) date.",
-    "url": "https://parsikit.dev/en/docs/api/datetime"
+    "url": "/en/docs/api/datetime"
   },
   {
     "slug": "api/dev_and_gui",
@@ -197,7 +197,7 @@
     "category": "api",
     "title": "Developer Diagnostics & GUI API (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
     "summary": "Persian-aware string formatter that accounts for Zero-Width Non-Joiner (ZWNJ) characters and diacritics when calculating visual padding. Supports :fa / :p format specifiers.",
-    "url": "https://parsikit.dev/en/docs/api/dev_and_gui"
+    "url": "/en/docs/api/dev_and_gui"
   },
   {
     "slug": "api/index",
@@ -205,7 +205,7 @@
     "category": "api",
     "title": "ParsiKit API Reference (English)",
     "summary": "Complete reference for all public modules and functions in ParsiKit:",
-    "url": "https://parsikit.dev/en/docs/api/index"
+    "url": "/en/docs/api/index"
   },
   {
     "slug": "api/models",
@@ -213,7 +213,7 @@
     "category": "api",
     "title": "Domain Models API (`parsikit.models`)",
     "summary": "Object-Oriented Domain Models (Value Objects) that perform instant validation upon creation and offer structured attributes, masked representations, and native Pydantic v2 support.",
-    "url": "https://parsikit.dev/en/docs/api/models"
+    "url": "/en/docs/api/models"
   },
   {
     "slug": "api/number_and_currency",
@@ -221,7 +221,7 @@
     "category": "api",
     "title": "Numbers & Currency API (`parsikit.number`, `parsikit.currency`)",
     "summary": "Replaces English digits (0-9) with Persian digits (۰-۹).",
-    "url": "https://parsikit.dev/en/docs/api/number_and_currency"
+    "url": "/en/docs/api/number_and_currency"
   },
   {
     "slug": "api/reshaper",
@@ -229,7 +229,7 @@
     "category": "api",
     "title": "Reshaper API (`parsikit.reshaper`)",
     "summary": "Lightweight, zero-dependency Persian letter connection shaper and Bidirectional (BiDi) layout reorganizer for graphic engines, image generation libraries, and games.",
-    "url": "https://parsikit.dev/en/docs/api/reshaper"
+    "url": "/en/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -237,7 +237,7 @@
     "category": "api",
     "title": "Text Processing API (`parsikit.text`)",
     "summary": "High-performance, Unicode-aware Persian text standardization, normalization, and keyboard utilities.",
-    "url": "https://parsikit.dev/en/docs/api/text"
+    "url": "/en/docs/api/text"
   },
   {
     "slug": "api/validators",
@@ -245,7 +245,7 @@
     "category": "api",
     "title": "Validators API (`parsikit.validators`)",
     "summary": "Validates a 10-digit Iranian National Code using the official modulo-11 checksum formula. Rejects sequences of 10 identical digits when strict=True.",
-    "url": "https://parsikit.dev/en/docs/api/validators"
+    "url": "/en/docs/api/validators"
   },
   {
     "slug": "faq",
@@ -253,7 +253,7 @@
     "category": "getting-started",
     "title": "Frequently Asked Questions (FAQ)",
     "summary": "ParsiKit supports Python 3.10 and newer (including 3.10, 3.11, 3.12, and 3.13).",
-    "url": "https://parsikit.dev/en/docs/faq"
+    "url": "/en/docs/faq"
   },
   {
     "slug": "guides/forms_and_security",
@@ -261,7 +261,7 @@
     "category": "guides",
     "title": "Guide: Form Validation & Sensitive Data Security",
     "summary": "Handling Personally Identifiable Information (PII) such as national identification numbers, credit card numbers, and phone numbers requires strict security controls to prevent exposure in application ",
-    "url": "https://parsikit.dev/en/docs/guides/forms_and_security"
+    "url": "/en/docs/guides/forms_and_security"
   },
   {
     "slug": "guides/gui_integration",
@@ -269,7 +269,7 @@
     "category": "guides",
     "title": "Guide: Desktop GUI & Graphics Integration",
     "summary": "Rendering Persian text in desktop applications (Tkinter, PyQt, PySide, CustomTkinter) or graphics pipelines (Pillow / PIL, OpenCV, ReportLab) requires specific adaptations for cursive shaping and righ",
-    "url": "https://parsikit.dev/en/docs/guides/gui_integration"
+    "url": "/en/docs/guides/gui_integration"
   },
   {
     "slug": "guides/web_backends",
@@ -277,7 +277,7 @@
     "category": "guides",
     "title": "Guide: Web Backends (FastAPI & Django Integration)",
     "summary": "This guide shows how to integrate ParsiKit into production web backends.",
-    "url": "https://parsikit.dev/en/docs/guides/web_backends"
+    "url": "/en/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -285,7 +285,7 @@
     "category": "getting-started",
     "title": "ParsiKit Official Documentation (v3.3.1)",
     "summary": "Welcome to the official documentation for ParsiKit!",
-    "url": "https://parsikit.dev/en/docs/index"
+    "url": "/en/docs/index"
   },
   {
     "slug": "installation",
@@ -293,7 +293,7 @@
     "category": "getting-started",
     "title": "Installation Guide",
     "summary": "ParsiKit requires Python 3.10 or higher. It has no external dependencies.",
-    "url": "https://parsikit.dev/en/docs/installation"
+    "url": "/en/docs/installation"
   },
   {
     "slug": "quickstart",
@@ -301,7 +301,7 @@
     "category": "getting-started",
     "title": "ParsiKit Quickstart Guide",
     "summary": "Get up and running with ParsiKit in less than 5 minutes.",
-    "url": "https://parsikit.dev/en/docs/quickstart"
+    "url": "/en/docs/quickstart"
   },
   {
     "slug": "troubleshooting",
@@ -309,7 +309,7 @@
     "category": "getting-started",
     "title": "Troubleshooting Guide (English)",
     "summary": "Solutions to common issues encountered when using ParsiKit.",
-    "url": "https://parsikit.dev/en/docs/troubleshooting"
+    "url": "/en/docs/troubleshooting"
   },
   {
     "slug": "tutorials/datetime",
@@ -317,7 +317,7 @@
     "category": "tutorials",
     "title": "Tutorial: Jalali (Solar Hijri) Dates & Relative Time",
     "summary": "The Jalali calendar is the official solar astronomical calendar used in Iran and Afghanistan. ParsiKit provides pure-Python astronomical conversion algorithms with zero dependencies.",
-    "url": "https://parsikit.dev/en/docs/tutorials/datetime"
+    "url": "/en/docs/tutorials/datetime"
   },
   {
     "slug": "tutorials/models",
@@ -325,7 +325,7 @@
     "category": "tutorials",
     "title": "Tutorial: Object-Oriented Domain Models",
     "summary": "ParsiKit provides rich domain value objects that wrap raw strings into structured, validated Python objects.",
-    "url": "https://parsikit.dev/en/docs/tutorials/models"
+    "url": "/en/docs/tutorials/models"
   },
   {
     "slug": "tutorials/numbers_and_currency",
@@ -333,7 +333,7 @@
     "category": "tutorials",
     "title": "Tutorial: Persian Numbers & Financial Calculations",
     "summary": "This tutorial demonstrates script digit conversion, writing numbers in Persian words, currency formatting, and loan calculations.",
-    "url": "https://parsikit.dev/en/docs/tutorials/numbers_and_currency"
+    "url": "/en/docs/tutorials/numbers_and_currency"
   },
   {
     "slug": "tutorials/text_processing",
@@ -341,7 +341,7 @@
     "category": "tutorials",
     "title": "Tutorial: Persian Text Processing & Standardization",
     "summary": "Handling Persian text in software requires handling distinct Unicode quirks: Arabic character substitution, Zero-Width Non-Joiner (ZWNJ) boundaries, diacritic marks, and mixed digit scripts.",
-    "url": "https://parsikit.dev/en/docs/tutorials/text_processing"
+    "url": "/en/docs/tutorials/text_processing"
   },
   {
     "slug": "tutorials/validation",
@@ -349,7 +349,7 @@
     "category": "tutorials",
     "title": "Tutorial: National Identifiers & Format Validation",
     "summary": "ParsiKit provides validation engines for all major Iranian public identification standards.",
-    "url": "https://parsikit.dev/en/docs/tutorials/validation"
+    "url": "/en/docs/tutorials/validation"
   },
   {
     "slug": "api/cache",
@@ -357,7 +357,7 @@
     "category": "api",
     "title": "سیستم کش چندنخی (parsikit.cache)",
     "summary": "ماژول parsikit.cache یک سیستم حافظه موقت امن در محیط‌های چندنخی (Thread-safe LRU Cache) فراهم می‌کند تا تبدیل‌های محاسباتی سنگین تکراری بدون افت عملکرد انجام شوند.",
-    "url": "https://parsikit.dev/prs-af/docs/api/cache"
+    "url": "/prs-af/docs/api/cache"
   },
   {
     "slug": "api/datetime",
@@ -365,7 +365,7 @@
     "category": "api",
     "title": "ماژول تقویم و زمان (parsikit.datetime)",
     "summary": "ماژول parsikit.datetime محاسبات دقیق و تبدیل‌های زمانی میان تقویم میلادی (Gregorian) و هجری شمسی (Solar Hijri / Jalali) را ارائه می‌دهد.",
-    "url": "https://parsikit.dev/prs-af/docs/api/datetime"
+    "url": "/prs-af/docs/api/datetime"
   },
   {
     "slug": "api/dev_and_gui",
@@ -373,7 +373,7 @@
     "category": "api",
     "title": "مرجع ابزارهای عیب‌یابی و گرافیک (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
     "summary": "ابزارهای تخصصی برای تشخیص و عیب‌یابی متنی، هم‌ترازی بصری در جدول‌ها، لاگ‌گیری و نمایش معیاری متون زبان دری در رابط‌های گرافیکی (GUI).",
-    "url": "https://parsikit.dev/prs-af/docs/api/dev_and_gui"
+    "url": "/prs-af/docs/api/dev_and_gui"
   },
   {
     "slug": "api/index",
@@ -381,7 +381,7 @@
     "category": "api",
     "title": "مرجع کامل توابع و کلاس‌های پارسی‌کیت (API)",
     "summary": "این مستند فهرست جامع تمام ماژول‌ها، کلاس‌ها و توابع موجود در کتابخانه پارسی‌کیت را معرفی می‌نماید.",
-    "url": "https://parsikit.dev/prs-af/docs/api/index"
+    "url": "/prs-af/docs/api/index"
   },
   {
     "slug": "api/models",
@@ -389,7 +389,7 @@
     "category": "api",
     "title": "مدل‌های شیءگرا (parsikit.models)",
     "summary": "ماژول parsikit.models کلاس‌های داده‌ای غنی (Domain Models) را برای کپسوله‌سازی و اعتبارسنجی خودکار مقادیر فراهم می‌آورد.",
-    "url": "https://parsikit.dev/prs-af/docs/api/models"
+    "url": "/prs-af/docs/api/models"
   },
   {
     "slug": "api/number_and_currency",
@@ -397,7 +397,7 @@
     "category": "api",
     "title": "ماژول اعداد و ارز (parsikit.currency)",
     "summary": "ماژول parsikit.currency و توابع مربوطه، تبدیل ارقام به نوشتار حروفی و محاسبات پولی را مدیریت می‌نمایند.",
-    "url": "https://parsikit.dev/prs-af/docs/api/number_and_currency"
+    "url": "/prs-af/docs/api/number_and_currency"
   },
   {
     "slug": "api/reshaper",
@@ -405,7 +405,7 @@
     "category": "api",
     "title": "مرجع ماژول بازآرایی گرافیکی (`parsikit.reshaper`)",
     "summary": "ابزار سبک و بدون وابستگی برای چسباندن حروف فارسی دری (Cursive Shaping) و بازآرایی جهت متن (BiDi) برای نمایش در موتورهای گرافیکی، تصاویر و بازی‌ها.",
-    "url": "https://parsikit.dev/prs-af/docs/api/reshaper"
+    "url": "/prs-af/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -413,7 +413,7 @@
     "category": "api",
     "title": "ماژول پردازش متن (parsikit.text)",
     "summary": "ماژول parsikit.text مجموعه‌ای از توابع کارآمد را برای پاکسازی و یکنواخت‌سازی متون زبان فارسی دری فراهم می‌آورد.",
-    "url": "https://parsikit.dev/prs-af/docs/api/text"
+    "url": "/prs-af/docs/api/text"
   },
   {
     "slug": "api/validators",
@@ -421,7 +421,7 @@
     "category": "api",
     "title": "ماژول اعتبارسنجی (parsikit.validators)",
     "summary": "ماژول parsikit.validators الگوریتم‌های رسمی برای بررسی صحت داده‌های هویتی، مالی و مخابراتی را فراهم می‌سازد.",
-    "url": "https://parsikit.dev/prs-af/docs/api/validators"
+    "url": "/prs-af/docs/api/validators"
   },
   {
     "slug": "faq",
@@ -429,7 +429,7 @@
     "category": "getting-started",
     "title": "پرسش‌های مکرر (FAQ)",
     "summary": "در این بخش به پرسش‌های رایج پیرامون کتابخانه پارسی‌کیت پاسخ داده شده است.",
-    "url": "https://parsikit.dev/prs-af/docs/faq"
+    "url": "/prs-af/docs/faq"
   },
   {
     "slug": "guides/forms_and_security",
@@ -437,7 +437,7 @@
     "category": "guides",
     "title": "راهنمای امنیت داده‌ها و اعتبارسنجی فرم‌ها",
     "summary": "این راهنما شیوه پیاده‌سازی اعتبارسنجی امن و جلوگیری از نشت اطلاعات حساس (PII) را بیان می‌کند.",
-    "url": "https://parsikit.dev/prs-af/docs/guides/forms_and_security"
+    "url": "/prs-af/docs/guides/forms_and_security"
   },
   {
     "slug": "guides/gui_integration",
@@ -445,7 +445,7 @@
     "category": "guides",
     "title": "رهنمود اتصال پارسی‌کیت به واسط‌های گرافیکی کاربر (GUI)",
     "summary": "پارسی‌کیت ماژول اختصاصی parsikit.gui را برای مدیریت و قالب‌بندی همزمان هنگام تایپ در فریمورک‌های دسکتاپ (مانند Tkinter، CustomTkinter، PyQt و PySide) ارائه می‌دهد.",
-    "url": "https://parsikit.dev/prs-af/docs/guides/gui_integration"
+    "url": "/prs-af/docs/guides/gui_integration"
   },
   {
     "slug": "guides/web_backends",
@@ -453,7 +453,7 @@
     "category": "guides",
     "title": "رهنمود استفاده از پارسی‌کیت در سیستم‌های ویب و بک‌اند (FastAPI و Django)",
     "summary": "کتابخانه پارسی‌کیت به دلیل برخورداری از ساختار Duck-Typing و سازگاری بومی با اسکیماهای Pydantic v2، گزینه‌ای ایده‌آل برای تصفیه داده‌ها و اعتبارسنجی ورودی‌ها در سرویس‌های پایتون محسوب می‌شود.",
-    "url": "https://parsikit.dev/prs-af/docs/guides/web_backends"
+    "url": "/prs-af/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -461,7 +461,7 @@
     "category": "getting-started",
     "title": "رهنمودهای جامع کتابخانه پارسی‌کیت (ParsiKit)",
     "summary": "به مرکز اسناد و رهنمودهای رسمی کتابخانه پارسی‌کیت (ParsiKit) خوش آمدید.",
-    "url": "https://parsikit.dev/prs-af/docs/index"
+    "url": "/prs-af/docs/index"
   },
   {
     "slug": "installation",
@@ -469,7 +469,7 @@
     "category": "getting-started",
     "title": "رهنمود نصب و راه‌اندازی پارسی‌کیت",
     "summary": "کتابخانه پارسی‌کیت کاملاً با پایتون خالص (Pure Python) نوشته شده و هیچ وابستگی به پکیج‌های خارجی یا کتابخانه‌های باینری ندارد. بنابراین در تمام سیستم‌های عامل (لینوکس، ویندوز و مک‌او‌اس) به سرعت و بدو",
-    "url": "https://parsikit.dev/prs-af/docs/installation"
+    "url": "/prs-af/docs/installation"
   },
   {
     "slug": "quickstart",
@@ -477,7 +477,7 @@
     "category": "getting-started",
     "title": "آغاز سریع با پارسی‌کیت (Quickstart)",
     "summary": "در این بخش با چند مثال کاربردی و روزمره با قابلیت‌های اساسی پارسی‌کیت آشنا می‌شویم.",
-    "url": "https://parsikit.dev/prs-af/docs/quickstart"
+    "url": "/prs-af/docs/quickstart"
   },
   {
     "slug": "troubleshooting",
@@ -485,7 +485,7 @@
     "category": "getting-started",
     "title": "عیب‌یابی و رفع اشکالات متداول",
     "summary": "راهکارهای حل اشکالاتی که ممکن است در جریان استفاده از پارسی‌کیت با آنها روبرو شوید.",
-    "url": "https://parsikit.dev/prs-af/docs/troubleshooting"
+    "url": "/prs-af/docs/troubleshooting"
   },
   {
     "slug": "tutorials/datetime",
@@ -493,7 +493,7 @@
     "category": "tutorials",
     "title": "آموزش تقویم نجومی هجری شمسی",
     "summary": "نحوه تبدیل تاریخ‌ها و مدیریت محاسبات تقویم خورشیدی در پروژه‌های پایتون.",
-    "url": "https://parsikit.dev/prs-af/docs/tutorials/datetime"
+    "url": "/prs-af/docs/tutorials/datetime"
   },
   {
     "slug": "tutorials/models",
@@ -501,7 +501,7 @@
     "category": "tutorials",
     "title": "آموزش مدل‌های شیءگرا در پارسی‌کیت (OOP Domain Models)",
     "summary": "در کنار توابع مستقل، پارسی‌کیت مجموعه‌ای از کلاس‌های غنی شیءگرا در ماژول parsikit.models فراهم آورده تا توسعه‌دهندگان بتوانند با داده‌ها و موجودیت‌ها به آسانی کار کنند.",
-    "url": "https://parsikit.dev/prs-af/docs/tutorials/models"
+    "url": "/prs-af/docs/tutorials/models"
   },
   {
     "slug": "tutorials/numbers_and_currency",
@@ -509,7 +509,7 @@
     "category": "tutorials",
     "title": "آموزش محاسبات ارقام و مبالغ مالی",
     "summary": "آموزش تبدیل اعداد به نوشتار حروفی و قالب‌بندی ارقام.",
-    "url": "https://parsikit.dev/prs-af/docs/tutorials/numbers_and_currency"
+    "url": "/prs-af/docs/tutorials/numbers_and_currency"
   },
   {
     "slug": "tutorials/text_processing",
@@ -517,7 +517,7 @@
     "category": "tutorials",
     "title": "آموزش تصفیه متن و نیم‌فاصله‌ها در زبان دری",
     "summary": "در این آموزش گام‌به‌گام با نحوه استفاده از ابزارهای تصفیه متن و نیم‌فاصله‌ها در پارسی‌کیت آشنا می‌شوید.",
-    "url": "https://parsikit.dev/prs-af/docs/tutorials/text_processing"
+    "url": "/prs-af/docs/tutorials/text_processing"
   },
   {
     "slug": "tutorials/validation",
@@ -525,7 +525,7 @@
     "category": "tutorials",
     "title": "آموزش تثبیت اعتبار اسناد و کارت‌های بانکی",
     "summary": "این آموزش به تشریح نحوه اعتبارسنجی شماره‌های تذکره الکترونیکی، کد ملی و کارت‌های بانکی می‌پردازد.",
-    "url": "https://parsikit.dev/prs-af/docs/tutorials/validation"
+    "url": "/prs-af/docs/tutorials/validation"
   },
   {
     "slug": "api/cache",
@@ -533,7 +533,7 @@
     "category": "api",
     "title": "Модули кеши сареъ (parsikit.cache)",
     "summary": "Модули parsikit.cache механизми кешкунии бисёрриштагӣ (Thread-safe LRU Cache)-ро таъмин менамояд.",
-    "url": "https://parsikit.dev/tg/docs/api/cache"
+    "url": "/tg/docs/api/cache"
   },
   {
     "slug": "api/datetime",
@@ -541,7 +541,7 @@
     "category": "api",
     "title": "Модули тақвим ва замон (parsikit.datetime)",
     "summary": "Табдили дақиқи таърихҳои мелодӣ ва ҳиҷрии шамсӣ (Jalali).",
-    "url": "https://parsikit.dev/tg/docs/api/datetime"
+    "url": "/tg/docs/api/datetime"
   },
   {
     "slug": "api/dev_and_gui",
@@ -549,7 +549,7 @@
     "category": "api",
     "title": "Маълумотномаи абзорҳои ташхис ва график (`parsikit.dev`, `parsikit.gui`, `parsikit.reshaper`)",
     "summary": "Абзорҳои махсус барои ташхиси хатогиҳои матнӣ, баробарсозии визуалии сутунҳо дар ҷадвалҳо, сабти гузоришҳо (logging) ва намоиши дурусти матн дар интерфейсҳои графикӣ (GUI).",
-    "url": "https://parsikit.dev/tg/docs/api/dev_and_gui"
+    "url": "/tg/docs/api/dev_and_gui"
   },
   {
     "slug": "api/index",
@@ -557,7 +557,7 @@
     "category": "api",
     "title": "Мундариҷаи расмии API (ParsiKit)",
     "summary": "Ин саҳифа тамоми модулҳо, тавобеъ ва классҳои китобхонаи ParsiKit-ро дар бар мегирад.",
-    "url": "https://parsikit.dev/tg/docs/api/index"
+    "url": "/tg/docs/api/index"
   },
   {
     "slug": "api/models",
@@ -565,7 +565,7 @@
     "category": "api",
     "title": "Моделҳои объектгаро (parsikit.models)",
     "summary": "Классҳои моделӣ барои нигоҳдорӣ ва санҷиши худкори додаҳо.",
-    "url": "https://parsikit.dev/tg/docs/api/models"
+    "url": "/tg/docs/api/models"
   },
   {
     "slug": "api/number_and_currency",
@@ -573,7 +573,7 @@
     "category": "api",
     "title": "Модули ҳисобҳои молӣ ва калимаҳо (parsikit.currency)",
     "summary": "Табдили ададҳо ба калимаҳои хоно ва ҳисобҳои воҳидҳои пулӣ.",
-    "url": "https://parsikit.dev/tg/docs/api/number_and_currency"
+    "url": "/tg/docs/api/number_and_currency"
   },
   {
     "slug": "api/reshaper",
@@ -581,7 +581,7 @@
     "category": "api",
     "title": "Модули бозсозии графикӣ (`parsikit.reshaper`)",
     "summary": "Абзори сабук ва бидуни вобастагӣ барои пайваст кардани ҳарфҳо (Cursive Shaping) ва баргардонидани самти матн (BiDi) барои муҳаррикҳои графикӣ, аксҳо ва бозиҳо.",
-    "url": "https://parsikit.dev/tg/docs/api/reshaper"
+    "url": "/tg/docs/api/reshaper"
   },
   {
     "slug": "api/text",
@@ -589,7 +589,7 @@
     "category": "api",
     "title": "Модули коркарди матн (parsikit.text)",
     "summary": "Тавобеи ин модул барои яксонсозии матн ва ислоҳи нимафосилаҳо мусоидат мекунанд.",
-    "url": "https://parsikit.dev/tg/docs/api/text"
+    "url": "/tg/docs/api/text"
   },
   {
     "slug": "api/validators",
@@ -597,7 +597,7 @@
     "category": "api",
     "title": "Модули санҷиши эътибор (parsikit.validators)",
     "summary": "Алгоритмҳои расмии тафтиши чексам ва шинохти додаҳои ҳувиятӣ.",
-    "url": "https://parsikit.dev/tg/docs/api/validators"
+    "url": "/tg/docs/api/validators"
   },
   {
     "slug": "faq",
@@ -605,7 +605,7 @@
     "category": "getting-started",
     "title": "Саволҳои маъмул (FAQ)",
     "summary": "Дар ин саҳифа посух ба саволҳои асосӣ пешниҳод мегардад.",
-    "url": "https://parsikit.dev/tg/docs/faq"
+    "url": "/tg/docs/faq"
   },
   {
     "slug": "guides/forms_and_security",
@@ -613,7 +613,7 @@
     "category": "guides",
     "title": "Роҳнамои амнияти додаҳо ва санҷиши шаклҳо",
     "summary": "Усулҳои амнияти маълумот ва ниқоббандии додаҳои ҳассос.",
-    "url": "https://parsikit.dev/tg/docs/guides/forms_and_security"
+    "url": "/tg/docs/guides/forms_and_security"
   },
   {
     "slug": "guides/gui_integration",
@@ -621,7 +621,7 @@
     "category": "guides",
     "title": "Роҳнамои пайвастшавӣ ба интерфейсҳои графикӣ (GUI)",
     "summary": "ParsiKit модули махсуси parsikit.gui-ро барои идора ва танзими ҳамзамони матн дар вақти навиштан дар барномаҳои мизи корӣ (ба мисли Tkinter, CustomTkinter, PyQt ва PySide) пешниҳод менамояд.",
-    "url": "https://parsikit.dev/tg/docs/guides/gui_integration"
+    "url": "/tg/docs/guides/gui_integration"
   },
   {
     "slug": "guides/web_backends",
@@ -629,7 +629,7 @@
     "category": "guides",
     "title": "Роҳнамои истифода дар веб-хидматҳо (FastAPI ва Django)",
     "summary": "ParsiKit ба шарофати мутобиқати хуб бо Pydantic v2 яке аз беҳтарин интихобҳо барои санҷиш ва тозакунии додаҳо дар API-ҳои Python мебошад.",
-    "url": "https://parsikit.dev/tg/docs/guides/web_backends"
+    "url": "/tg/docs/guides/web_backends"
   },
   {
     "slug": "index",
@@ -637,7 +637,7 @@
     "category": "getting-started",
     "title": "Роҳнамои расмии китобхонаи ParsiKit",
     "summary": "Ба маркази ҳуҷҷатгузорӣ ва роҳнамоҳои китобхонаи ParsiKit хуш омадед.",
-    "url": "https://parsikit.dev/tg/docs/index"
+    "url": "/tg/docs/index"
   },
   {
     "slug": "installation",
@@ -645,7 +645,7 @@
     "category": "getting-started",
     "title": "Роҳнамои насб ва бакорандозии ParsiKit",
     "summary": "Китобхонаи ParsiKit комилан бо забони холиси Python (Pure Python) навишта шудааст ва ҳеҷ гуна вобастагӣ ба китобхонаҳои берунаи C надорад. Аз ин рӯ, он дар ҳама гуна системаи омил (Linux, macOS, Windo",
-    "url": "https://parsikit.dev/tg/docs/installation"
+    "url": "/tg/docs/installation"
   },
   {
     "slug": "quickstart",
@@ -653,7 +653,7 @@
     "category": "getting-started",
     "title": "Оғози зуд бо ParsiKit (Quickstart)",
     "summary": "Дар ин бахш бо мисолҳои сода ва муҳимтарини коркарди ParsiKit шинос мешавем.",
-    "url": "https://parsikit.dev/tg/docs/quickstart"
+    "url": "/tg/docs/quickstart"
   },
   {
     "slug": "troubleshooting",
@@ -661,7 +661,7 @@
     "category": "getting-started",
     "title": "Бартараф кардани хатогиҳо ва мушкилоти умумӣ",
     "summary": "Роҳнамои кӯтоҳ барои ҳалли хатогиҳои маъмул ҳангоми истифодаи ParsiKit.",
-    "url": "https://parsikit.dev/tg/docs/troubleshooting"
+    "url": "/tg/docs/troubleshooting"
   },
   {
     "slug": "tutorials/datetime",
@@ -669,7 +669,7 @@
     "category": "tutorials",
     "title": "Омӯзиши тақвими нуҷумии ҳиҷрии шамсӣ",
     "summary": "Тарзи табдили таърих ва муҳосибаи соли кабиса бо ParsiKit.",
-    "url": "https://parsikit.dev/tg/docs/tutorials/datetime"
+    "url": "/tg/docs/tutorials/datetime"
   },
   {
     "slug": "tutorials/models",
@@ -677,7 +677,7 @@
     "category": "tutorials",
     "title": "Омӯзиши моделҳои объектгаро дар ParsiKit (Domain Models)",
     "summary": "Дар баробари функсияҳои мустақил, ParsiKit маҷмӯаи синфҳои объектгароро дар модули parsikit.models пешниҳод кардааст, то барномасозон тавонанд бо додаҳо ба осонӣ кор кунанд.",
-    "url": "https://parsikit.dev/tg/docs/tutorials/models"
+    "url": "/tg/docs/tutorials/models"
   },
   {
     "slug": "tutorials/numbers_and_currency",
@@ -685,7 +685,7 @@
     "category": "tutorials",
     "title": "Омӯзиши табдили ададҳо ба калимаҳо",
     "summary": "Табдили рақамҳо ба калимаҳои хоно ва муҳосибаи воҳидҳои пулӣ.",
-    "url": "https://parsikit.dev/tg/docs/tutorials/numbers_and_currency"
+    "url": "/tg/docs/tutorials/numbers_and_currency"
   },
   {
     "slug": "tutorials/text_processing",
@@ -693,7 +693,7 @@
     "category": "tutorials",
     "title": "Омӯзиши поксозии матн ва нимафосилаҳо",
     "summary": "Роҳнамои амалии стандартисозии матнҳо бо ParsiKit.",
-    "url": "https://parsikit.dev/tg/docs/tutorials/text_processing"
+    "url": "/tg/docs/tutorials/text_processing"
   },
   {
     "slug": "tutorials/validation",
@@ -701,7 +701,7 @@
     "category": "tutorials",
     "title": "Омӯзиши санҷиши эътибори рақамҳо ва кортҳо",
     "summary": "Тарзи санҷиши рақамҳои миллӣ ва кортҳои бонкӣ.",
-    "url": "https://parsikit.dev/tg/docs/tutorials/validation"
+    "url": "/tg/docs/tutorials/validation"
   },
   {
     "slug": "development/architecture",
@@ -709,7 +709,7 @@
     "category": "development",
     "title": "ParsiKit Architecture & Technical Design",
     "summary": "Project Owner: Ali Kamrani (MRThugh)",
-    "url": "https://parsikit.dev/en/docs/development/architecture"
+    "url": "/en/docs/development/architecture"
   },
   {
     "slug": "development/audit-3.3.1",
@@ -717,7 +717,7 @@
     "category": "development",
     "title": "ParsiKit v3.3.1 — Phase Zero Baseline Audit Report",
     "summary": "Author & Project Owner: Ali Kamrani (MRThugh)",
-    "url": "https://parsikit.dev/en/docs/development/audit-3.3.1"
+    "url": "/en/docs/development/audit-3.3.1"
   },
   {
     "slug": "development/contributing",
@@ -725,7 +725,7 @@
     "category": "development",
     "title": "Contributing to ParsiKit",
     "summary": "Project Owner: Ali Kamrani (MRThugh)",
-    "url": "https://parsikit.dev/en/docs/development/contributing"
+    "url": "/en/docs/development/contributing"
   },
   {
     "slug": "development/final-release-audit-3.3.1",
@@ -733,7 +733,7 @@
     "category": "development",
     "title": "ParsiKit v3.3.1 — Final Release Audit, Packaging & Quality Report",
     "summary": "Package Name: parsikit",
-    "url": "https://parsikit.dev/en/docs/development/final-release-audit-3.3.1"
+    "url": "/en/docs/development/final-release-audit-3.3.1"
   },
   {
     "slug": "development/release-process",
@@ -741,7 +741,7 @@
     "category": "development",
     "title": "ParsiKit Release Process",
     "summary": "Author & Maintainer: Ali Kamrani (MRThugh)",
-    "url": "https://parsikit.dev/en/docs/development/release-process"
+    "url": "/en/docs/development/release-process"
   },
   {
     "slug": "development/testing",
@@ -749,6 +749,6 @@
     "category": "development",
     "title": "ParsiKit Testing Guide",
     "summary": "Target Version: 3.3.1",
-    "url": "https://parsikit.dev/en/docs/development/testing"
+    "url": "/en/docs/development/testing"
   }
 ]

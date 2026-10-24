@@ -118,19 +118,24 @@ npm run dev
 # 3. Synchronize documentation & metadata from repository sources
 npm run sync:docs
 
-# 4. Run automated test suite (59 unit, security, i18n, routing, and validator fixture tests)
+# 4. Run automated test suite (70 unit, security, i18n, routing, domain safety, and validator fixture tests)
 npm test
 
 # 5. Type-check codebase with strict TypeScript
 npm run lint
 
-# 6. Build production bundle, prerender all static pages, generate redirects and sitemap, and validate
+# 6. Build local distribution (without requiring a production domain)
 npm run build
 
-# 7. Audit production build integrity across all generated artifacts
+# 7. Audit distribution integrity for local build
 npm run validate
 
-# 8. Preview production build locally
+# 8. Build and validate for production deployment (with verified origin)
+# Set SITE_URL (and BASE_PATH if deploying to a GitHub Pages subpath e.g. /parsikit-website)
+SITE_URL=https://your-domain.com npm run build
+npm run validate:production
+
+# 9. Preview production build locally
 npm run preview
 ```
 

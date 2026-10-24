@@ -1,5 +1,4 @@
 # ParsiKit — Machine-Readable LLM Summary
-# Source: https://parsikit.dev
 # Repository: https://github.com/MRThugh/ParsiKit
 # Author: Ali Kamrani (MRThugh)
 # License: MIT
@@ -10,10 +9,10 @@
 ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python library providing Persian and domestic data infrastructure. It includes text cleansing and Zero-Width Non-Joiner (ZWNJ) normalization, national identification checksums (Modulo 11), bank card verification (Luhn algorithm), bank issuer BIN detection, Sheba IBAN verification (ISO 7064 Mod 97-10), astronomical Solar Hijri (Jalali) calendar conversions with 33-year leap cycle support, number-to-words spelling in Persian, currency conversions (Rial/Toman), VAT calculation, PII masking, and thread-safe in-memory caching.
 
 ## Official Multilingual Documentation
-- English: https://parsikit.dev/en/docs/installation
-- Persian (Iran): https://parsikit.dev/fa/docs/installation
-- Dari (Afghanistan): https://parsikit.dev/prs-af/docs/installation
-- Tajik (Tajikistan): https://parsikit.dev/tg/docs/installation
+- English: /en/docs/installation
+- Persian (Iran): /fa/docs/installation
+- Dari (Afghanistan): /prs-af/docs/installation
+- Tajik (Tajikistan): /tg/docs/installation
 
 ## Key Modules and API Summary
 
@@ -57,6 +56,5 @@ ParsiKit (`parsikit`) is a production-grade, zero-dependency, pure Python librar
 pip install parsikit
 ```
 
-## Documentation & Full Reference
-- Web: https://parsikit.dev
-- Repository: https://github.com/MRThugh/ParsiKit
+## Official Library Repository
+- https://github.com/MRThugh/ParsiKit

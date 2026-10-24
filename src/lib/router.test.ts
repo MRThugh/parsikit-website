@@ -136,20 +136,40 @@ test('router: legacy Spanish redirects preserve query strings and fragments', ()
   assert.equal(parsed.hash, 'docker');
 });
 
-test('seo: computePageMetadata generates canonical and hreflang URLs for 4 languages', () => {
+test('seo: computePageMetadata without verified origin omits canonical and alternates', () => {
   const homeMeta = computePageMetadata('en', 'home', null);
-  assert.equal(homeMeta.canonicalUrl, 'https://parsikit.dev/en');
-  assert.equal(homeMeta.alternateEnUrl, 'https://parsikit.dev/en');
-  assert.equal(homeMeta.alternateFaUrl, 'https://parsikit.dev/fa');
-  assert.equal(homeMeta.alternatePrsUrl, 'https://parsikit.dev/prs-af');
-  assert.equal(homeMeta.alternateTgUrl, 'https://parsikit.dev/tg');
-  assert.equal(homeMeta.alternateXDefaultUrl, 'https://parsikit.dev/en');
+  // Without verified origin, no misleading canonical or alternate tags are emitted
+  assert.equal(homeMeta.canonicalUrl, undefined);
+  assert.equal(homeMeta.alternateEnUrl, undefined);
+  assert.equal(homeMeta.alternateFaUrl, undefined);
+  assert.equal(homeMeta.alternatePrsUrl, undefined);
+  assert.equal(homeMeta.alternateTgUrl, undefined);
+  assert.equal(homeMeta.alternateXDefaultUrl, undefined);
+  assert.equal(homeMeta.ogUrl, undefined);
   assert.ok(homeMeta.title.includes('ParsiKit'));
 
   const doc = ALL_DOCS.find((d) => d.slug === 'api/validators' && d.lang === 'en');
   assert.ok(doc);
   const docMeta = computePageMetadata('en', 'docs', doc || null);
-  assert.equal(docMeta.canonicalUrl, 'https://parsikit.dev/en/docs/api/validators');
+  assert.equal(docMeta.canonicalUrl, undefined);
+  assert.equal(docMeta.schemaType, 'TechArticle');
+});
+
+test('seo: computePageMetadata with verified origin generates verified canonical and hreflang URLs', () => {
+  const verifiedTestOrigin = 'https://verified-domain.example.org';
+  const homeMeta = computePageMetadata('en', 'home', null, verifiedTestOrigin);
+  assert.equal(homeMeta.canonicalUrl, 'https://verified-domain.example.org/en');
+  assert.equal(homeMeta.alternateEnUrl, 'https://verified-domain.example.org/en');
+  assert.equal(homeMeta.alternateFaUrl, 'https://verified-domain.example.org/fa');
+  assert.equal(homeMeta.alternatePrsUrl, 'https://verified-domain.example.org/prs-af');
+  assert.equal(homeMeta.alternateTgUrl, 'https://verified-domain.example.org/tg');
+  assert.equal(homeMeta.alternateXDefaultUrl, 'https://verified-domain.example.org/en');
+  assert.equal(homeMeta.ogUrl, 'https://verified-domain.example.org/en');
+
+  const doc = ALL_DOCS.find((d) => d.slug === 'api/validators' && d.lang === 'en');
+  assert.ok(doc);
+  const docMeta = computePageMetadata('en', 'docs', doc || null, verifiedTestOrigin);
+  assert.equal(docMeta.canonicalUrl, 'https://verified-domain.example.org/en/docs/api/validators');
   assert.equal(docMeta.schemaType, 'TechArticle');
 });
 

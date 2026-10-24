@@ -1,9 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { ALL_DOCS } from '../src/data/docsManifest';
-import { VALID_LANGS, buildRoutePath } from '../src/lib/router';
+import { VALID_LANGS } from '../src/lib/router';
 import { LOCALES } from '../src/i18n/config';
-import { BASE_SITE_URL } from '../src/lib/seo';
+import { getVerifiedSiteUrl, getDeploymentBasePath } from '../src/config/site';
 
 export interface XmlNode {
   tag: string;
@@ -80,7 +79,9 @@ export function parseXml(xmlContent: string): XmlNode {
       skipWhitespace();
       const quote = xmlContent[pos];
       if (quote !== '"' && quote !== "'") {
-        throw new Error(`Expected quote around attribute value for '${attrName}' at position ${pos}`);
+        throw new Error(
+          `Expected quote around attribute value for '${attrName}' at position ${pos}`
+        );
       }
       pos++; // consume open quote
       let attrValue = '';
@@ -125,7 +126,9 @@ export function parseXml(xmlContent: string): XmlNode {
         }
         pos++;
         if (closingTagName !== tagName) {
-          throw new Error(`Mismatched closing tag: expected </${tagName}>, found </${closingTagName}>`);
+          throw new Error(
+            `Mismatched closing tag: expected </${tagName}>, found </${closingTagName}>`
+          );
         }
         closed = true;
         break;
@@ -152,6 +155,12 @@ export function parseXml(xmlContent: string): XmlNode {
   return rootNode;
 }
 
+export interface ValidationOptions {
+  requireVerifiedOrigin?: boolean;
+  siteUrl?: string;
+  basePath?: string;
+}
+
 export interface ValidationReport {
   success: boolean;
   checkedPagesCount: number;
@@ -165,24 +174,31 @@ export interface ValidationReport {
 }
 
 /**
- * Recursively retrieves all HTML files from the target directory.
+ * Recursively retrieves all files from the target directory.
  */
-export function getAllHtmlFiles(dir: string): string[] {
+export function getAllFiles(dir: string): string[] {
   const results: string[] = [];
   if (!fs.existsSync(dir)) return results;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      results.push(...getAllHtmlFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      results.push(...getAllFiles(fullPath));
+    } else if (entry.isFile()) {
       results.push(fullPath);
     }
   }
   return results;
 }
 
-export function validateDistArtifacts(distDir: string): ValidationReport {
+export function getAllHtmlFiles(dir: string): string[] {
+  return getAllFiles(dir).filter((f) => f.endsWith('.html'));
+}
+
+export function validateDistArtifacts(
+  distDir: string,
+  options?: ValidationOptions
+): ValidationReport {
   const report: ValidationReport = {
     success: true,
     checkedPagesCount: 0,
@@ -201,8 +217,46 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
     return report;
   }
 
+  // Resolve configuration
+  const siteUrl = options?.siteUrl ?? getVerifiedSiteUrl();
+  const basePath = options?.basePath ?? getDeploymentBasePath();
+  const requireVerifiedOrigin =
+    options?.requireVerifiedOrigin ??
+    (process.env.REQUIRE_PRODUCTION_ORIGIN === 'true' ||
+      process.argv.includes('--require-origin'));
+
+  // 1. Critical Audit: Ensure unauthorized origin NEVER appears in ANY generated artifact
+  const allDistFiles = getAllFiles(distDir);
+  for (const file of allDistFiles) {
+    const rel = path.relative(distDir, file).replace(/\\/g, '/');
+    // Check text-based artifacts for hardcoded unauthorized domain
+    if (
+      rel.endsWith('.html') ||
+      rel.endsWith('.xml') ||
+      rel.endsWith('.txt') ||
+      rel.endsWith('.json') ||
+      rel.endsWith('.webmanifest')
+    ) {
+      try {
+        const content = fs.readFileSync(file, 'utf-8');
+        if (content.includes('https://parsikit.dev') || content.includes('http://parsikit.dev')) {
+          report.errors.push(
+            `Unauthorized domain 'parsikit.dev' found in generated artifact: ${rel}`
+          );
+        }
+      } catch {}
+    }
+  }
+
+  // 2. Verified Production Origin Check
+  if (requireVerifiedOrigin && !siteUrl) {
+    report.errors.push(
+      'Missing verified production origin: A verified production base URL (SITE_URL or VITE_SITE_URL) must be configured for production deployment. Domain-dependent production SEO artifacts (canonical URLs, sitemap.xml, absolute og:url, JSON-LD domain references) cannot be verified without a confirmed domain.'
+    );
+  }
+
   // Find all generated HTML files across dist/
-  const allHtmlFiles = getAllHtmlFiles(distDir);
+  const allHtmlFiles = allDistFiles.filter((f) => f.endsWith('.html'));
   if (allHtmlFiles.length === 0) {
     report.errors.push(`No HTML files found in ${distDir}`);
     report.success = false;
@@ -212,7 +266,7 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
   const pageCanonicalMap: Map<string, string> = new Map();
   const pageAlternatesMap: Map<string, Record<string, string>> = new Map();
 
-  // 1. Audit Every Single Generated HTML Page
+  // 3. Audit Every Single Generated HTML Page
   for (const htmlFile of allHtmlFiles) {
     const relPath = path.relative(distDir, htmlFile).replace(/\\/g, '/');
     const html = fs.readFileSync(htmlFile, 'utf-8');
@@ -223,7 +277,9 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
 
       // Verify meta-refresh and window.location.replace
       if (!html.includes('http-equiv="refresh"') || !html.includes('window.location.replace')) {
-        report.errors.push(`Legacy redirect page ${relPath} missing meta-refresh or location.replace script`);
+        report.errors.push(
+          `Legacy redirect page ${relPath} missing meta-refresh or location.replace script`
+        );
       }
 
       // Verify noindex
@@ -231,29 +287,36 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
         report.errors.push(`Legacy redirect page ${relPath} must specify noindex robots directive`);
       }
 
-      // Extract canonical URL and destination
+      // Verify query string and fragment preservation logic is in the script
+      if (!html.includes('window.location.search') || !html.includes('window.location.hash')) {
+        report.errors.push(
+          `Legacy redirect ${relPath} script does not preserve window.location.search or window.location.hash`
+        );
+      }
+
+      // Check canonical link if present
       const canonicalMatch = html.match(/<link rel="canonical" href="(.*?)" \/>/);
-      if (!canonicalMatch) {
+      if (siteUrl && !canonicalMatch) {
         report.errors.push(`Legacy redirect page ${relPath} missing canonical destination link`);
-      } else {
+      } else if (canonicalMatch && siteUrl) {
         const targetUrl = canonicalMatch[1];
-        if (!targetUrl.startsWith(BASE_SITE_URL)) {
-          report.errors.push(`Legacy redirect ${relPath} canonical destination does not use configured BASE_SITE_URL: ${targetUrl}`);
+        const expectedPrefix = `${siteUrl}${basePath}`;
+        if (!targetUrl.startsWith(expectedPrefix)) {
+          report.errors.push(
+            `Legacy redirect ${relPath} canonical destination does not use verified origin: ${targetUrl}`
+          );
         } else {
           // Verify target destination actually exists in dist
-          const targetRel = targetUrl.replace(BASE_SITE_URL, '').replace(/^\//, '');
+          const targetRel = targetUrl.replace(expectedPrefix, '').replace(/^\//, '');
           const targetDistPath = targetRel
             ? path.join(distDir, targetRel, 'index.html')
             : path.join(distDir, 'index.html');
           if (!fs.existsSync(targetDistPath)) {
-            report.errors.push(`Legacy redirect ${relPath} points to nonexistent page: ${targetUrl} (checked ${targetDistPath})`);
+            report.errors.push(
+              `Legacy redirect ${relPath} points to nonexistent page: ${targetUrl} (checked ${targetDistPath})`
+            );
           }
         }
-      }
-
-      // Verify query string and fragment preservation logic is in the script
-      if (!html.includes('window.location.search') || !html.includes('window.location.hash')) {
-        report.errors.push(`Legacy redirect ${relPath} script does not preserve window.location.search or window.location.hash`);
       }
 
       continue;
@@ -289,8 +352,15 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
             const htmlAttrs = htmlTagMatch[1];
             const langMatch = htmlAttrs.match(/\blang=["']([^"']+)["']/i);
             const dirMatch = htmlAttrs.match(/\bdir=["']([^"']+)["']/i);
-            if (!langMatch || langMatch[1] !== loc.locale || !dirMatch || dirMatch[1] !== loc.direction) {
-              report.errors.push(`Localized 404 page ${relPath} lang/dir mismatch (expected lang="${loc.locale}", dir="${loc.direction}")`);
+            if (
+              !langMatch ||
+              langMatch[1] !== loc.locale ||
+              !dirMatch ||
+              dirMatch[1] !== loc.direction
+            ) {
+              report.errors.push(
+                `Localized 404 page ${relPath} lang/dir mismatch (expected lang="${loc.locale}", dir="${loc.direction}")`
+              );
             }
           }
         }
@@ -320,8 +390,15 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
         const langMatch = htmlAttrs.match(/\blang=["']([^"']+)["']/i);
         const dirMatch = htmlAttrs.match(/\bdir=["']([^"']+)["']/i);
 
-        if (!langMatch || langMatch[1] !== loc.locale || !dirMatch || dirMatch[1] !== loc.direction) {
-          report.errors.push(`HTML lang/dir tag mismatch in ${relPath} (expected lang="${loc.locale}", dir="${loc.direction}")`);
+        if (
+          !langMatch ||
+          langMatch[1] !== loc.locale ||
+          !dirMatch ||
+          dirMatch[1] !== loc.direction
+        ) {
+          report.errors.push(
+            `HTML lang/dir tag mismatch in ${relPath} (expected lang="${loc.locale}", dir="${loc.direction}")`
+          );
         }
       }
     }
@@ -339,38 +416,69 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
 
     // Validate Canonical URL
     const canonicalMatches = Array.from(html.matchAll(/<link rel="canonical" href="(.*?)" \/>/g));
-    if (canonicalMatches.length === 0) {
-      report.errors.push(`Missing canonical link in ${relPath}`);
-    } else if (canonicalMatches.length > 1) {
-      report.errors.push(`Duplicate canonical declarations found in ${relPath} (${canonicalMatches.length} occurrences)`);
+
+    if (siteUrl) {
+      // With verified origin, canonical is required and must match expected absolute URL
+      if (canonicalMatches.length === 0) {
+        report.errors.push(`Missing canonical link in ${relPath}`);
+      } else if (canonicalMatches.length > 1) {
+        report.errors.push(
+          `Duplicate canonical declarations found in ${relPath} (${canonicalMatches.length} occurrences)`
+        );
+      } else {
+        const canonicalUrl = canonicalMatches[0][1];
+        const expectedPrefix = `${siteUrl}${basePath}`;
+        if (!canonicalUrl.startsWith(expectedPrefix)) {
+          report.errors.push(
+            `Canonical URL in ${relPath} does not use verified origin ${expectedPrefix}: ${canonicalUrl}`
+          );
+        }
+        const expectedRel = relPath.replace(/\/index\.html$/, '').replace(/^index\.html$/, '');
+        const expectedCanonical = expectedRel
+          ? `${expectedPrefix}/${expectedRel}`
+          : `${expectedPrefix}/en`;
+        if (canonicalUrl !== expectedCanonical && expectedRel !== '') {
+          report.errors.push(
+            `Canonical URL mismatch in ${relPath}: expected ${expectedCanonical}, found ${canonicalUrl}`
+          );
+        }
+        pageCanonicalMap.set(relPath, canonicalUrl);
+      }
     } else {
-      const canonicalUrl = canonicalMatches[0][1];
-      if (!canonicalUrl.startsWith(BASE_SITE_URL)) {
-        report.errors.push(`Canonical URL in ${relPath} does not use expected origin ${BASE_SITE_URL}: ${canonicalUrl}`);
+      // Without verified origin, absolute canonical must NOT be present
+      if (canonicalMatches.length > 0) {
+        const url = canonicalMatches[0][1];
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          report.errors.push(
+            `Active page ${relPath} contains absolute canonical URL when no verified origin is configured: ${url}`
+          );
+        }
       }
-      const expectedRel = relPath.replace(/\/index\.html$/, '').replace(/^index\.html$/, '');
-      const expectedCanonical = expectedRel ? `${BASE_SITE_URL}/${expectedRel}` : `${BASE_SITE_URL}/en`;
-      if (canonicalUrl !== expectedCanonical && expectedRel !== '') {
-        report.errors.push(`Canonical URL mismatch in ${relPath}: expected ${expectedCanonical}, found ${canonicalUrl}`);
-      }
-      pageCanonicalMap.set(relPath, canonicalUrl);
     }
 
     // Validate Robots Directive: active pages must not specify noindex
     const robotsMatch = html.match(/<meta name="robots" content="(.*?)" \/>/);
     if (robotsMatch && robotsMatch[1].includes('noindex')) {
-      report.errors.push(`Active indexable page ${relPath} incorrectly declares noindex robots directive`);
+      report.errors.push(
+        `Active indexable page ${relPath} incorrectly declares noindex robots directive`
+      );
     }
 
     // Validate Structured Data JSON-LD
-    const jsonLdMatches = Array.from(html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g));
+    const jsonLdMatches = Array.from(
+      html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)
+    );
     if (jsonLdMatches.length > 1) {
-      report.errors.push(`Duplicate JSON-LD structured data blocks found in ${relPath} (${jsonLdMatches.length} blocks found)`);
+      report.errors.push(
+        `Duplicate JSON-LD structured data blocks found in ${relPath} (${jsonLdMatches.length} blocks found)`
+      );
     } else if (jsonLdMatches.length === 1) {
       try {
         const parsed = JSON.parse(jsonLdMatches[0][1]);
         if (parsed['@context'] !== 'https://schema.org') {
-          report.errors.push(`JSON-LD @context in ${relPath} must be 'https://schema.org', found '${parsed['@context']}'`);
+          report.errors.push(
+            `JSON-LD @context in ${relPath} must be 'https://schema.org', found '${parsed['@context']}'`
+          );
         }
       } catch (err: any) {
         report.errors.push(`Malformed JSON-LD syntax in ${relPath}: ${err.message}`);
@@ -379,14 +487,14 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
 
     // Validate Social Media Images (og:image & twitter:image)
     const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)" \/>/);
-    if (ogImageMatch) {
+    if (ogImageMatch && siteUrl) {
       const imgUrl = ogImageMatch[1];
       if (!imgUrl.startsWith('https://')) {
         report.errors.push(`og:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
       }
     }
     const twImageMatch = html.match(/<meta name="twitter:image" content="(.*?)" \/>/);
-    if (twImageMatch) {
+    if (twImageMatch && siteUrl) {
       const imgUrl = twImageMatch[1];
       if (!imgUrl.startsWith('https://')) {
         report.errors.push(`twitter:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
@@ -394,7 +502,9 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
     }
 
     // Validate Alternate Hreflang Declarations
-    const alternateMatches = Array.from(html.matchAll(/<link rel="alternate" hreflang="(.*?)" href="(.*?)" \/>/g));
+    const alternateMatches = Array.from(
+      html.matchAll(/<link rel="alternate" hreflang="(.*?)" href="(.*?)" \/>/g)
+    );
     const alternates: Record<string, string> = {};
     const seenHreflang = new Set<string>();
 
@@ -413,55 +523,61 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
       }
       seenHreflang.add(hreflang);
 
-      if (!targetUrl.startsWith(BASE_SITE_URL)) {
-        report.errors.push(`Alternate link hreflang="${hreflang}" in ${relPath} does not use expected origin: ${targetUrl}`);
-      }
+      if (siteUrl) {
+        const expectedPrefix = `${siteUrl}${basePath}`;
+        if (!targetUrl.startsWith(expectedPrefix)) {
+          report.errors.push(
+            `Alternate link hreflang="${hreflang}" in ${relPath} does not use verified origin: ${targetUrl}`
+          );
+        }
 
-      // Check for conflicting canonical and self-referencing hreflang declarations
-      const isSelfHreflang =
-        hreflang === expectedLang ||
-        (expectedLang === 'fa' && (hreflang === 'fa' || hreflang === 'fa-IR')) ||
-        (expectedLang === 'prs-af' && (hreflang === 'prs' || hreflang === 'prs-AF')) ||
-        (expectedLang === 'tg' && (hreflang === 'tg' || hreflang === 'tg-TJ')) ||
-        (expectedLang === 'en' && hreflang === 'en');
-      const currentCanonical = canonicalMatches.length > 0 ? canonicalMatches[0][1] : '';
-      if (isSelfHreflang && currentCanonical && targetUrl !== currentCanonical) {
-        report.errors.push(`Conflicting canonical and hreflang declarations in ${relPath}: canonical is ${currentCanonical}, but self-referencing hreflang="${hreflang}" declares ${targetUrl}`);
+        // Check for conflicting canonical and self-referencing hreflang declarations
+        const isSelfHreflang =
+          hreflang === expectedLang ||
+          (expectedLang === 'fa' && (hreflang === 'fa' || hreflang === 'fa-IR')) ||
+          (expectedLang === 'prs-af' && (hreflang === 'prs' || hreflang === 'prs-AF')) ||
+          (expectedLang === 'tg' && (hreflang === 'tg' || hreflang === 'tg-TJ')) ||
+          (expectedLang === 'en' && hreflang === 'en');
+        const currentCanonical = canonicalMatches.length > 0 ? canonicalMatches[0][1] : '';
+        if (isSelfHreflang && currentCanonical && targetUrl !== currentCanonical) {
+          report.errors.push(
+            `Conflicting canonical and hreflang declarations in ${relPath}: canonical is ${currentCanonical}, but self-referencing hreflang="${hreflang}" declares ${targetUrl}`
+          );
+        }
       }
 
       alternates[hreflang] = targetUrl;
     }
     pageAlternatesMap.set(relPath, alternates);
 
-    // 2. Validate All Local Asset and Link References in this HTML page
-    // A: Scripts
+    // 4. Validate All Local Asset and Link References in this HTML page
+    // Scripts
     const scriptMatches = html.matchAll(/<script[^>]+src=["'](.*?)["']/g);
     for (const m of scriptMatches) {
-      const src = m[1];
-      validateReference(relPath, src, 'script', distDir, report);
+      validateReference(relPath, m[1], 'script', distDir, basePath, report);
     }
 
-    // B: Stylesheets & Links
+    // Stylesheets & Links
     const linkMatches = html.matchAll(/<link[^>]+href=["'](.*?)["']/g);
     for (const m of linkMatches) {
       const href = m[1];
       const relMatch = m[0].match(/rel=["'](.*?)["']/);
       const relVal = relMatch ? relMatch[1] : '';
       if (['canonical', 'alternate'].includes(relVal)) continue;
-      validateReference(relPath, href, 'link', distDir, report);
+      validateReference(relPath, href, 'link', distDir, basePath, report);
     }
 
-    // C: Images & Media
+    // Images & Media
     const imgMatches = html.matchAll(/<img[^>]+src=["'](.*?)["']/g);
     for (const m of imgMatches) {
-      validateReference(relPath, m[1], 'image', distDir, report);
+      validateReference(relPath, m[1], 'image', distDir, basePath, report);
     }
     const mediaMatches = html.matchAll(/<(?:source|video|audio)[^>]+src=["'](.*?)["']/g);
     for (const m of mediaMatches) {
-      validateReference(relPath, m[1], 'media', distDir, report);
+      validateReference(relPath, m[1], 'media', distDir, basePath, report);
     }
 
-    // D: Anchor hyperlinks
+    // Anchor hyperlinks
     const anchorMatches = html.matchAll(/<a[^>]+href=["'](.*?)["']/g);
     for (const m of anchorMatches) {
       const href = m[1];
@@ -469,108 +585,146 @@ export function validateDistArtifacts(distDir: string): ValidationReport {
         report.errors.push(`Found link to deprecated Spanish route in ${relPath}: ${href}`);
         continue;
       }
-      validateReference(relPath, href, 'anchor', distDir, report);
+      validateReference(relPath, href, 'anchor', distDir, basePath, report);
     }
   }
 
-  // 3. Reciprocal Hreflang Validation across all parsed pages
-  for (const [pageRelPath, alternates] of pageAlternatesMap.entries()) {
-    const sourceCanonical = pageCanonicalMap.get(pageRelPath);
-    if (!sourceCanonical) continue;
+  // 5. Reciprocal Hreflang Validation across all parsed pages (when siteUrl is configured)
+  if (siteUrl) {
+    const expectedPrefix = `${siteUrl}${basePath}`;
+    for (const [pageRelPath, alternates] of pageAlternatesMap.entries()) {
+      const sourceCanonical = pageCanonicalMap.get(pageRelPath);
+      if (!sourceCanonical) continue;
 
-    for (const [hreflang, targetUrl] of Object.entries(alternates)) {
-      if (hreflang === 'x-default') continue;
-      const targetRel = targetUrl.replace(BASE_SITE_URL, '').replace(/^\//, '');
-      const targetRelPath = targetRel ? `${targetRel}/index.html` : 'index.html';
-      const targetIndexPath = path.join(distDir, targetRelPath);
+      for (const [hreflang, targetUrl] of Object.entries(alternates)) {
+        if (hreflang === 'x-default') continue;
+        const targetRel = targetUrl.replace(expectedPrefix, '').replace(/^\//, '');
+        const targetRelPath = targetRel ? `${targetRel}/index.html` : 'index.html';
+        const targetIndexPath = path.join(distDir, targetRelPath);
 
-      if (!fs.existsSync(targetIndexPath)) {
-        report.errors.push(`Alternate hreflang="${hreflang}" in ${pageRelPath} points to nonexistent page: ${targetUrl}`);
-        continue;
-      }
+        if (!fs.existsSync(targetIndexPath)) {
+          report.errors.push(
+            `Alternate hreflang="${hreflang}" in ${pageRelPath} points to nonexistent page: ${targetUrl}`
+          );
+          continue;
+        }
 
-      const targetAlternates = pageAlternatesMap.get(targetRelPath);
-      if (targetAlternates) {
-        const hasReciprocalBackLink = Object.values(targetAlternates).includes(sourceCanonical);
-        if (!hasReciprocalBackLink) {
-          report.errors.push(`Non-reciprocal hreflang link: ${pageRelPath} declares alternate ${targetUrl}, but ${targetRelPath} does not link back to ${sourceCanonical}`);
+        const targetAlternates = pageAlternatesMap.get(targetRelPath);
+        if (targetAlternates) {
+          const hasReciprocalBackLink = Object.values(targetAlternates).includes(sourceCanonical);
+          if (!hasReciprocalBackLink) {
+            report.errors.push(
+              `Non-reciprocal hreflang link: ${pageRelPath} declares alternate ${targetUrl}, but ${targetRelPath} does not link back to ${sourceCanonical}`
+            );
+          }
         }
       }
     }
   }
 
-  // 4. Audit sitemap.xml with strict XML parser
+  // 6. Audit sitemap.xml
   const sitemapPath = path.join(distDir, 'sitemap.xml');
-  if (!fs.existsSync(sitemapPath)) {
-    report.errors.push('Missing sitemap.xml in dist!');
-  } else {
-    const sitemapContent = fs.readFileSync(sitemapPath, 'utf-8');
-    let sitemapAst: XmlNode;
-    try {
-      sitemapAst = parseXml(sitemapContent);
-    } catch (err: any) {
-      report.errors.push(`sitemap.xml XML syntax error: ${err.message}`);
-      sitemapAst = { tag: '', attributes: {}, children: [], text: '' };
-    }
-
-    if (sitemapAst.tag !== 'urlset') {
-      report.errors.push(`Root tag of sitemap.xml must be <urlset>, found <${sitemapAst.tag}>`);
-    }
-
-    const urlNodes = sitemapAst.children.filter((c) => c.tag === 'url');
-    report.sitemapUrlsCount = urlNodes.length;
-    const sitemapUrlsSeen = new Set<string>();
-
-    for (const urlNode of urlNodes) {
-      const locNode = urlNode.children.find((c) => c.tag === 'loc');
-      if (!locNode || !locNode.text) {
-        report.errors.push('Found <url> without non-empty <loc> in sitemap.xml');
-        continue;
-      }
-      const loc = locNode.text;
-      if (!loc.startsWith(BASE_SITE_URL)) {
-        report.errors.push(`Sitemap URL does not use configured BASE_SITE_URL (${BASE_SITE_URL}): ${loc}`);
-      }
-      if (sitemapUrlsSeen.has(loc)) {
-        report.errors.push(`Duplicate URL in sitemap.xml: ${loc}`);
-      }
-      sitemapUrlsSeen.add(loc);
-
-      if (loc.includes('/404') || loc.endsWith('404.html')) {
-        report.errors.push(`404 page must not be included in sitemap.xml: ${loc}`);
-      }
-      if (loc.includes('/es/') || loc.endsWith('/es')) {
-        report.errors.push(`Deprecated Spanish routes must not be present in sitemap.xml: ${loc}`);
+  if (siteUrl) {
+    if (!fs.existsSync(sitemapPath)) {
+      report.errors.push('Missing sitemap.xml in dist for configured production origin!');
+    } else {
+      const sitemapContent = fs.readFileSync(sitemapPath, 'utf-8');
+      let sitemapAst: XmlNode;
+      try {
+        sitemapAst = parseXml(sitemapContent);
+      } catch (err: any) {
+        report.errors.push(`sitemap.xml XML syntax error: ${err.message}`);
+        sitemapAst = { tag: '', attributes: {}, children: [], text: '' };
       }
 
-      // Check corresponding generated HTML exists in dist
-      const relPath = loc.replace(BASE_SITE_URL, '').replace(/^\//, '');
-      const expectedDistPath = relPath ? path.join(distDir, relPath, 'index.html') : path.join(distDir, 'index.html');
-      if (!fs.existsSync(expectedDistPath)) {
-        report.errors.push(`Sitemap URL has no matching generated HTML file in dist: ${loc} (checked ${expectedDistPath})`);
-      } else {
-        // Strict Canonical Check: Every sitemap URL must match the canonical URL of the corresponding page
-        const html = fs.readFileSync(expectedDistPath, 'utf-8');
-        const canonicalMatch = html.match(/<link rel="canonical" href="(.*?)" \/>/);
-        if (canonicalMatch && canonicalMatch[1] !== loc) {
-          report.errors.push(`Non-canonical URL in sitemap.xml: ${loc} points to page whose canonical is declared as ${canonicalMatch[1]}`);
+      if (sitemapAst.tag !== 'urlset') {
+        report.errors.push(`Root tag of sitemap.xml must be <urlset>, found <${sitemapAst.tag}>`);
+      }
+
+      const expectedPrefix = `${siteUrl}${basePath}`;
+      const urlNodes = sitemapAst.children.filter((c) => c.tag === 'url');
+      report.sitemapUrlsCount = urlNodes.length;
+      const sitemapUrlsSeen = new Set<string>();
+
+      for (const urlNode of urlNodes) {
+        const locNode = urlNode.children.find((c) => c.tag === 'loc');
+        if (!locNode || !locNode.text) {
+          report.errors.push('Found <url> without non-empty <loc> in sitemap.xml');
+          continue;
+        }
+        const loc = locNode.text;
+        if (!loc.startsWith(expectedPrefix)) {
+          report.errors.push(
+            `Sitemap URL does not use verified origin (${expectedPrefix}): ${loc}`
+          );
+        }
+        if (sitemapUrlsSeen.has(loc)) {
+          report.errors.push(`Duplicate URL in sitemap.xml: ${loc}`);
+        }
+        sitemapUrlsSeen.add(loc);
+
+        if (loc.includes('/404') || loc.endsWith('404.html')) {
+          report.errors.push(`404 page must not be included in sitemap.xml: ${loc}`);
+        }
+        if (loc.includes('/es/') || loc.endsWith('/es')) {
+          report.errors.push(
+            `Deprecated Spanish routes must not be present in sitemap.xml: ${loc}`
+          );
+        }
+
+        // Check corresponding generated HTML exists in dist
+        const relPath = loc.replace(expectedPrefix, '').replace(/^\//, '');
+        const expectedDistPath = relPath
+          ? path.join(distDir, relPath, 'index.html')
+          : path.join(distDir, 'index.html');
+        if (!fs.existsSync(expectedDistPath)) {
+          report.errors.push(
+            `Sitemap URL has no matching generated HTML file in dist: ${loc} (checked ${expectedDistPath})`
+          );
+        } else {
+          // Strict Canonical Check: Every sitemap URL must match the canonical URL of the corresponding page
+          const html = fs.readFileSync(expectedDistPath, 'utf-8');
+          const canonicalMatch = html.match(/<link rel="canonical" href="(.*?)" \/>/);
+          if (canonicalMatch && canonicalMatch[1] !== loc) {
+            report.errors.push(
+              `Non-canonical URL in sitemap.xml: ${loc} points to page whose canonical is declared as ${canonicalMatch[1]}`
+            );
+          }
         }
       }
     }
+  } else {
+    // If no verified origin is configured, sitemap.xml must NOT be published
+    if (fs.existsSync(sitemapPath)) {
+      report.errors.push(
+        'sitemap.xml must not be published without a verified production origin configured (SITE_URL or VITE_SITE_URL).'
+      );
+    }
   }
 
-  // 5. Audit robots.txt
+  // 7. Audit robots.txt
   const robotsPath = path.join(distDir, 'robots.txt');
   if (!fs.existsSync(robotsPath)) {
     report.errors.push('Missing robots.txt in dist!');
   } else {
     const robotsContent = fs.readFileSync(robotsPath, 'utf-8');
-    if (!robotsContent.includes(`Sitemap: ${BASE_SITE_URL}/sitemap.xml`)) {
-      report.errors.push('robots.txt does not declare correct sitemap URL!');
+    if (siteUrl) {
+      const expectedSitemapLine = `Sitemap: ${siteUrl}${basePath}/sitemap.xml`;
+      if (!robotsContent.includes(expectedSitemapLine)) {
+        report.errors.push(
+          `robots.txt does not declare correct sitemap URL! Expected '${expectedSitemapLine}'`
+        );
+      }
+    } else {
+      if (robotsContent.includes('Sitemap:')) {
+        report.errors.push(
+          'robots.txt declares a Sitemap line but no verified production origin is configured!'
+        );
+      }
     }
   }
 
-  // 6. Audit site.webmanifest
+  // 8. Audit site.webmanifest
   const manifestPath = path.join(distDir, 'site.webmanifest');
   if (fs.existsSync(manifestPath)) {
     try {
@@ -607,6 +761,7 @@ function validateReference(
   rawRef: string,
   kind: 'script' | 'link' | 'image' | 'media' | 'anchor',
   distDir: string,
+  basePath: string,
   report: ValidationReport
 ) {
   if (!rawRef || typeof rawRef !== 'string') return;
@@ -615,7 +770,11 @@ function validateReference(
   if (rawRef.startsWith('#')) return;
 
   // Ignore external URLs and mailto
-  if (rawRef.startsWith('http://') || rawRef.startsWith('https://') || rawRef.startsWith('mailto:')) {
+  if (
+    rawRef.startsWith('http://') ||
+    rawRef.startsWith('https://') ||
+    rawRef.startsWith('mailto:')
+  ) {
     return;
   }
 
@@ -624,7 +783,9 @@ function validateReference(
 
   // Reject protocol-relative URLs
   if (rawRef.startsWith('//')) {
-    report.errors.push(`Protocol-relative reference '//' prohibited in ${sourceHtmlRelPath}: ${rawRef}`);
+    report.errors.push(
+      `Protocol-relative reference '//' prohibited in ${sourceHtmlRelPath}: ${rawRef}`
+    );
     return;
   }
 
@@ -635,7 +796,12 @@ function validateReference(
   }
 
   // Strip query string and fragment before checking filesystem
-  const cleanPath = decodeURIComponent(rawRef.split(/[?#]/)[0]);
+  let cleanPath = decodeURIComponent(rawRef.split(/[?#]/)[0]);
+
+  // Strip basePath if present (for project deployments like /parsikit-website)
+  if (basePath && cleanPath.startsWith(basePath)) {
+    cleanPath = cleanPath.slice(basePath.length) || '/';
+  }
 
   // Resolve filesystem target
   let resolvedTarget: string;
@@ -648,7 +814,9 @@ function validateReference(
 
   // Traversal protection
   if (!resolvedTarget.startsWith(distDir)) {
-    report.errors.push(`Filesystem traversal outside dist detected in ${sourceHtmlRelPath}: ${rawRef} -> ${resolvedTarget}`);
+    report.errors.push(
+      `Filesystem traversal outside dist detected in ${sourceHtmlRelPath}: ${rawRef} -> ${resolvedTarget}`
+    );
     return;
   }
 
@@ -658,7 +826,9 @@ function validateReference(
   const htmlFileExists = fs.existsSync(`${resolvedTarget}.html`);
 
   if (!fileExists && !dirIndexExists && !htmlFileExists) {
-    report.errors.push(`Broken local ${kind} reference in ${sourceHtmlRelPath}: '${rawRef}' (target not found at ${resolvedTarget})`);
+    report.errors.push(
+      `Broken local ${kind} reference in ${sourceHtmlRelPath}: '${rawRef}' (target not found at ${resolvedTarget})`
+    );
   }
 }
 
@@ -676,15 +846,42 @@ export function runValidation() {
     process.exit(1);
   }
 
-  console.log(`✅ All generated HTML pages inspected (${report.checkedPagesCount} active pages + 404s verified).`);
-  console.log(`✅ HTML redirect fallback verified (${report.redirectsCheckedCount} legacy Spanish stubs checked; client-side meta-refresh + window.location.replace).`);
-  console.log(`   [Platform limitation notice: HTTP 301 headers are NOT VERIFIED because static host GitHub Pages does not issue server-side HTTP 301 headers.]`);
-  console.log(`✅ Sitemap XML parsed and validated (${report.sitemapUrlsCount} absolute URLs verified, zero errors).`);
-  console.log(`✅ robots.txt verified with correct absolute sitemap declaration.`);
-  console.log(`✅ Canonical URLs & reciprocal hreflang alternate links verified across all 4 locales (${report.hreflangAlternatesCheckedCount} alternate links verified).`);
-  console.log(`✅ Local static assets (${report.assetsCheckedCount} scripts/styles/images verified) and internal links (${report.internalLinksCheckedCount} anchors verified).`);
-  console.log(`✅ 404 pages (dist/404.html and 4 localized pages with noindex) verified and excluded from sitemap.`);
-  console.log('🎉 Production Quality, SEO & Artifact Validation Audit PASSED with 100% compliance!');
+  console.log(
+    `✅ All generated HTML pages inspected (${report.checkedPagesCount} active pages + 404s verified).`
+  );
+  console.log(
+    `✅ HTML redirect fallback verified (${report.redirectsCheckedCount} legacy Spanish stubs checked; client-side meta-refresh + window.location.replace).`
+  );
+  console.log(
+    `   [Platform limitation notice: HTTP 301 headers are NOT VERIFIED because static host GitHub Pages does not issue server-side HTTP 301 headers.]`
+  );
+
+  const siteUrl = getVerifiedSiteUrl();
+  if (siteUrl) {
+    console.log(
+      `✅ Sitemap XML parsed and validated for verified origin ${siteUrl} (${report.sitemapUrlsCount} absolute URLs verified, zero errors).`
+    );
+    console.log(`✅ robots.txt verified with correct absolute sitemap declaration.`);
+    console.log(
+      `✅ Canonical URLs & reciprocal hreflang alternate links verified across all 4 locales (${report.hreflangAlternatesCheckedCount} alternate links verified).`
+    );
+  } else {
+    console.log(
+      `ℹ️  Notice: No verified production origin (SITE_URL) configured. Domain-dependent production SEO artifacts omitted for local build.`
+    );
+    console.log(`✅ robots.txt verified without unverified sitemap declarations.`);
+    console.log(`✅ Verified NO unauthorized domains (e.g. parsikit.dev) appear in dist.`);
+  }
+
+  console.log(
+    `✅ Local static assets (${report.assetsCheckedCount} scripts/styles/images verified) and internal links (${report.internalLinksCheckedCount} anchors verified).`
+  );
+  console.log(
+    `✅ 404 pages (dist/404.html and 4 localized pages with noindex) verified and excluded from sitemap.`
+  );
+  console.log(
+    '🎉 Production Quality, SEO & Artifact Validation Audit PASSED with 100% compliance!'
+  );
 }
 
 if (process.argv[1] && process.argv[1].endsWith('validate-production.ts')) {

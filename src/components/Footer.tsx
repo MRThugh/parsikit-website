@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { getTranslations } from '../i18n/translations';
 import { LOCALES } from '../i18n/config';
+import { hasVerifiedSiteUrl } from '../config/site';
 
 export function Footer() {
   const { lang, setRoute, navigateToDoc, toggleLang, isRtl } = useApp();
@@ -24,7 +25,7 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <img
-                src="/parsikit-logo.png"
+                src={`${import.meta.env.BASE_URL}parsikit-logo.png`}
                 alt="ParsiKit Logo"
                 className="w-10 h-10 object-contain"
                 width="40"
@@ -223,16 +224,18 @@ export function Footer() {
                   MIT License
                 </a>
               </li>
-              <li>
-                <a
-                  href="/sitemap.xml"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors font-mono text-xs"
-                >
-                  sitemap.xml
-                </a>
-              </li>
+              {hasVerifiedSiteUrl() && (
+                <li>
+                  <a
+                    href={`${import.meta.env.BASE_URL}sitemap.xml`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors font-mono text-xs"
+                  >
+                    sitemap.xml
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>
