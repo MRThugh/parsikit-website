@@ -20,6 +20,7 @@ import { ALL_DOCS } from '../data/docsManifest';
 import { getTranslations } from '../i18n/translations';
 import { renderMarkdownToHtml } from '../lib/markdown';
 import { LOCALES } from '../i18n/config';
+import { getDeploymentBasePath } from '../lib/seo';
 
 export function DocumentationView() {
   const {
@@ -159,7 +160,13 @@ export function DocumentationView() {
     const pathPart = queryIdx !== -1 ? pathAndQuery.slice(0, queryIdx) : pathAndQuery;
     const queryPart = queryIdx !== -1 ? pathAndQuery.slice(queryIdx + 1) : '';
 
-    const cleanSlug = pathPart
+    const basePath = getDeploymentBasePath();
+    let normalizedPath = pathPart;
+    if (basePath && normalizedPath.startsWith(basePath)) {
+      normalizedPath = normalizedPath.slice(basePath.length);
+    }
+
+    const cleanSlug = normalizedPath
       .replace(/^\//, '')
       .replace(/^docs\//, '')
       .replace(/^(fa|en|prs-af|tg)\/docs\//, '')

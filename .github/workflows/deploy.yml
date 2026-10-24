@@ -56,6 +56,12 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}
           BASE_PATH: ${{ vars.BASE_PATH }}
 
+      - name: Validate Production Artifacts
+        run: npm run validate:production
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
+
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:

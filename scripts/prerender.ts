@@ -105,6 +105,14 @@ function renderHtmlTemplate(
     `<meta property="og:image" content="${logoImgSrc}" />`
   );
   html = html.replace(
+    /<meta property="og:image:alt" content=".*?" \/>/,
+    `<meta property="og:image:alt" content="${meta.title.replace(/"/g, '&quot;')}" />`
+  );
+  html = html.replace(
+    /<meta property="og:locale" content=".*?" \/>/,
+    `<meta property="og:locale" content="${loc.ogLocale}" />`
+  );
+  html = html.replace(
     /<meta name="twitter:title" content=".*?" \/>/,
     `<meta name="twitter:title" content="${meta.title.replace(/"/g, '&quot;')}" />`
   );
@@ -116,12 +124,15 @@ function renderHtmlTemplate(
     /<meta name="twitter:image" content=".*?" \/>/,
     `<meta name="twitter:image" content="${logoImgSrc}" />`
   );
+  html = html.replace(
+    /<meta name="twitter:image:alt" content=".*?" \/>/,
+    `<meta name="twitter:image:alt" content="${meta.title.replace(/"/g, '&quot;')}" />`
+  );
 
-  // Dynamic Schema.org JSON-LD
+  // Dynamic Schema.org JSON-LD (clean, authentic open-source library metadata)
   let schemaGraph: any[] = [];
   if (meta.schemaType === 'TechArticle' && activeDoc) {
     const articleNode: Record<string, any> = {
-      '@context': 'https://schema.org',
       '@type': 'TechArticle',
       headline: meta.title,
       description: meta.description,
@@ -134,6 +145,7 @@ function renderHtmlTemplate(
       publisher: {
         '@type': 'Organization',
         name: 'ParsiKit',
+        url: OFFICIAL_REPO_URL,
       },
     };
 
@@ -142,7 +154,6 @@ function renderHtmlTemplate(
       articleNode.mainEntityOfPage = meta.canonicalUrl;
       schemaGraph.push(articleNode);
       schemaGraph.push({
-        '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
           {
@@ -170,12 +181,14 @@ function renderHtmlTemplate(
     }
   } else {
     const appNode: Record<string, any> = {
-      '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
+      '@id': `${OFFICIAL_REPO_URL}#software`,
       name: 'ParsiKit',
       description: meta.description,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Cross-platform',
+      programmingLanguage: 'Python',
+      codeRepository: OFFICIAL_REPO_URL,
       softwareVersion: REPO_METADATA.version,
       license: 'https://opensource.org/licenses/MIT',
       author: {
@@ -183,17 +196,11 @@ function renderHtmlTemplate(
         name: OFFICIAL_AUTHOR,
         url: 'https://github.com/MRThugh',
       },
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
     };
     schemaGraph.push(appNode);
 
     if (siteUrl) {
       schemaGraph.push({
-        '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'ParsiKit Official Website',
         url: `${siteUrl}${basePath}`,
@@ -205,6 +212,7 @@ function renderHtmlTemplate(
       });
     }
   }
+
 
   // Remove any existing JSON-LD from baseHtml to prevent duplicate structured data blocks
   html = html.replace(

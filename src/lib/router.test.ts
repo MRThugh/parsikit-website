@@ -192,3 +192,21 @@ test('router: 404 not-found route handling and URL generation', () => {
   assert.equal(parsedMissingDoc.lang, 'tg');
   assert.equal(parsedMissingDoc.docSlug, 'missing-doc-xyz');
 });
+
+test('router: correctly parses paths when deployed under a subpath (BASE_PATH)', () => {
+  const parsedRoot = parseRoutePath('/parsikit-website/fa', '/parsikit-website');
+  assert.equal(parsedRoot.route, 'home');
+  assert.equal(parsedRoot.lang, 'fa');
+
+  const parsedDoc = parseRoutePath('/parsikit-website/en/docs/installation', '/parsikit-website');
+  assert.equal(parsedDoc.route, 'docs');
+  assert.equal(parsedDoc.lang, 'en');
+  assert.equal(parsedDoc.docSlug, 'installation');
+
+  const parsedPlayground = parseRoutePath('/parsikit-website/prs-af/playground?tab=text#cleaner', '/parsikit-website');
+  assert.equal(parsedPlayground.route, 'playground');
+  assert.equal(parsedPlayground.lang, 'prs-af');
+  assert.equal(parsedPlayground.query, 'tab=text');
+  assert.equal(parsedPlayground.hash, 'cleaner');
+});
+

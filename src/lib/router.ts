@@ -11,6 +11,7 @@
 
 import { type LangPrefix, SUPPORTED_LANG_PREFIXES, DEFAULT_LANG_PREFIX } from '../i18n/config';
 import { ALL_DOCS, type DocEntry } from '../data/docsManifest';
+import { getDeploymentBasePath } from '../config/site';
 
 export type PageRoute = 'home' | 'docs' | 'playground' | 'architecture' | 'changelog' | 'not-found';
 export type AppLang = LangPrefix;
@@ -96,8 +97,14 @@ export function resolveDocument(requestedLang: AppLang, rawSlug: string): DocRes
  * Checks if a pathname is a deprecated Spanish URL and returns the migrated URL.
  */
 export function checkLegacyRedirect(pathname: string): string | null {
+  const deploymentBase = getDeploymentBasePath();
+  let cleanPathname = pathname;
+  if (deploymentBase && (cleanPathname === deploymentBase || cleanPathname.startsWith(`${deploymentBase}/`))) {
+    cleanPathname = cleanPathname.slice(deploymentBase.length) || '/';
+  }
+
   // Strip query/hash before checking path
-  const pathWithoutQuery = pathname.split(/[?#]/)[0];
+  const pathWithoutQuery = cleanPathname.split(/[?#]/)[0];
   const cleanPath = pathWithoutQuery.replace(/^\/|\/$/g, '');
   if (cleanPath === 'es') {
     return '/en';
@@ -109,7 +116,7 @@ export function checkLegacyRedirect(pathname: string): string | null {
   return null;
 }
 
-export function parseRoutePath(rawInput: string): RouteState {
+export function parseRoutePath(rawInput: string, overrideBasePath?: string): RouteState {
   // Extract query and hash
   const hashIdx = rawInput.indexOf('#');
   const pathAndQuery = hashIdx !== -1 ? rawInput.slice(0, hashIdx) : rawInput;
@@ -119,7 +126,13 @@ export function parseRoutePath(rawInput: string): RouteState {
   const pathname = queryIdx !== -1 ? pathAndQuery.slice(0, queryIdx) : pathAndQuery;
   const query = queryIdx !== -1 ? pathAndQuery.slice(queryIdx + 1) : undefined;
 
-  const legacyTarget = checkLegacyRedirect(pathname);
+  const deploymentBase = overrideBasePath !== undefined ? overrideBasePath : getDeploymentBasePath();
+  let normalizedPathname = pathname;
+  if (deploymentBase && (normalizedPathname === deploymentBase || normalizedPathname.startsWith(`${deploymentBase}/`))) {
+    normalizedPathname = normalizedPathname.slice(deploymentBase.length) || '/';
+  }
+
+  const legacyTarget = checkLegacyRedirect(normalizedPathname);
   if (legacyTarget) {
     const migratedState = parseRoutePath(legacyTarget + (query ? `?${query}` : '') + (hash ? `#${hash}` : ''));
     return {
@@ -131,7 +144,7 @@ export function parseRoutePath(rawInput: string): RouteState {
     };
   }
 
-  const path = pathname.replace(/^\/|\/$/g, '');
+  const path = normalizedPathname.replace(/^\/|\/$/g, '');
   if (!path) {
     return { lang: DEFAULT_LANG_PREFIX, route: 'home', query, hash };
   }
@@ -232,13 +245,19 @@ export function parseCurrentUrl(): RouteState {
   // 2. Check legacy Spanish redirect and update browser history cleanly
   const legacyTarget = checkLegacyRedirect(window.location.pathname);
   if (legacyTarget) {
-    const finalTarget = legacyTarget + window.location.search + window.location.hash;
+    const deploymentBase = getDeploymentBasePath();
+    const finalTarget = `${deploymentBase}${legacyTarget}${window.location.search}${window.location.hash}`;
     window.history.replaceState(null, '', finalTarget);
-    return parseRoutePath(finalTarget);
+    return parseRoutePath(legacyTarget + window.location.search + window.location.hash);
   }
 
   // 3. Parse pathname
-  const path = window.location.pathname.replace(/^\/|\/$/g, '');
+  const deploymentBase = getDeploymentBasePath();
+  let cleanPath = window.location.pathname;
+  if (deploymentBase && (cleanPath === deploymentBase || cleanPath.startsWith(`${deploymentBase}/`))) {
+    cleanPath = cleanPath.slice(deploymentBase.length) || '/';
+  }
+  const path = cleanPath.replace(/^\/|\/$/g, '');
   if (!path) {
     const saved = localStorage.getItem('parsikit_lang') as AppLang | null;
     const initialLang = saved && VALID_LANGS.includes(saved) ? saved : DEFAULT_LANG_PREFIX;

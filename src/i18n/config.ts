@@ -16,6 +16,7 @@ export interface LocaleMeta {
   prefix: LangPrefix;
   direction: TextDirection;
   hreflang: string;
+  ogLocale: string;
   nameNative: string;
   nameEnglish: string;
   shortCode: string;
@@ -28,6 +29,7 @@ export const LOCALES: Record<LangPrefix, LocaleMeta> = {
     prefix: 'fa',
     direction: 'rtl',
     hreflang: 'fa-IR',
+    ogLocale: 'fa_IR',
     nameNative: 'فارسی',
     nameEnglish: 'Persian (Iran)',
     shortCode: 'فا',
@@ -38,6 +40,7 @@ export const LOCALES: Record<LangPrefix, LocaleMeta> = {
     prefix: 'en',
     direction: 'ltr',
     hreflang: 'en',
+    ogLocale: 'en_US',
     nameNative: 'English',
     nameEnglish: 'English',
     shortCode: 'EN',
@@ -48,6 +51,7 @@ export const LOCALES: Record<LangPrefix, LocaleMeta> = {
     prefix: 'prs-af',
     direction: 'rtl',
     hreflang: 'prs-AF',
+    ogLocale: 'fa_AF',
     nameNative: 'دری',
     nameEnglish: 'Dari (Afghanistan)',
     shortCode: 'دری',
@@ -58,6 +62,7 @@ export const LOCALES: Record<LangPrefix, LocaleMeta> = {
     prefix: 'tg',
     direction: 'ltr',
     hreflang: 'tg-TJ',
+    ogLocale: 'tg_TJ',
     nameNative: 'Тоҷикӣ',
     nameEnglish: 'Tajik (Tajikistan)',
     shortCode: 'ТҶ',

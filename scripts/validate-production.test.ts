@@ -4,7 +4,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { parseXml, validateDistArtifacts } from './validate-production';
-import { getVerifiedSiteUrl } from '../src/config/site';
+import {
+  getVerifiedSiteUrl,
+  getDeploymentBasePath,
+  validateAndNormalizeOrigin,
+  normalizeBasePath,
+} from '../src/config/site';
 
 const TEST_VERIFIED_ORIGIN = 'https://verified.example.org';
 
@@ -39,9 +44,11 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
 <head>
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website and documentation for ParsiKit" />
+  <meta property="og:locale" content="en_US" />
   <link rel="canonical" href="${origin}/en" />
   <link rel="alternate" hreflang="en" href="${origin}/en" />
   <link rel="alternate" hreflang="fa" href="${origin}/fa" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ParsiKit","author":{"@type":"Person","name":"Ali Kamrani"}}</script>
 </head>
 <body><h1>English Documentation</h1></body>
 </html>`;
@@ -53,9 +60,11 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
 <head>
   <title>پارسی‌کیت — زیرساخت داده‌های فارسی</title>
   <meta name="description" content="مستندات و وبگاه رسمی پارسی‌کیت" />
+  <meta property="og:locale" content="fa_IR" />
   <link rel="canonical" href="${origin}/fa" />
   <link rel="alternate" hreflang="en" href="${origin}/en" />
   <link rel="alternate" hreflang="fa" href="${origin}/fa" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ParsiKit","author":{"@type":"Person","name":"Ali Kamrani"}}</script>
 </head>
 <body><h1>مستندات فارسی</h1></body>
 </html>`;
@@ -637,6 +646,7 @@ test('validator scenario 24: dynamically discovers and audits deep pages without
 <head>
   <title>Advanced Security Tutorial — ParsiKit</title>
   <meta name="description" content="In-depth guide to cryptographic data handling with ParsiKit" />
+  <meta property="og:locale" content="en_US" />
   <link rel="canonical" href="${TEST_VERIFIED_ORIGIN}/en/tutorials/advanced-security" />
   <link rel="alternate" hreflang="en" href="${TEST_VERIFIED_ORIGIN}/en/tutorials/advanced-security" />
   <link rel="alternate" hreflang="fa" href="${TEST_VERIFIED_ORIGIN}/fa/tutorials/advanced-security" />
@@ -653,6 +663,7 @@ test('validator scenario 24: dynamically discovers and audits deep pages without
 <head>
   <title>آموزش پیشرفته امنیت — پارسی‌کیت</title>
   <meta name="description" content="راهنمای جامع امنیت داده‌ها در پارسی‌کیت" />
+  <meta property="og:locale" content="fa_IR" />
   <link rel="canonical" href="${TEST_VERIFIED_ORIGIN}/fa/tutorials/advanced-security" />
   <link rel="alternate" hreflang="en" href="${TEST_VERIFIED_ORIGIN}/en/tutorials/advanced-security" />
   <link rel="alternate" hreflang="fa" href="${TEST_VERIFIED_ORIGIN}/fa/tutorials/advanced-security" />
@@ -817,6 +828,7 @@ test('validator scenario 31: local development dist without domain passes local 
 <head>
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website" />
+  <meta property="og:locale" content="en_US" />
 </head>
 <body><h1>ParsiKit</h1></body>
 </html>`;
@@ -828,6 +840,7 @@ test('validator scenario 31: local development dist without domain passes local 
 <head>
   <title>پارسی‌کیت</title>
   <meta name="description" content="مستندات" />
+  <meta property="og:locale" content="fa_IR" />
 </head>
 <body><h1>پارسی‌کیت</h1></body>
 </html>`;
@@ -887,3 +900,111 @@ test('validator scenario 33: getVerifiedSiteUrl rejects unverified and temporary
     process.env.SITE_URL = originalEnv;
   }
 });
+
+// Scenario 34: Configuration conflict between SITE_URL and VITE_SITE_URL
+test('validator scenario 34: throws error when SITE_URL and VITE_SITE_URL conflict', () => {
+  const origSite = process.env.SITE_URL;
+  const origVite = process.env.VITE_SITE_URL;
+  try {
+    process.env.SITE_URL = 'https://domain-a.org';
+    process.env.VITE_SITE_URL = 'https://domain-b.org';
+    assert.throws(() => getVerifiedSiteUrl(), /Configuration conflict: SITE_URL.*and VITE_SITE_URL.*do not match/);
+  } finally {
+    process.env.SITE_URL = origSite;
+    process.env.VITE_SITE_URL = origVite;
+  }
+});
+
+// Scenario 35: Configuration conflict between BASE_PATH and VITE_BASE_PATH
+test('validator scenario 35: throws error when BASE_PATH and VITE_BASE_PATH conflict', () => {
+  const origBase = process.env.BASE_PATH;
+  const origViteBase = process.env.VITE_BASE_PATH;
+  try {
+    process.env.BASE_PATH = '/path-one';
+    process.env.VITE_BASE_PATH = '/path-two';
+    assert.throws(() => getDeploymentBasePath(), /Configuration conflict: BASE_PATH.*and VITE_BASE_PATH.*do not match/);
+  } finally {
+    process.env.BASE_PATH = origBase;
+    process.env.VITE_BASE_PATH = origViteBase;
+  }
+});
+
+// Scenario 36: Rejection of embedded credentials in SITE_URL
+test('validator scenario 36: rejects embedded credentials in origin URL', () => {
+  assert.equal(validateAndNormalizeOrigin('https://user:pass@example.com'), undefined);
+  assert.equal(validateAndNormalizeOrigin('https://admin@example.com'), undefined);
+});
+
+// Scenario 37: Rejection of unsupported protocols and schemes
+test('validator scenario 37: rejects unsupported protocols and schemes', () => {
+  assert.equal(validateAndNormalizeOrigin('ftp://example.com'), undefined);
+  assert.equal(validateAndNormalizeOrigin('javascript:alert(1)'), undefined);
+  assert.equal(validateAndNormalizeOrigin('file:///etc/passwd'), undefined);
+  assert.equal(validateAndNormalizeOrigin('data:text/html,test'), undefined);
+});
+
+// Scenario 38: Rejection of IPv4 and IPv6 loopback addresses
+test('validator scenario 38: rejects loopback addresses in origin URL', () => {
+  assert.equal(validateAndNormalizeOrigin('http://127.0.0.1:8080'), undefined);
+  assert.equal(validateAndNormalizeOrigin('http://0.0.0.0'), undefined);
+  assert.equal(validateAndNormalizeOrigin('http://[::1]'), undefined);
+  assert.equal(validateAndNormalizeOrigin('http://localhost'), undefined);
+  assert.equal(validateAndNormalizeOrigin('http://sub.localhost'), undefined);
+});
+
+// Scenario 39: Rejection of fabricated commercial fields in JSON-LD
+test('validator scenario 39: rejects fabricated commercial offers in JSON-LD', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc39-'));
+  try {
+    createBaseValidDist(tmpDir);
+    const badJsonLdHtml = fs.readFileSync(path.join(tmpDir, 'en/index.html'), 'utf-8')
+      .replace(
+        '</head>',
+        '<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ParsiKit","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"name":"Ali Kamrani"}}</script></head>'
+      );
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), badJsonLdHtml);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes("Fabricated or invented commercial fields ('offers' / 'aggregateRating') found in JSON-LD")));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 40: Base path enforcement on root-relative references
+test('validator scenario 40: rejects root-relative links lacking configured base path', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc40-'));
+  try {
+    createBaseValidDist(tmpDir);
+    // Add an internal anchor with /en without /subpath when base path is /subpath
+    const badHtml = fs.readFileSync(path.join(tmpDir, 'en/index.html'), 'utf-8')
+      .replace('</body>', '<a href="/en/docs/installation">Missing Base Path</a></body>');
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), badHtml);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN, basePath: '/subpath' });
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes('does not respect configured base path (/subpath): \'/en/docs/installation\'')));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 41: OpenGraph og:locale tag validation and mismatch detection
+test('validator scenario 41: detects missing or mismatched og:locale in localized pages', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc41-'));
+  try {
+    createBaseValidDist(tmpDir);
+    // fa/index.html has mismatched locale en_US instead of fa_IR
+    const badFaHtml = fs.readFileSync(path.join(tmpDir, 'fa/index.html'), 'utf-8')
+      .replace('content="fa_IR"', 'content="en_US"');
+    fs.writeFileSync(path.join(tmpDir, 'fa/index.html'), badFaHtml);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, false);
+    assert.ok(report.errors.some((e) => e.includes("og:locale mismatch in fa/index.html: expected 'fa_IR', found 'en_US'")));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+

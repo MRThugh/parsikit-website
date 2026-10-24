@@ -65,3 +65,8 @@ jobs:
           test -f dist/es/index.html || (echo "Missing dist/es/index.html redirect stub" && exit 1)
           grep -q "http-equiv=\"refresh\"" dist/es/index.html || (echo "dist/es/index.html must be a redirect stub" && exit 1)
           echo "All 4 active locales, robots, and legacy Spanish redirect verified!"
+
+      - name: Validate Production Build Dry-Run (With Test Origin)
+        run: |
+          SITE_URL=https://test.example.org npm run build
+          SITE_URL=https://test.example.org npm run validate:production

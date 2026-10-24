@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+import { getDeploymentBasePath } from '../config/site';
 
 export function escapeHtml(str: string): string {
   return str
@@ -174,8 +175,12 @@ export function resolveRelativeDocLink(
   let resolvedSlug: string;
 
   // Handle root-relative link (e.g. /docs/installation or /fa/docs/installation)
+  const basePath = getDeploymentBasePath();
   if (rawPath.startsWith('/')) {
     let clean = rawPath.replace(/^\/+/, '');
+    if (basePath && clean.startsWith(basePath.replace(/^\/+/, ''))) {
+      clean = clean.slice(basePath.replace(/^\/+/, '').length).replace(/^\/+/, '');
+    }
     for (const l of ['fa', 'en', 'prs-af', 'tg']) {
       if (clean.startsWith(`${l}/docs/`)) {
         clean = clean.slice(`${l}/docs/`.length);
@@ -220,7 +225,7 @@ export function resolveRelativeDocLink(
 
   const suffix = `${queryPart}${hashPart}`;
   if (lang) {
-    return `/${lang}/docs/${resolvedSlug}${suffix}`;
+    return `${basePath}/${lang}/docs/${resolvedSlug}${suffix}`;
   }
   return `${resolvedSlug}${suffix}`;
 }

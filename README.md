@@ -118,7 +118,7 @@ npm run dev
 # 3. Synchronize documentation & metadata from repository sources
 npm run sync:docs
 
-# 4. Run automated test suite (70 unit, security, i18n, routing, domain safety, and validator fixture tests)
+# 4. Run automated test suite (79 unit, security, i18n, routing, domain safety, and validator fixture tests)
 npm test
 
 # 5. Type-check codebase with strict TypeScript
@@ -131,13 +131,53 @@ npm run build
 npm run validate
 
 # 8. Build and validate for production deployment (with verified origin)
-# Set SITE_URL (and BASE_PATH if deploying to a GitHub Pages subpath e.g. /parsikit-website)
-SITE_URL=https://your-domain.com npm run build
-npm run validate:production
+# Standard GitHub Pages project site:
+SITE_URL=https://mrthugh.github.io BASE_PATH=/parsikit-website npm run build
+SITE_URL=https://mrthugh.github.io BASE_PATH=/parsikit-website npm run validate:production
+
+# Optional custom domain deployment (if apex/root domain configured):
+SITE_URL=https://your-custom-domain.example BASE_PATH= npm run build
+SITE_URL=https://your-custom-domain.example BASE_PATH= npm run validate:production
 
 # 9. Preview production build locally
 npm run preview
 ```
+
+---
+
+## ⚙️ Environment Configuration & Deployment Architecture
+
+### 1. Authoritative Configuration: `SITE_URL` vs `BASE_PATH`
+
+| Variable | Description | Standard GitHub Pages Example | Custom Domain (Optional) |
+|---|---|---|---|
+| `SITE_URL` | The verified public **ORIGIN** (scheme + hostname + port). Never includes subpaths. Never use unverified domains. | `https://mrthugh.github.io` | `https://your-custom-domain.example` |
+| `BASE_PATH` | The subpath under which the application is mounted. | `/parsikit-website` | `""` (empty for root) |
+
+- **Local Development & Offline Builds**: When `SITE_URL` is omitted, the build and dev server function with 100% feature completeness. Domain-dependent production SEO artifacts (`sitemap.xml`, absolute `canonicalUrl`, absolute `og:url`) are safely omitted to prevent publishing fabricated or incorrect URLs.
+- **Strict Production Enforcement**: `npm run validate:production` rejects builds that lack a verified production origin, ensuring that unconfigured environments never deploy silent regressions.
+- **Conflict Prevention**: If both standard and Vite-prefixed variables are set (e.g., `SITE_URL` and `VITE_SITE_URL`), their normalized values must match or the build system halts with a configuration error.
+
+### 2. GitHub Pages Project Site Setup (Owner Action)
+
+To enable automated deployments via GitHub Actions (`.github/workflows/deploy.yml`), set the following repository variables in **GitHub Settings > Secrets and variables > Actions > Variables**:
+
+- **Repository Variable**: `SITE_URL` = `https://mrthugh.github.io`
+- **Repository Variable**: `BASE_PATH` = `/parsikit-website`
+
+*(If and only if you configure an apex custom domain in GitHub Pages settings, set `SITE_URL=https://your-custom-domain.example` and `BASE_PATH=`)*.
+
+### 3. Hosting Limitations & Search Engine Setup
+
+- **GitHub Pages Limitation for `robots.txt`**: When deploying to a GitHub Pages project site (`https://mrthugh.github.io/parsikit-website/`), `robots.txt` is served at `https://mrthugh.github.io/parsikit-website/robots.txt`. However, search engine crawlers (Googlebot, Bingbot) request `/robots.txt` exclusively from the origin root (`https://mrthugh.github.io/robots.txt`).
+- **Recommended Search Console Setup**:
+  1. Add a **URL-prefix property** for `https://mrthugh.github.io/parsikit-website/` in [Google Search Console](https://search.google.com/search-console).
+  2. Explicitly submit the sitemap URL: `https://mrthugh.github.io/parsikit-website/sitemap.xml`.
+  3. (Optional) If an apex domain is mapped to the repository, `robots.txt` is served directly at root `/robots.txt`.
+
+### 4. Machine-Readable LLM Summary (`public/llms.txt`)
+
+The repository maintains an authoritative, up-to-date `public/llms.txt` file detailing ParsiKit's architectural capabilities, Python standard library parity, module APIs (`parsikit.text`, `parsikit.validators`, `parsikit.datetime`, `parsikit.number_and_currency`, `parsikit.security`, `parsikit.cache`), and official multilingual documentation links without any unverified website domains.
 
 ---
 
@@ -146,3 +186,4 @@ npm run preview
 Distributed under the **MIT License**.  
 Crafted with dedication for the Persian open-source developer ecosystem by **Ali Kamrani (علی کامرانی)**.  
 Official Repository: [https://github.com/MRThugh/ParsiKit](https://github.com/MRThugh/ParsiKit)
+

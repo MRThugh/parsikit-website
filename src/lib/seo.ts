@@ -288,6 +288,17 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
   const ogImage = document.querySelector('meta[property="og:image"]');
   if (ogImage && meta.ogImage) ogImage.setAttribute('content', meta.ogImage);
 
+  const ogImageAlt = document.querySelector('meta[property="og:image:alt"]');
+  if (ogImageAlt) ogImageAlt.setAttribute('content', meta.title);
+
+  let ogLocale = document.querySelector('meta[property="og:locale"]');
+  if (!ogLocale) {
+    ogLocale = document.createElement('meta');
+    ogLocale.setAttribute('property', 'og:locale');
+    document.head.appendChild(ogLocale);
+  }
+  ogLocale.setAttribute('content', loc.ogLocale);
+
   // Twitter
   const twTitle = document.querySelector('meta[name="twitter:title"]');
   if (twTitle) twTitle.setAttribute('content', meta.title);
@@ -297,6 +308,9 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
 
   const twImage = document.querySelector('meta[name="twitter:image"]');
   if (twImage && meta.twitterImage) twImage.setAttribute('content', meta.twitterImage);
+
+  const twImageAlt = document.querySelector('meta[name="twitter:image:alt"]');
+  if (twImageAlt) twImageAlt.setAttribute('content', meta.title);
 
   // Canonical link: strictly ONLY set when a verified canonicalUrl is computed
   let canonicalTag = document.querySelector('link[rel="canonical"]');

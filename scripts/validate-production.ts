@@ -472,18 +472,42 @@ export function validateDistArtifacts(
       report.errors.push(
         `Duplicate JSON-LD structured data blocks found in ${relPath} (${jsonLdMatches.length} blocks found)`
       );
-    } else if (jsonLdMatches.length === 1) {
+    }
+    for (const match of jsonLdMatches) {
       try {
-        const parsed = JSON.parse(jsonLdMatches[0][1]);
+        const parsed = JSON.parse(match[1]);
         if (parsed['@context'] !== 'https://schema.org') {
           report.errors.push(
             `JSON-LD @context in ${relPath} must be 'https://schema.org', found '${parsed['@context']}'`
           );
         }
+        const jsonStr = match[1];
+        if (jsonStr.includes('"offers"') || jsonStr.includes('"aggregateRating"')) {
+          report.errors.push(
+            `Fabricated or invented commercial fields ('offers' / 'aggregateRating') found in JSON-LD in ${relPath}`
+          );
+        }
+        if (!jsonStr.includes('Ali Kamrani') && !jsonStr.includes('MRThugh')) {
+          report.errors.push(`JSON-LD in ${relPath} must reference authentic author Ali Kamrani`);
+        }
       } catch (err: any) {
         report.errors.push(`Malformed JSON-LD syntax in ${relPath}: ${err.message}`);
       }
     }
+
+
+    // Validate OpenGraph Locale
+    if (loc && relPath !== 'index.html') {
+      const ogLocaleMatch = html.match(/<meta property="og:locale" content="(.*?)" \/>/);
+      if (!ogLocaleMatch) {
+        report.errors.push(`Missing og:locale declaration in ${relPath}`);
+      } else if (ogLocaleMatch[1] !== loc.ogLocale) {
+        report.errors.push(
+          `og:locale mismatch in ${relPath}: expected '${loc.ogLocale}', found '${ogLocaleMatch[1]}'`
+        );
+      }
+    }
+
 
     // Validate Social Media Images (og:image & twitter:image)
     const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)" \/>/);
@@ -797,6 +821,16 @@ function validateReference(
 
   // Strip query string and fragment before checking filesystem
   let cleanPath = decodeURIComponent(rawRef.split(/[?#]/)[0]);
+
+  // If a base path is configured, verify root-relative references include it
+  if (basePath && cleanPath.startsWith('/')) {
+    if (!cleanPath.startsWith(basePath)) {
+      report.errors.push(
+        `Internal ${kind} reference in ${sourceHtmlRelPath} does not respect configured base path (${basePath}): '${rawRef}'`
+      );
+      return;
+    }
+  }
 
   // Strip basePath if present (for project deployments like /parsikit-website)
   if (basePath && cleanPath.startsWith(basePath)) {

@@ -9,7 +9,7 @@ import {
   resolveDocument,
   VALID_LANGS,
 } from '../lib/router';
-import { computePageMetadata, updateDocumentHead } from '../lib/seo';
+import { computePageMetadata, updateDocumentHead, getDeploymentBasePath } from '../lib/seo';
 import { LOCALES, isRtlPrefix } from '../i18n/config';
 
 interface AppContextType {
@@ -120,9 +120,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     const newPath = buildRoutePath(effectiveLang, finalRoute, effectiveSlug, options);
+    const fullBrowserPath = `${getDeploymentBasePath()}${newPath}`;
 
-    if (typeof window !== 'undefined' && window.location.pathname + window.location.search + window.location.hash !== newPath) {
-      window.history.pushState(null, '', newPath);
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname + window.location.search + window.location.hash !== fullBrowserPath
+    ) {
+      window.history.pushState(null, '', fullBrowserPath);
     }
 
     if (targetLang && targetLang !== lang) {
