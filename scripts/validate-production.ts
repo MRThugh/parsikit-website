@@ -226,10 +226,12 @@ export function validateDistArtifacts(
       process.argv.includes('--require-origin'));
 
   // 1. Critical Audit: Ensure unauthorized origin NEVER appears in ANY generated artifact
+  // (Distinguish website origin e.g. https://parsikit.dev or //parsikit.dev from Python module parsikit.dev)
+  const unauthorizedUrlPattern = /(?:https?:)?\/\/(?:[a-zA-Z0-9-]+\.)*parsikit\.dev\b/i;
   const allDistFiles = getAllFiles(distDir);
   for (const file of allDistFiles) {
     const rel = path.relative(distDir, file).replace(/\\/g, '/');
-    // Check text-based artifacts for hardcoded unauthorized domain
+    // Check text-based artifacts for hardcoded unauthorized website domain
     if (
       rel.endsWith('.html') ||
       rel.endsWith('.xml') ||
@@ -239,13 +241,21 @@ export function validateDistArtifacts(
     ) {
       try {
         const content = fs.readFileSync(file, 'utf-8');
-        if (content.includes('https://parsikit.dev') || content.includes('http://parsikit.dev')) {
+        if (unauthorizedUrlPattern.test(content)) {
           report.errors.push(
             `Unauthorized domain 'parsikit.dev' found in generated artifact: ${rel}`
           );
         }
       } catch {}
     }
+  }
+
+  // 1b. Ensure static sitemap was NOT accidentally reintroduced into public/
+  const publicSitemapPath = path.resolve(distDir, '../public/sitemap.xml');
+  if (fs.existsSync(publicSitemapPath)) {
+    report.errors.push(
+      'Static sitemap detected in source tree (public/sitemap.xml)! Sitemap generation must remain exclusively dynamic in scripts/prerender.ts.'
+    );
   }
 
   // 2. Verified Production Origin Check
@@ -510,11 +520,24 @@ export function validateDistArtifacts(
 
 
     // Validate Social Media Images (og:image & twitter:image)
+    const expectedPrefix = `${siteUrl}${basePath}`;
     const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)" \/>/);
     if (ogImageMatch && siteUrl) {
       const imgUrl = ogImageMatch[1];
       if (!imgUrl.startsWith('https://')) {
         report.errors.push(`og:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
+      } else if (!imgUrl.startsWith(`${expectedPrefix}/`)) {
+        report.errors.push(
+          `og:image in ${relPath} does not match verified origin and base path (${expectedPrefix}): ${imgUrl}`
+        );
+      } else {
+        const assetRel = imgUrl.slice(`${expectedPrefix}/`.length);
+        const assetDistPath = path.join(distDir, assetRel);
+        if (!fs.existsSync(assetDistPath)) {
+          report.errors.push(
+            `og:image target in ${relPath} not found in dist: ${imgUrl} (checked ${assetDistPath})`
+          );
+        }
       }
     }
     const twImageMatch = html.match(/<meta name="twitter:image" content="(.*?)" \/>/);
@@ -522,6 +545,18 @@ export function validateDistArtifacts(
       const imgUrl = twImageMatch[1];
       if (!imgUrl.startsWith('https://')) {
         report.errors.push(`twitter:image in ${relPath} must be an absolute HTTPS URL: ${imgUrl}`);
+      } else if (!imgUrl.startsWith(`${expectedPrefix}/`)) {
+        report.errors.push(
+          `twitter:image in ${relPath} does not match verified origin and base path (${expectedPrefix}): ${imgUrl}`
+        );
+      } else {
+        const assetRel = imgUrl.slice(`${expectedPrefix}/`.length);
+        const assetDistPath = path.join(distDir, assetRel);
+        if (!fs.existsSync(assetDistPath)) {
+          report.errors.push(
+            `twitter:image target in ${relPath} not found in dist: ${imgUrl} (checked ${assetDistPath})`
+          );
+        }
       }
     }
 
@@ -750,7 +785,9 @@ export function validateDistArtifacts(
 
   // 8. Audit site.webmanifest
   const manifestPath = path.join(distDir, 'site.webmanifest');
-  if (fs.existsSync(manifestPath)) {
+  if (!fs.existsSync(manifestPath)) {
+    report.errors.push('Missing site.webmanifest in dist!');
+  } else {
     try {
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
       if (!manifest.name || !manifest.name.trim()) {
@@ -759,12 +796,52 @@ export function validateDistArtifacts(
       if (!manifest.short_name || !manifest.short_name.trim()) {
         report.errors.push('site.webmanifest short_name must be non-empty');
       }
-      if (Array.isArray(manifest.icons)) {
+
+      const expectedPrefix = basePath ? `${basePath}/` : '/';
+
+      if (!manifest.start_url) {
+        report.errors.push('site.webmanifest missing start_url');
+      } else if (manifest.start_url !== expectedPrefix) {
+        report.errors.push(
+          `site.webmanifest start_url mismatch for configured base path (${basePath || 'root'}): expected '${expectedPrefix}', found '${manifest.start_url}'`
+        );
+      }
+
+      if (manifest.scope && manifest.scope !== expectedPrefix) {
+        report.errors.push(
+          `site.webmanifest scope mismatch for configured base path (${basePath || 'root'}): expected '${expectedPrefix}', found '${manifest.scope}'`
+        );
+      }
+
+      if (!Array.isArray(manifest.icons) || manifest.icons.length === 0) {
+        report.errors.push('site.webmanifest must declare at least one icon');
+      } else {
         for (const icon of manifest.icons) {
-          const iconRel = icon.src.replace(/^\//, '');
+          if (!icon.src || typeof icon.src !== 'string') {
+            report.errors.push('site.webmanifest icon missing valid src');
+            continue;
+          }
+
+          if (basePath && !icon.src.startsWith(`${basePath}/`)) {
+            report.errors.push(
+              `site.webmanifest icon '${icon.src}' does not respect configured base path (${basePath}): must start with '${basePath}/'`
+            );
+            continue;
+          } else if (!basePath && !icon.src.startsWith('/')) {
+            report.errors.push(
+              `site.webmanifest icon '${icon.src}' must be a root-relative path starting with '/'`
+            );
+            continue;
+          }
+
+          const iconRel = basePath && icon.src.startsWith(basePath)
+            ? icon.src.slice(basePath.length).replace(/^\/+/, '')
+            : icon.src.replace(/^\/+/, '');
           const iconFullPath = path.join(distDir, iconRel);
           if (!fs.existsSync(iconFullPath)) {
-            report.errors.push(`site.webmanifest icon not found in dist: ${icon.src}`);
+            report.errors.push(
+              `site.webmanifest icon not found in dist: ${icon.src} (checked ${iconFullPath})`
+            );
           }
         }
       }

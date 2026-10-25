@@ -19,7 +19,7 @@ export const OFFICIAL_AUTHOR_URL = 'https://github.com/MRThugh';
 export function normalizeBasePath(rawPath: string | undefined): string {
   if (!rawPath) return '';
   const trimmed = String(rawPath).trim();
-  if (trimmed === '/' || !trimmed) return '';
+  if (trimmed === '/' || !trimmed || trimmed === 'undefined' || trimmed === 'null') return '';
   return `/${trimmed.replace(/^\/+/, '').replace(/\/+$/, '')}`;
 }
 

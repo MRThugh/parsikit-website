@@ -3,6 +3,7 @@
   "short_name": "ParsiKit",
   "description": "Production-grade pure Python library for Persian data infrastructure by Ali Kamrani.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#FAF7F2",
   "theme_color": "#126E68",

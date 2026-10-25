@@ -49,7 +49,10 @@ jobs:
 
       - name: Validate Sitemap, Robots & Multilingual Prerendered Outputs
         run: |
+          test ! -f public/sitemap.xml || (echo "Regression: public/sitemap.xml must not exist in source tree!" && exit 1)
+          test ! -f dist/sitemap.xml || (echo "Regression: dist/sitemap.xml must not exist when SITE_URL is unconfigured!" && exit 1)
           test -f dist/robots.txt || (echo "Missing dist/robots.txt" && exit 1)
+          test -f dist/site.webmanifest || (echo "Missing dist/site.webmanifest" && exit 1)
           test -f dist/404.html || (echo "Missing dist/404.html" && exit 1)
           test -f dist/en/index.html || (echo "Missing dist/en/index.html" && exit 1)
           test -f dist/fa/index.html || (echo "Missing dist/fa/index.html" && exit 1)

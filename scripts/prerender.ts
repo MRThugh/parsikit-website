@@ -14,6 +14,7 @@ import {
   OFFICIAL_REPO_URL,
   OFFICIAL_AUTHOR,
 } from '../src/config/site';
+import { buildWebManifest } from '../src/lib/manifest';
 
 function renderHtmlTemplate(
   baseHtml: string,
@@ -740,6 +741,11 @@ Allow: /
     fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
     console.log('Notice: Verified production origin not configured. Domain-dependent production SEO artifacts (sitemap.xml, absolute canonicals) omitted.');
   }
+
+  // Generate base-path aware site.webmanifest in dist/
+  const manifest = buildWebManifest(basePath);
+  fs.writeFileSync(path.join(distDir, 'site.webmanifest'), JSON.stringify(manifest, null, 2) + '\n');
+  console.log(`Prerender complete: generated base-path aware site.webmanifest (start_url: "${manifest.start_url}")`);
 
   console.log(
     `Prerender complete: generated ${routesToPrerender.length} static index.html pages, ${legacySpanishRoutes.length} legacy Spanish HTML fallback redirect stubs (client-side meta-refresh + window.location.replace)!`

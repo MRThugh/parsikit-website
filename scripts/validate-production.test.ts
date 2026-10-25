@@ -10,6 +10,7 @@ import {
   validateAndNormalizeOrigin,
   normalizeBasePath,
 } from '../src/config/site';
+import { buildWebManifest } from '../src/lib/manifest';
 
 const TEST_VERIFIED_ORIGIN = 'https://verified.example.org';
 
@@ -17,12 +18,25 @@ const TEST_VERIFIED_ORIGIN = 'https://verified.example.org';
  * Creates a minimal valid dist/ fixture directory structure.
  * Clean, passes all validation checks with zero errors under TEST_VERIFIED_ORIGIN.
  */
-function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN) {
+function createBaseValidDist(
+  dir: string,
+  origin: string = TEST_VERIFIED_ORIGIN,
+  basePath: string = ''
+) {
+  const normBase = basePath ? `/${basePath.replace(/^\/+|\/+$/g, '')}` : '';
+  const prefix = normBase ? `${normBase}/` : '/';
+  const fullPrefix = origin ? `${origin}${normBase}` : normBase;
+
   // Directories
   fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'fa'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'en/404'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'fa/404'), { recursive: true });
+
+  // Dummy icons & assets in dist root
+  fs.writeFileSync(path.join(dir, 'android-chrome-192x192.png'), 'fake-png');
+  fs.writeFileSync(path.join(dir, 'android-chrome-512x512.png'), 'fake-png');
+  fs.writeFileSync(path.join(dir, 'parsikit-logo.png'), 'fake-logo');
 
   // Root index.html
   const rootHtml = `<!DOCTYPE html>
@@ -30,9 +44,9 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
 <head>
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website and documentation for ParsiKit" />
-  <link rel="canonical" href="${origin}/en" />
-  <link rel="alternate" hreflang="en" href="${origin}/en" />
-  <link rel="alternate" hreflang="fa" href="${origin}/fa" />
+  ${origin ? `<link rel="canonical" href="${fullPrefix}/en" />
+  <link rel="alternate" hreflang="en" href="${fullPrefix}/en" />
+  <link rel="alternate" hreflang="fa" href="${fullPrefix}/fa" />` : ''}
 </head>
 <body><h1>ParsiKit</h1></body>
 </html>`;
@@ -45,9 +59,9 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website and documentation for ParsiKit" />
   <meta property="og:locale" content="en_US" />
-  <link rel="canonical" href="${origin}/en" />
-  <link rel="alternate" hreflang="en" href="${origin}/en" />
-  <link rel="alternate" hreflang="fa" href="${origin}/fa" />
+  ${origin ? `<link rel="canonical" href="${fullPrefix}/en" />
+  <link rel="alternate" hreflang="en" href="${fullPrefix}/en" />
+  <link rel="alternate" hreflang="fa" href="${fullPrefix}/fa" />` : ''}
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ParsiKit","author":{"@type":"Person","name":"Ali Kamrani"}}</script>
 </head>
 <body><h1>English Documentation</h1></body>
@@ -61,9 +75,9 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
   <title>پارسی‌کیت — زیرساخت داده‌های فارسی</title>
   <meta name="description" content="مستندات و وبگاه رسمی پارسی‌کیت" />
   <meta property="og:locale" content="fa_IR" />
-  <link rel="canonical" href="${origin}/fa" />
-  <link rel="alternate" hreflang="en" href="${origin}/en" />
-  <link rel="alternate" hreflang="fa" href="${origin}/fa" />
+  ${origin ? `<link rel="canonical" href="${fullPrefix}/fa" />
+  <link rel="alternate" hreflang="en" href="${fullPrefix}/en" />
+  <link rel="alternate" hreflang="fa" href="${fullPrefix}/fa" />` : ''}
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ParsiKit","author":{"@type":"Person","name":"Ali Kamrani"}}</script>
 </head>
 <body><h1>مستندات فارسی</h1></body>
@@ -104,31 +118,31 @@ function createBaseValidDist(dir: string, origin: string = TEST_VERIFIED_ORIGIN)
   fs.writeFileSync(path.join(dir, 'fa/404/index.html'), fa404Html);
 
   // robots.txt
-  const robotsTxt = `User-agent: *
+  const robotsTxt = origin ? `User-agent: *
 Allow: /
-Sitemap: ${origin}/sitemap.xml
+Sitemap: ${fullPrefix}/sitemap.xml
+` : `User-agent: *
+Allow: /
 `;
   fs.writeFileSync(path.join(dir, 'robots.txt'), robotsTxt);
 
   // sitemap.xml
-  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+  if (origin) {
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${origin}/en</loc>
+    <loc>${fullPrefix}/en</loc>
   </url>
   <url>
-    <loc>${origin}/fa</loc>
+    <loc>${fullPrefix}/fa</loc>
   </url>
 </urlset>`;
-  fs.writeFileSync(path.join(dir, 'sitemap.xml'), sitemapXml);
+    fs.writeFileSync(path.join(dir, 'sitemap.xml'), sitemapXml);
+  }
 
   // site.webmanifest
-  const manifest = {
-    name: 'ParsiKit — Persian Data Infrastructure',
-    short_name: 'ParsiKit',
-    icons: [],
-  };
-  fs.writeFileSync(path.join(dir, 'site.webmanifest'), JSON.stringify(manifest));
+  const manifest = buildWebManifest(basePath);
+  fs.writeFileSync(path.join(dir, 'site.webmanifest'), JSON.stringify(manifest, null, 2));
 }
 
 // ==========================================
@@ -749,7 +763,10 @@ test('validator scenario 27: detects empty name in site.webmanifest', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc27-'));
   try {
     createBaseValidDist(tmpDir);
-    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify({ name: '', short_name: '' }));
+    fs.writeFileSync(
+      path.join(tmpDir, 'site.webmanifest'),
+      JSON.stringify({ name: '', short_name: '', start_url: '/' })
+    );
 
     const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
     assert.equal(report.success, false);
@@ -769,7 +786,8 @@ test('validator scenario 28: detects missing icon declared in site.webmanifest',
       JSON.stringify({
         name: 'ParsiKit',
         short_name: 'ParsiKit',
-        icons: [{ src: '/missing-icon-999.png', sizes: '192x192' }],
+        start_url: '/',
+        icons: [{ src: '/missing-icon-999.png', sizes: '192x192', type: 'image/png' }],
       })
     );
 
@@ -853,7 +871,9 @@ test('validator scenario 31: local development dist without domain passes local 
     fs.writeFileSync(path.join(tmpDir, 'fa/404/index.html'), fa404);
 
     fs.writeFileSync(path.join(tmpDir, 'robots.txt'), 'User-agent: *\nAllow: /\n');
-    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify({ name: 'ParsiKit', short_name: 'ParsiKit' }));
+    fs.writeFileSync(path.join(tmpDir, 'android-chrome-192x192.png'), 'fake-png');
+    fs.writeFileSync(path.join(tmpDir, 'android-chrome-512x512.png'), 'fake-png');
+    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify(buildWebManifest('')));
 
     const report = validateDistArtifacts(tmpDir, { requireVerifiedOrigin: false, siteUrl: undefined });
     assert.equal(report.success, true);
@@ -897,7 +917,8 @@ test('validator scenario 33: getVerifiedSiteUrl rejects unverified and temporary
     process.env.SITE_URL = 'https://my-real-custom-domain.org';
     assert.equal(getVerifiedSiteUrl(), 'https://my-real-custom-domain.org');
   } finally {
-    process.env.SITE_URL = originalEnv;
+    if (originalEnv !== undefined) process.env.SITE_URL = originalEnv;
+    else delete process.env.SITE_URL;
   }
 });
 
@@ -910,8 +931,10 @@ test('validator scenario 34: throws error when SITE_URL and VITE_SITE_URL confli
     process.env.VITE_SITE_URL = 'https://domain-b.org';
     assert.throws(() => getVerifiedSiteUrl(), /Configuration conflict: SITE_URL.*and VITE_SITE_URL.*do not match/);
   } finally {
-    process.env.SITE_URL = origSite;
-    process.env.VITE_SITE_URL = origVite;
+    if (origSite !== undefined) process.env.SITE_URL = origSite;
+    else delete process.env.SITE_URL;
+    if (origVite !== undefined) process.env.VITE_SITE_URL = origVite;
+    else delete process.env.VITE_SITE_URL;
   }
 });
 
@@ -924,8 +947,10 @@ test('validator scenario 35: throws error when BASE_PATH and VITE_BASE_PATH conf
     process.env.VITE_BASE_PATH = '/path-two';
     assert.throws(() => getDeploymentBasePath(), /Configuration conflict: BASE_PATH.*and VITE_BASE_PATH.*do not match/);
   } finally {
-    process.env.BASE_PATH = origBase;
-    process.env.VITE_BASE_PATH = origViteBase;
+    if (origBase !== undefined) process.env.BASE_PATH = origBase;
+    else delete process.env.BASE_PATH;
+    if (origViteBase !== undefined) process.env.VITE_BASE_PATH = origViteBase;
+    else delete process.env.VITE_BASE_PATH;
   }
 });
 
@@ -976,7 +1001,7 @@ test('validator scenario 39: rejects fabricated commercial offers in JSON-LD', (
 test('validator scenario 40: rejects root-relative links lacking configured base path', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc40-'));
   try {
-    createBaseValidDist(tmpDir);
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN, '/subpath');
     // Add an internal anchor with /en without /subpath when base path is /subpath
     const badHtml = fs.readFileSync(path.join(tmpDir, 'en/index.html'), 'utf-8')
       .replace('</body>', '<a href="/en/docs/installation">Missing Base Path</a></body>');
@@ -1007,4 +1032,185 @@ test('validator scenario 41: detects missing or mismatched og:locale in localize
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+// Scenario 42: Static sitemap regression test (public/sitemap.xml must not exist)
+test('validator scenario 42: confirms public/sitemap.xml does not exist in source repository', () => {
+  const publicSitemapPath = path.resolve(process.cwd(), 'public/sitemap.xml');
+  assert.equal(
+    fs.existsSync(publicSitemapPath),
+    false,
+    'Regression detected: public/sitemap.xml must not exist in source tree! Sitemap generation must remain exclusively in scripts/prerender.ts.'
+  );
+});
+
+// Scenario 43: Stale sitemap detection between consecutive builds
+test('validator scenario 43: rejects unverified build when a stale sitemap.xml exists in dist', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc43-'));
+  try {
+    createBaseValidDist(tmpDir, '');
+    // Simulate stale sitemap.xml lingering from an earlier build with origin
+    fs.writeFileSync(path.join(tmpDir, 'sitemap.xml'), '<urlset><url><loc>https://stale.example.org/en</loc></url></urlset>');
+
+    const report = validateDistArtifacts(tmpDir, { requireVerifiedOrigin: false, siteUrl: undefined });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) =>
+        e.includes('sitemap.xml must not be published without a verified production origin configured')
+      )
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 44: Web manifest base-path awareness for Root Deployment (BASE_PATH="")
+test('validator scenario 44: web manifest conforms to root deployment (BASE_PATH="")', () => {
+  const manifest = buildWebManifest('');
+  assert.equal(manifest.start_url, '/');
+  assert.equal(manifest.scope, '/');
+  assert.equal(manifest.icons[0].src, '/android-chrome-192x192.png');
+  assert.equal(manifest.icons[1].src, '/android-chrome-512x512.png');
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc44-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN, '');
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN, basePath: '' });
+    assert.equal(report.success, true);
+    assert.equal(report.errors.length, 0);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 45: Web manifest base-path awareness for GitHub Pages project deployment (BASE_PATH="/parsikit-website")
+test('validator scenario 45: web manifest conforms to project deployment (BASE_PATH="/parsikit-website")', () => {
+  const manifest = buildWebManifest('/parsikit-website');
+  assert.equal(manifest.start_url, '/parsikit-website/');
+  assert.equal(manifest.scope, '/parsikit-website/');
+  assert.equal(manifest.icons[0].src, '/parsikit-website/android-chrome-192x192.png');
+  assert.equal(manifest.icons[1].src, '/parsikit-website/android-chrome-512x512.png');
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc45-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN, '/parsikit-website');
+    const report = validateDistArtifacts(tmpDir, {
+      siteUrl: TEST_VERIFIED_ORIGIN,
+      basePath: '/parsikit-website',
+    });
+    assert.equal(report.success, true);
+    assert.equal(report.errors.length, 0);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 46: Rejects web manifest with root start_url under project deployment
+test('validator scenario 46: rejects manifest start_url mismatch under project deployment', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc46-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN, '/parsikit-website');
+    // Overwrite manifest with wrong root-relative start_url
+    const badManifest = {
+      ...buildWebManifest('/parsikit-website'),
+      start_url: '/',
+    };
+    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify(badManifest, null, 2));
+
+    const report = validateDistArtifacts(tmpDir, {
+      siteUrl: TEST_VERIFIED_ORIGIN,
+      basePath: '/parsikit-website',
+    });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) =>
+        e.includes("site.webmanifest start_url mismatch for configured base path (/parsikit-website): expected '/parsikit-website/', found '/'")
+      )
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 47: Rejects web manifest with un-prefixed icon under project deployment
+test('validator scenario 47: rejects manifest icon lacking base path prefix', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc47-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN, '/parsikit-website');
+    const badManifest = {
+      ...buildWebManifest('/parsikit-website'),
+      icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' }],
+    };
+    fs.writeFileSync(path.join(tmpDir, 'site.webmanifest'), JSON.stringify(badManifest, null, 2));
+
+    const report = validateDistArtifacts(tmpDir, {
+      siteUrl: TEST_VERIFIED_ORIGIN,
+      basePath: '/parsikit-website',
+    });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) =>
+        e.includes("site.webmanifest icon '/android-chrome-192x192.png' does not respect configured base path (/parsikit-website)")
+      )
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 48: Python module parsikit.dev references are NOT falsely classified as unauthorized origin
+test('validator scenario 48: permits Python module parsikit.dev while rejecting parsikit.dev as a website origin', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc48-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+    // Add legitimate Python code / doc reference to parsikit.dev module
+    const pythonModuleHtml = fs.readFileSync(path.join(tmpDir, 'en/index.html'), 'utf-8')
+      .replace('</h1>', '</h1><p>Learn how to use the parsikit.dev module for CLI utilities: <code>from parsikit.dev import DevTools</code></p>');
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), pythonModuleHtml);
+
+    // This should PASS because parsikit.dev is used as a module identifier, not an HTTP/HTTPS URL
+    const passReport = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(passReport.success, true);
+    assert.equal(passReport.errors.length, 0);
+
+    // Now inject unauthorized website origin URL https://parsikit.dev/tools
+    const badOriginHtml = pythonModuleHtml.replace(
+      '</body>',
+      '<a href="https://parsikit.dev/tools">Unauthorized Origin</a></body>'
+    );
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), badOriginHtml);
+
+    const failReport = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(failReport.success, false);
+    assert.ok(
+      failReport.errors.some((e) =>
+        e.includes("Unauthorized domain 'parsikit.dev' found in generated artifact")
+      )
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 49: Social image validation in production (og:image must resolve to physical file)
+test('validator scenario 49: rejects og:image pointing to nonexistent asset file in dist', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc49-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+    // Add og:image pointing to a file that does not exist in dist
+    const badHtml = fs.readFileSync(path.join(tmpDir, 'en/index.html'), 'utf-8')
+      .replace('</head>', `<meta property="og:image" content="${TEST_VERIFIED_ORIGIN}/nonexistent-banner.png" /></head>`);
+    fs.writeFileSync(path.join(tmpDir, 'en/index.html'), badHtml);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) =>
+        e.includes(`og:image target in en/index.html not found in dist: ${TEST_VERIFIED_ORIGIN}/nonexistent-banner.png`)
+      )
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
