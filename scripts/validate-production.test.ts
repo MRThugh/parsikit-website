@@ -44,6 +44,7 @@ function createBaseValidDist(
 <head>
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website and documentation for ParsiKit" />
+  <meta name="google-site-verification" content="oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0" />
   ${origin ? `<link rel="canonical" href="${fullPrefix}/en" />
   <link rel="alternate" hreflang="en" href="${fullPrefix}/en" />
   <link rel="alternate" hreflang="fa" href="${fullPrefix}/fa" />` : ''}
@@ -846,6 +847,7 @@ test('validator scenario 31: local development dist without domain passes local 
 <head>
   <title>ParsiKit — Persian Data Infrastructure</title>
   <meta name="description" content="Official website" />
+  <meta name="google-site-verification" content="oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0" />
   <meta property="og:locale" content="en_US" />
 </head>
 <body><h1>ParsiKit</h1></body>
@@ -1212,5 +1214,111 @@ test('validator scenario 49: rejects og:image pointing to nonexistent asset file
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+// Scenario 50: Verifies homepage contains exact google-site-verification meta tag inside <head>
+test('validator scenario 50: verifies homepage contains exact google-site-verification meta tag inside <head>', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc50-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, true);
+    assert.equal(report.errors.length, 0);
+
+    const rootHtml = fs.readFileSync(path.join(tmpDir, 'index.html'), 'utf-8');
+    assert.ok(
+      rootHtml.includes('<meta name="google-site-verification" content="oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0" />'),
+      'Root homepage must contain exact google-site-verification tag'
+    );
+    const headEndIdx = rootHtml.indexOf('</head>');
+    const tagIdx = rootHtml.indexOf('name="google-site-verification"');
+    assert.ok(tagIdx !== -1 && tagIdx < headEndIdx, 'Tag must be located inside <head>');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 51: Rejects homepage when google-site-verification tag is missing or has incorrect token
+test('validator scenario 51: rejects homepage missing google-site-verification tag or having wrong token', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc51-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+
+    // Case A: Missing tag
+    const strippedHtml = fs.readFileSync(path.join(tmpDir, 'index.html'), 'utf-8')
+      .replace(/<meta name="google-site-verification".*?\/>\s*/, '');
+    fs.writeFileSync(path.join(tmpDir, 'index.html'), strippedHtml);
+
+    const reportMissing = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(reportMissing.success, false);
+    assert.ok(
+      reportMissing.errors.some((e) => e.includes('Missing Google Search Console verification meta tag in homepage index.html'))
+    );
+
+    // Case B: Incorrect token
+    const wrongTokenHtml = fs.readFileSync(path.join(tmpDir, 'index.html'), 'utf-8')
+      .replace('</head>', '<meta name="google-site-verification" content="wrong-token-abc" />\n</head>');
+    fs.writeFileSync(path.join(tmpDir, 'index.html'), wrongTokenHtml);
+
+    const reportWrong = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(reportWrong.success, false);
+    assert.ok(
+      reportWrong.errors.some((e) => e.includes("Invalid Google Search Console verification token in index.html: expected 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0'"))
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 52: Rejects google-site-verification tag placed outside <head>
+test('validator scenario 52: rejects google-site-verification tag placed outside <head>', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc52-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+    // Move tag from <head> to <body>
+    const badPlacementHtml = fs.readFileSync(path.join(tmpDir, 'index.html'), 'utf-8')
+      .replace(/<meta name="google-site-verification".*?\/>\s*/, '')
+      .replace('</body>', '<meta name="google-site-verification" content="oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0" /></body>');
+    fs.writeFileSync(path.join(tmpDir, 'index.html'), badPlacementHtml);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) => e.includes('Google Search Console verification meta tag must be inside <head> before </head> in index.html'))
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+// Scenario 53: Rejects unnecessary duplication of google-site-verification tag on non-homepage pages
+test('validator scenario 53: rejects unnecessary duplication of google-site-verification on non-homepage routes', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'parsikit-sc53-'));
+  try {
+    createBaseValidDist(tmpDir, TEST_VERIFIED_ORIGIN);
+    // Create a non-homepage doc page with the tag inadvertently duplicated
+    fs.mkdirSync(path.join(tmpDir, 'en/docs/quickstart'), { recursive: true });
+    const docWithLeakedTag = `<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <title>Quickstart — ParsiKit</title>
+  <meta name="description" content="Quickstart documentation" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="google-site-verification" content="oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0" />
+  <link rel="canonical" href="${TEST_VERIFIED_ORIGIN}/en/docs/quickstart" />
+</head>
+<body><h1>Quickstart</h1></body>
+</html>`;
+    fs.writeFileSync(path.join(tmpDir, 'en/docs/quickstart/index.html'), docWithLeakedTag);
+
+    const report = validateDistArtifacts(tmpDir, { siteUrl: TEST_VERIFIED_ORIGIN });
+    assert.equal(report.success, false);
+    assert.ok(
+      report.errors.some((e) => e.includes('Unnecessary duplication: Google Search Console verification meta tag should not be present on non-homepage en/docs/quickstart/index.html'))
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 

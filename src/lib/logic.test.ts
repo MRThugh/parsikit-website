@@ -24,7 +24,7 @@ import {
 } from './jalali';
 import { searchDocumentation } from './search';
 import { parseRoutePath, buildRoutePath, checkLegacyRedirect, VALID_LANGS } from './router';
-import { computePageMetadata, BASE_SITE_URL } from './seo';
+import { computePageMetadata, BASE_SITE_URL, GOOGLE_SITE_VERIFICATION_TOKEN } from './seo';
 import { ALL_DOCS } from '../data/docsManifest';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { parsePyprojectData } from '../../scripts/build-docs-manifest';
@@ -216,7 +216,22 @@ test('seo: 4-language metadata and reciprocal hreflang alternate URL generation'
     const docMeta = computePageMetadata('prs-af', 'docs', doc, testOrigin);
     assert.equal(docMeta.schemaType, 'TechArticle');
     assert.ok(docMeta.canonicalUrl?.includes('/prs-af/docs/installation'));
+    assert.equal(docMeta.googleSiteVerification, undefined, 'Docs pages must not have googleSiteVerification');
   }
+
+  // 3. Google Site Verification token: strictly on home route only
+  assert.equal(unconfiguredMeta.googleSiteVerification, GOOGLE_SITE_VERIFICATION_TOKEN);
+  assert.equal(homeMetaEn.googleSiteVerification, GOOGLE_SITE_VERIFICATION_TOKEN);
+  assert.equal(homeMetaTg.googleSiteVerification, GOOGLE_SITE_VERIFICATION_TOKEN);
+
+  const playgroundMeta = computePageMetadata('en', 'playground', null);
+  assert.equal(playgroundMeta.googleSiteVerification, undefined);
+
+  const archMeta = computePageMetadata('en', 'architecture', null);
+  assert.equal(archMeta.googleSiteVerification, undefined);
+
+  const changelogMeta = computePageMetadata('en', 'changelog', null);
+  assert.equal(changelogMeta.googleSiteVerification, undefined);
 });
 
 test('search: documentation queries across multilingual datasets', () => {

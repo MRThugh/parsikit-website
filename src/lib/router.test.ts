@@ -136,6 +136,25 @@ test('router: legacy Spanish redirects preserve query strings and fragments', ()
   assert.equal(parsed.hash, 'docker');
 });
 
+test('seo: computePageMetadata assigns Google Search Console verification exclusively to home route', () => {
+  const homeMetaEn = computePageMetadata('en', 'home', null);
+  const homeMetaFa = computePageMetadata('fa', 'home', null);
+  const homeMetaPrs = computePageMetadata('prs-af', 'home', null);
+  const homeMetaTg = computePageMetadata('tg', 'home', null);
+
+  assert.equal(homeMetaEn.googleSiteVerification, 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0');
+  assert.equal(homeMetaFa.googleSiteVerification, 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0');
+  assert.equal(homeMetaPrs.googleSiteVerification, 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0');
+  assert.equal(homeMetaTg.googleSiteVerification, 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0');
+
+  const doc = ALL_DOCS.find((d) => d.slug === 'api/validators' && d.lang === 'en');
+  assert.equal(computePageMetadata('en', 'docs', doc || null).googleSiteVerification, undefined);
+  assert.equal(computePageMetadata('en', 'playground', null).googleSiteVerification, undefined);
+  assert.equal(computePageMetadata('en', 'architecture', null).googleSiteVerification, undefined);
+  assert.equal(computePageMetadata('en', 'changelog', null).googleSiteVerification, undefined);
+  assert.equal(computePageMetadata('en', 'not-found', null).googleSiteVerification, undefined);
+});
+
 test('seo: computePageMetadata without verified origin omits canonical and alternates', () => {
   const homeMeta = computePageMetadata('en', 'home', null);
   // Without verified origin, no misleading canonical or alternate tags are emitted

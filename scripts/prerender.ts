@@ -16,7 +16,7 @@ import {
 } from '../src/config/site';
 import { buildWebManifest } from '../src/lib/manifest';
 
-function renderHtmlTemplate(
+export function renderHtmlTemplate(
   baseHtml: string,
   lang: AppLang,
   route: PageRoute,
@@ -46,6 +46,12 @@ function renderHtmlTemplate(
     /<meta name="description" content=".*?" \/>/,
     `<meta name="description" content="${meta.description.replace(/"/g, '&quot;')}" />`
   );
+
+  // Google Search Console Verification Meta Tag: Strictly rendered on homepage
+  html = html.replace(/<meta name="google-site-verification"[^>]*\/>\s*/g, '');
+  const googleVerificationTag = meta.googleSiteVerification
+    ? `<meta name="google-site-verification" content="${meta.googleSiteVerification}" />`
+    : '';
 
   // Canonical Tag: Strictly ONLY rendered if a verified origin is configured
   let canonicalTag = '';
@@ -226,6 +232,7 @@ function renderHtmlTemplate(
   const robotsTag = meta.robots ? `<meta name="robots" content="${meta.robots}" />` : '';
 
   const headInjections = [
+    googleVerificationTag,
     meta.canonicalUrl && !html.includes('<link rel="canonical"') ? canonicalTag : '',
     robotsTag,
     alternateEnTag,
@@ -752,4 +759,8 @@ Allow: /
   );
 }
 
-prerender();
+if (process.argv[1] && process.argv[1].endsWith('prerender.ts')) {
+  prerender();
+}
+
+export { prerender };

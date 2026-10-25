@@ -424,6 +424,36 @@ export function validateDistArtifacts(
       report.errors.push(`Missing or empty meta description in ${relPath}`);
     }
 
+    // Validate Google Search Console Verification Meta Tag on Homepage
+    const isHomepage = relPath === 'index.html' || VALID_LANGS.some((l) => relPath === `${l}/index.html`);
+    const gsvMatches = Array.from(html.matchAll(/<meta name="google-site-verification" content="(.*?)" \/>/g));
+
+    if (relPath === 'index.html') {
+      if (gsvMatches.length === 0) {
+        report.errors.push(`Missing Google Search Console verification meta tag in homepage ${relPath}`);
+      } else if (gsvMatches.length > 1) {
+        report.errors.push(`Duplicate Google Search Console verification meta tag in homepage ${relPath}`);
+      } else if (gsvMatches[0][1] !== 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0') {
+        report.errors.push(
+          `Invalid Google Search Console verification token in ${relPath}: expected 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0', found '${gsvMatches[0][1]}'`
+        );
+      } else {
+        const headEndIdx = html.indexOf('</head>');
+        const tagIdx = html.indexOf(gsvMatches[0][0]);
+        if (headEndIdx === -1 || tagIdx === -1 || tagIdx > headEndIdx) {
+          report.errors.push(
+            `Google Search Console verification meta tag must be inside <head> before </head> in ${relPath}`
+          );
+        }
+      }
+    } else if (!isHomepage) {
+      if (gsvMatches.length > 0) {
+        report.errors.push(
+          `Unnecessary duplication: Google Search Console verification meta tag should not be present on non-homepage ${relPath}`
+        );
+      }
+    }
+
     // Validate Canonical URL
     const canonicalMatches = Array.from(html.matchAll(/<link rel="canonical" href="(.*?)" \/>/g));
 

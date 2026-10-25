@@ -28,6 +28,9 @@ export function getBaseSiteUrl(): string {
 // Deprecated export for backwards compatibility with existing imports
 export const BASE_SITE_URL = getBaseSiteUrl();
 
+export const GOOGLE_SITE_VERIFICATION_TOKEN = 'oyr2TvocGA0knI6goWuCRxG1PmQQXYRA4bMbGWNSch0';
+export const GOOGLE_SITE_VERIFICATION = GOOGLE_SITE_VERIFICATION_TOKEN;
+
 export interface SeoMetadata {
   title: string;
   description: string;
@@ -43,6 +46,7 @@ export interface SeoMetadata {
   schemaType: 'SoftwareApplication' | 'TechArticle' | 'WebSite';
   headline?: string;
   robots?: string;
+  googleSiteVerification?: string;
 }
 
 export function computePageMetadata(
@@ -90,7 +94,10 @@ export function computePageMetadata(
     }
   }
 
+  let googleSiteVerification: string | undefined = undefined;
+
   if (route === 'home') {
+    googleSiteVerification = GOOGLE_SITE_VERIFICATION_TOKEN;
     if (lang === 'fa') {
       title = 'پارسی‌کیت — زیرساخت داده‌های فارسی برای پایتون';
       description =
@@ -233,6 +240,7 @@ export function computePageMetadata(
     schemaType,
     headline: activeDoc ? activeDoc.title : undefined,
     robots,
+    googleSiteVerification,
   };
 }
 
@@ -354,6 +362,19 @@ export function updateDocumentHead(meta: SeoMetadata, lang: AppLang) {
   // Remove deprecated Spanish alternate if lingering in DOM
   const lingeringEs = document.querySelector('link[rel="alternate"][hreflang="es"]');
   if (lingeringEs) lingeringEs.remove();
+
+  // Google Search Console verification meta tag (homepage only)
+  let gsvTag = document.querySelector('meta[name="google-site-verification"]');
+  if (meta.googleSiteVerification) {
+    if (!gsvTag) {
+      gsvTag = document.createElement('meta');
+      gsvTag.setAttribute('name', 'google-site-verification');
+      document.head.appendChild(gsvTag);
+    }
+    gsvTag.setAttribute('content', meta.googleSiteVerification);
+  } else if (gsvTag) {
+    gsvTag.remove();
+  }
 
   // Update html lang & dir
   document.documentElement.lang = loc.locale;
