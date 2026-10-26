@@ -20,7 +20,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseClasses =
-      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]';
+      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]';
 
     const sizeClasses = {
       sm: 'px-3.5 py-2 text-xs gap-1.5',
@@ -30,13 +30,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantClasses = {
       primary:
-        'bg-[#176B65] hover:bg-[#105650] dark:bg-[#69C5B7] dark:hover:bg-[#8AD7CB] text-white dark:text-[#0D1715] font-semibold shadow-sm hover:shadow active:scale-[0.99]',
+        'bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-semibold shadow-sm hover:shadow active:scale-[0.98] border border-[var(--primary)]',
       secondary:
-        'bg-white dark:bg-[#182A26] hover:bg-[#F7F4EC] dark:hover:bg-[#20352F] text-[#202D29] dark:text-[#F0F3EC] border border-[#DCD5C6] dark:border-[#30443D] hover:border-[#C5BCAF] dark:hover:border-[#445D54]',
+        'bg-[var(--surface)] hover:bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] active:scale-[0.98]',
       ghost:
-        'text-[#596760] dark:text-[#B1C0B8] hover:text-[#202D29] dark:hover:text-white hover:bg-[#EFE9DB]/60 dark:hover:bg-[#20352F]/60',
+        'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--primary-surface)]',
       subtle:
-        'bg-[#EFE9DB] dark:bg-[#182A26] hover:bg-[#E5DEC9] dark:hover:bg-[#20352F] text-[#202D29] dark:text-[#F0F3EC] border border-transparent',
+        'bg-[var(--background-secondary)] hover:bg-[var(--border)] text-[var(--text-primary)] border border-transparent',
     };
 
     const widthClass = fullWidth ? 'w-full' : '';

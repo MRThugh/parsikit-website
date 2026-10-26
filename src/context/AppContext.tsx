@@ -76,12 +76,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('parsikit_lang', lang);
   }, [lang, route, activeDoc]);
 
-  // Sync theme without clobbering body classes
+  // Sync theme without clobbering body classes, plus update theme-color meta
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.toggle('dark', theme === 'dark');
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('parsikit_theme', theme);
+
+      // Dynamically update browser theme-color for mobile chrome & desktop status bars
+      const themeColor = theme === 'dark' ? '#0D1715' : '#F7F4EC';
+      const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+      if (metaTags.length > 0) {
+        metaTags.forEach((t) => t.setAttribute('content', themeColor));
+      } else {
+        const meta = document.createElement('meta');
+        meta.setAttribute('name', 'theme-color');
+        meta.setAttribute('content', themeColor);
+        document.head.appendChild(meta);
+      }
     }
   }, [theme]);
 
