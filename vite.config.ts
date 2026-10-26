@@ -4,11 +4,19 @@ import path from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
-  const basePath = process.env.BASE_PATH || process.env.VITE_BASE_PATH || '/';
-  const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+  const ghRepo = process.env.GITHUB_REPOSITORY;
+  const ghRepoBase = ghRepo ? `/${ghRepo.split('/')[1]}` : undefined;
+  const rawBase = process.env.BASE_PATH || process.env.VITE_BASE_PATH || ghRepoBase || '/';
+  const cleanBase = rawBase.trim();
+  const normalizedBase = cleanBase.endsWith('/') ? cleanBase : `${cleanBase}/`;
+  const cleanBasePath = cleanBase === '/' ? '' : cleanBase.replace(/\/+$/, '');
 
   return {
     base: normalizedBase,
+    define: {
+      'process.env.BASE_PATH': JSON.stringify(cleanBasePath),
+      'process.env.VITE_BASE_PATH': JSON.stringify(cleanBasePath),
+    },
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

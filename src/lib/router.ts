@@ -131,6 +131,9 @@ export function parseRoutePath(rawInput: string, overrideBasePath?: string): Rou
   if (deploymentBase && (normalizedPathname === deploymentBase || normalizedPathname.startsWith(`${deploymentBase}/`))) {
     normalizedPathname = normalizedPathname.slice(deploymentBase.length) || '/';
   }
+  if (normalizedPathname === '/parsikit-website' || normalizedPathname.startsWith('/parsikit-website/')) {
+    normalizedPathname = normalizedPathname.slice('/parsikit-website'.length) || '/';
+  }
 
   const legacyTarget = checkLegacyRedirect(normalizedPathname);
   if (legacyTarget) {
@@ -257,6 +260,9 @@ export function parseCurrentUrl(): RouteState {
   if (deploymentBase && (cleanPath === deploymentBase || cleanPath.startsWith(`${deploymentBase}/`))) {
     cleanPath = cleanPath.slice(deploymentBase.length) || '/';
   }
+  if (cleanPath === '/parsikit-website' || cleanPath.startsWith('/parsikit-website/')) {
+    cleanPath = cleanPath.slice('/parsikit-website'.length) || '/';
+  }
   const path = cleanPath.replace(/^\/|\/$/g, '');
   if (!path) {
     const saved = localStorage.getItem('parsikit_lang') as AppLang | null;
@@ -264,7 +270,7 @@ export function parseCurrentUrl(): RouteState {
     return { lang: initialLang, route: 'home' };
   }
 
-  return parseRoutePath(fullUrl);
+  return parseRoutePath(fullUrl, deploymentBase || (window.location.pathname.startsWith('/parsikit-website') ? '/parsikit-website' : undefined));
 }
 
 export function buildRoutePath(

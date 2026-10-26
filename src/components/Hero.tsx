@@ -129,13 +129,15 @@ print(mobile.international)  # Output: '+989121234567'
     { id: 'models' as const, label: lang === 'en' ? 'Domain Models' : lang === 'tg' ? 'Моделҳои объектгаро' : 'مدل‌های شیءگرا', icon: Cpu },
   ];
 
+  const activeSnippet = codeSnippets[activeTab];
+
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28">
-      {/* Subtle backdrop */}
-      <div className="absolute inset-0 bg-iranian-pattern opacity-40 pointer-events-none" />
+      {/* Subtle Persian Girih lattice background */}
+      <div className="absolute inset-0 bg-iranian-pattern opacity-60 pointer-events-none" />
 
-      {/* Subtle Persian turquoise & lapis ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-[#126E68]/15 via-[#1D3D63]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
+      {/* Subtle Persian turquoise & lapis ambient illumination */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[360px] bg-gradient-to-tr from-[#176B65]/12 via-[#1D3D63]/10 to-[#B68A3D]/8 blur-3xl pointer-events-none rounded-full" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -147,35 +149,35 @@ print(mobile.international)  # Output: '+989121234567'
             className="lg:col-span-6 flex flex-col items-start text-left rtl:text-right"
           >
             {/* Unboxed Metadata (Zero-Pill Discipline) */}
-            <div className="flex items-center flex-wrap gap-2 text-xs font-mono text-[#126E68] dark:text-[#52C5BE] mb-4">
-              <span>ParsiKit v{REPO_METADATA.version}</span>
-              <span aria-hidden="true" className="text-stone-300 dark:text-stone-700">·</span>
+            <div className="flex items-center flex-wrap gap-2 text-xs font-mono text-[#176B65] dark:text-[#69C5B7] mb-4">
+              <span className="font-semibold">ParsiKit v{REPO_METADATA.version}</span>
+              <span aria-hidden="true" className="text-[#DCD5C6] dark:text-[#30443D]">·</span>
               <span>Python {REPO_METADATA.pythonRequirement}</span>
-              <span aria-hidden="true" className="text-stone-300 dark:text-stone-700">·</span>
+              <span aria-hidden="true" className="text-[#DCD5C6] dark:text-[#30443D]">·</span>
               <span>Zero Dependencies</span>
-              <span aria-hidden="true" className="text-stone-300 dark:text-stone-700">·</span>
+              <span aria-hidden="true" className="text-[#DCD5C6] dark:text-[#30443D]">·</span>
               <span>{REPO_METADATA.license} License</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-stone-900 dark:text-white leading-[1.18] mb-5">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#202D29] dark:text-[#F0F3EC] leading-[1.18] mb-5">
               {t.hero.headlinePart1}
-              <span className="text-[#126E68] dark:text-[#52C5BE] underline decoration-[#D4A03D]/60 decoration-wavy underline-offset-8">
+              <span className="text-[#176B65] dark:text-[#69C5B7] underline decoration-[#B68A3D]/60 decoration-wavy underline-offset-8">
                 {t.hero.headlineHighlight}
               </span>
               {t.hero.headlinePart2}
             </h1>
 
             {/* Subtitle / Description */}
-            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed mb-8 max-w-xl">
+            <p className="text-base sm:text-lg text-[#596760] dark:text-[#B1C0B8] leading-relaxed mb-8 max-w-xl">
               {t.hero.description}
             </p>
 
             {/* Pip Install Widget */}
             <div className="w-full max-w-md mb-8">
-              <div className="flex items-center justify-between p-2 pl-4 rtl:pl-2 rtl:pr-4 rounded-xl bg-stone-900 text-stone-100 border border-stone-800 shadow-md font-mono text-sm">
+              <div className="flex items-center justify-between p-2 pl-4 rtl:pl-2 rtl:pr-4 rounded-xl bg-[#101D1A] text-[#E6EFEA] border border-[#30443D] shadow-md font-mono text-sm">
                 <div className="flex items-center gap-2 overflow-x-auto" dir="ltr">
-                  <span className="text-[#52C5BE] select-none">$</span>
+                  <span className="text-[#69C5B7] select-none font-bold">$</span>
                   <span className="select-all">pip install parsikit</span>
                 </div>
                 <button
@@ -214,95 +216,60 @@ print(mobile.international)  # Output: '+989121234567'
                 size="md"
                 onClick={() => setRoute('playground')}
               >
-                <Terminal className="w-4 h-4 text-[#126E68] dark:text-[#52C5BE]" />
+                <Terminal className="w-4 h-4 text-[#176B65] dark:text-[#69C5B7]" />
                 <span>{t.hero.livePlayground}</span>
               </Button>
-
-              <a
-                href="https://github.com/MRThugh/ParsiKit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-xl text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors text-sm min-h-[44px]"
-              >
-                <span>GitHub</span>
-                <span className="text-xs opacity-60">↗</span>
-              </a>
-            </div>
-
-            {/* Project Creator Credit */}
-            <div className="mt-8 text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
-              <span>{t.hero.createdBy}</span>
-              <a
-                href="https://github.com/MRThugh"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-stone-800 dark:text-stone-200 hover:text-[#126E68] dark:hover:text-[#52C5BE] underline underline-offset-2"
-              >
-                Ali Kamrani (MRThugh)
-              </a>
             </div>
           </motion.div>
 
-          {/* Right Column: Interactive Code Showcase with Tab Switcher */}
-          <div className="lg:col-span-6 w-full">
-            <div className="rounded-2xl border border-stone-200/90 dark:border-white/10 bg-white/70 dark:bg-[#121917]/90 backdrop-blur-xl shadow-xl overflow-hidden">
-              {/* Tab Bar (Interactive Filter Controls) */}
-              <div className="flex items-center gap-1 p-2 bg-stone-100/80 dark:bg-black/30 border-b border-stone-200 dark:border-white/10 overflow-x-auto">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer min-h-[40px] ${
-                        isActive
-                          ? 'bg-white dark:bg-[#1A2422] text-[#126E68] dark:text-[#52C5BE] shadow-sm font-semibold'
-                          : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Code Surface */}
-              <div className="p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-3 text-xs text-stone-500 dark:text-stone-400">
-                  <span className="font-mono text-stone-700 dark:text-stone-300 font-medium" dir="ltr">
-                    {codeSnippets[activeTab].title}
-                  </span>
-                  <span className="text-[11px] font-mono text-[#D4A03D]">
-                    Python 3.10+
-                  </span>
-                </div>
-
-                <div className="rounded-xl overflow-hidden border border-stone-900/10 dark:border-white/5 bg-[#141B19] text-[#E2E8E7]">
-                  <pre
-                    dir="ltr"
-                    className="p-4 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed text-left"
-                  >
-                    <code>{codeSnippets[activeTab].code}</code>
-                  </pre>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
-                  <span>
-                    {t.hero.purePythonNote}
-                  </span>
+          {/* Right Column: Code Showcase & Feature Tabs */}
+          <motion.div
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:col-span-6 w-full"
+          >
+            {/* Interactive Tab Bar */}
+            <div className="flex items-center gap-1 p-1 bg-[#EFE9DB]/80 dark:bg-[#182A26] rounded-xl border border-[#DCD5C6] dark:border-[#30443D] mb-3 overflow-x-auto">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                const Icon = tab.icon;
+                return (
                   <button
-                    onClick={() => setRoute('playground')}
-                    className="text-[#126E68] dark:text-[#52C5BE] font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer min-h-[38px] ${
+                      isActive
+                        ? 'bg-white dark:bg-[#20352F] text-[#176B65] dark:text-[#69C5B7] shadow-sm font-semibold'
+                        : 'text-[#596760] dark:text-[#B1C0B8] hover:text-[#202D29] dark:hover:text-white'
+                    }`}
                   >
-                    <span>{t.hero.runInBrowser}</span>
-                    <span>→</span>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
                   </button>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
+
+            {/* Code Box */}
+            <div className="rounded-2xl border border-[#DCD5C6] dark:border-[#30443D] bg-[#101D1A] text-[#E6EFEA] shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 bg-[#0A1311] border-b border-[#30443D]/60 text-xs text-stone-400">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 opacity-60">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                  </div>
+                  <span className="font-mono text-stone-300 ml-2">{activeSnippet.title}</span>
+                </div>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#69C5B7]">Python 3.10+</span>
+              </div>
+
+              <pre dir="ltr" className="p-4 sm:p-5 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed text-left text-stone-200">
+                <code>{activeSnippet.code}</code>
+              </pre>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -53,14 +53,18 @@ jobs:
       - name: Build & Prerender Static Site
         run: npm run build
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
-          BASE_PATH: ${{ vars.BASE_PATH }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://mrthugh.github.io' }}
+          VITE_SITE_URL: ${{ vars.SITE_URL || 'https://mrthugh.github.io' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/parsikit-website' }}
+          VITE_BASE_PATH: ${{ vars.BASE_PATH || '/parsikit-website' }}
 
       - name: Validate Production Artifacts
         run: npm run validate:production
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
-          BASE_PATH: ${{ vars.BASE_PATH }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://mrthugh.github.io' }}
+          VITE_SITE_URL: ${{ vars.SITE_URL || 'https://mrthugh.github.io' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/parsikit-website' }}
+          VITE_BASE_PATH: ${{ vars.BASE_PATH || '/parsikit-website' }}
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3

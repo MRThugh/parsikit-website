@@ -2,6 +2,7 @@ import React from 'react';
 import { Database, Zap, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CodeBlock } from './CodeBlock';
+import { Button } from './ui/Button';
 import { getTranslations } from '../i18n/translations';
 
 export function ArchitectureView() {
@@ -46,7 +47,7 @@ class ThreadSafeLRUCache:
         : lang === 'tg'
         ? 'Танзими визуалии матнҳо дар терминал, ташхиси хатогиҳо ва пайвастшавӣ ба абзорҳои графикӣ.'
         : 'Visual terminal alignment (pformat), text debugging, GUI font reshaping, global settings.',
-      color: 'border-l-sky-500',
+      badgeColor: 'text-sky-600 dark:text-sky-400',
     },
     {
       level: 'Layer 3',
@@ -59,7 +60,7 @@ class ThreadSafeLRUCache:
         : lang === 'tg'
         ? 'Моделҳои маълумотӣ бо санҷиши худкор, муайянсозии оператор ва мутобиқат бо Pydantic.'
         : 'Rich value objects (NationalCode, BankCard, MobileNumber, Sheba) with native Pydantic v2 support.',
-      color: 'border-l-[#126E68]',
+      badgeColor: 'text-[var(--primary)]',
     },
     {
       level: 'Layer 2',
@@ -72,7 +73,7 @@ class ThreadSafeLRUCache:
         : lang === 'tg'
         ? 'Алгоритмҳои холиси Python: чексами рақами миллӣ, алгоритми Лун, тақвими шамсӣ ва ададҳо ба калимаҳо.'
         : 'Pure algorithmic transformations: Modulo 11, Luhn, astronomical Jalali calendar, written numbers.',
-      color: 'border-l-[#D4A03D]',
+      badgeColor: 'text-[var(--accent)]',
     },
     {
       level: 'Layer 1',
@@ -85,7 +86,7 @@ class ThreadSafeLRUCache:
         : lang === 'tg'
         ? 'Кеши сареъ барои муҳити бисёрриштагӣ ва идораи хатоҳо бидуни ифшои додаҳои ҳассос.'
         : 'Thread-safe in-memory caching and sanitized Iranian domain exception tree.',
-      color: 'border-l-rose-500',
+      badgeColor: 'text-rose-600 dark:text-rose-400',
     },
   ];
 
@@ -93,20 +94,20 @@ class ThreadSafeLRUCache:
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       {/* Header */}
       <div className="mb-12">
-        <div className="text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
+        <div className="text-xs font-mono font-semibold text-[var(--primary)] uppercase tracking-wider mb-2">
           {t.architecture.principlesTitle}
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-white tracking-tight mb-4">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[var(--text-primary)] tracking-tight mb-4">
           {t.architecture.title}
         </h1>
-        <p className="text-base text-stone-600 dark:text-stone-300 leading-relaxed max-w-3xl">
+        <p className="text-base text-[var(--text-secondary)] leading-relaxed max-w-3xl">
           {t.architecture.subtitle}
         </p>
       </div>
 
       {/* Layer Diagram */}
       <div className="space-y-4 mb-16">
-        <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-4">
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">
           {t.architecture.layersTitle}
         </h2>
 
@@ -114,24 +115,27 @@ class ThreadSafeLRUCache:
           {layers.map((layer) => (
             <div
               key={layer.level}
-              className="p-5 rounded-xl border border-stone-200 dark:border-white/10 bg-white dark:bg-[#141C1A] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-[var(--primary)]/40"
             >
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-xs font-bold text-[#D4A03D]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`font-mono text-xs font-bold ${layer.badgeColor}`}>
                     {layer.level}
                   </span>
-                  <span className="text-stone-300 dark:text-stone-700">·</span>
-                  <span className="font-semibold text-sm text-stone-900 dark:text-white">
+                  <span className="text-[var(--text-muted)]">·</span>
+                  <span className="font-semibold text-sm text-[var(--text-primary)]">
                     {layer.name}
                   </span>
                 </div>
-                <p className="text-xs text-stone-600 dark:text-stone-400">
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   {layer.desc}
                 </p>
               </div>
 
-              <div className="font-mono text-xs text-[#126E68] dark:text-[#52C5BE] shrink-0 bg-[#126E68]/10 dark:bg-[#126E68]/20 px-3 py-1.5 rounded-lg" dir="ltr">
+              <div
+                className="font-mono text-xs text-[var(--primary)] shrink-0 bg-[var(--primary-surface)] border border-[var(--primary)]/15 px-3 py-1.5 rounded-lg"
+                dir="ltr"
+              >
                 {layer.modules}
               </div>
             </div>
@@ -140,23 +144,23 @@ class ThreadSafeLRUCache:
       </div>
 
       {/* Deep-Dive Technical Sections */}
-      <div className="space-y-12">
+      <div className="space-y-8">
         {/* Pillar 1: Zero External Dependencies */}
-        <section className="p-6 sm:p-8 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-[#141C1A]">
+        <section className="p-6 sm:p-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#126E68]/10 dark:bg-[#126E68]/20 flex items-center justify-center text-[#126E68] dark:text-[#52C5BE]">
+            <div className="w-10 h-10 rounded-xl bg-[var(--primary-surface)] border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {isRtl ? '۱. فلسفه صفر وابستگی (Zero Dependencies)' : '1. Zero External Dependencies Philosophy'}
               </h3>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-[var(--text-muted)]">
                 {isRtl ? 'اجرا تنها با کتابخانه استاندارد پایتون (re, math, datetime, typing)' : 'Powered strictly by Python Standard Library'}
               </span>
             </div>
           </div>
-          <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
             {isRtl
               ? 'کتابخانه‌های متفرقه معمولا با نیاز به نصب صدها مگابایت پکیج‌های C/Rust یا کامپایلرهای خارجی، ساخت ایمیج‌های داکر را کند می‌کنند. پارسی‌کیت تمام منطق پردازش حروف یونیکد، تقویم جلالی و محاسبات ریاضی را خالص در پایتون ۳.۱۰+ پیاده‌سازی کرده است.'
               : 'Many localization packages require native C extensions, large binary wheels, or heavy regex engines that complicate lightweight Docker builds. ParsiKit guarantees instant cold starts and minimal container footprint without any external wheel dependencies.'}
@@ -164,21 +168,21 @@ class ThreadSafeLRUCache:
         </section>
 
         {/* Pillar 2: Thread-Safe Caching */}
-        <section className="p-6 sm:p-8 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-[#141C1A]">
+        <section className="p-6 sm:p-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#D4A03D]/10 dark:bg-[#D4A03D]/20 flex items-center justify-center text-[#D4A03D]">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-surface)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)]">
               <Zap className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {isRtl ? '۲. سیستم کش چندنخی (Thread-Safe LRU Cache)' : '2. Thread-Safe In-Memory LRU Cache'}
               </h3>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-[var(--text-muted)]">
                 {isRtl ? 'بهینه‌سازی محاسبات سنگین ریاضی و تاریخی در سرورهای همزمان' : 'Sub-millisecond latency for repetitive transformations'}
               </span>
             </div>
           </div>
-          <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
             {isRtl
               ? 'برای سرویس‌هایی با ترافیک بالا (مانند درگاه‌های پرداخت، فاکتورهای بانکی و فرم‌های ثبت‌نام)، تبدیل مکرر ارقام به حروف و تقویم با قفل اختصاصی پایتون کش می‌شوند تا هیچ پردازش تکراری روی پردازنده تحمیل نشود.'
               : 'High-throughput APIs (such as payment gateways and accounting microservices) benefit from atomic in-memory caching that eliminates redundant date parsing and integer decomposition.'}
@@ -189,21 +193,21 @@ class ThreadSafeLRUCache:
         </section>
 
         {/* Pillar 3: Defensive Security & PII Protection */}
-        <section className="p-6 sm:p-8 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-[#141C1A]">
+        <section className="p-6 sm:p-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {isRtl ? '۳. حفظ امنیت و محرمانگی داده‌ها (PII Protection)' : '3. Defensive PII Security & Safe Exception Logging'}
               </h3>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-[var(--text-muted)]">
                 {isRtl ? 'عدم افشای کدهای ملی و شماره کارت‌ها در لاگ‌ها و ردیابی ارورها' : 'Zero credential exposure in stack traces'}
               </span>
             </div>
           </div>
-          <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
             {isRtl
               ? 'در نسخه ۳.۳.۱، پیام‌های خطای InvalidCardNumberError و InvalidNationalCodeError به صورت کامل پاکسازی شده‌اند تا اگر استثنایی رخ داد و در سیستم‌هایی مانند Sentry لاگ شد، اطلاعات هویتی و مالی کاربر نشت پیدا نکند.'
               : 'In v3.3.1, exception constructors for InvalidCardNumberError and InvalidNationalCodeError sanitize all payload inputs. Raw 16-digit PANs and 10-digit national codes are never exposed to central log aggregators or APM monitoring tools.'}
@@ -213,13 +217,15 @@ class ThreadSafeLRUCache:
 
       {/* Bottom CTA */}
       <div className="mt-16 text-center">
-        <button
+        <Button
+          variant="primary"
+          size="lg"
           onClick={() => navigateToDoc('development/architecture')}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#126E68] text-white font-medium hover:bg-[#0D544F] transition-colors cursor-pointer text-sm"
+          className="inline-flex items-center gap-2"
         >
           <span>{t.architecture.viewInDocs}</span>
           {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-        </button>
+        </Button>
       </div>
     </div>
   );

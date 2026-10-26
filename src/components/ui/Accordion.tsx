@@ -41,7 +41,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpenIndex }: Ac
         return (
           <div
             key={item.id || idx}
-            className="rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-[#141C1A] overflow-hidden transition-all shadow-sm"
+            className="rounded-2xl border border-[#DCD5C6] dark:border-[#30443D] bg-white dark:bg-[#182A26] overflow-hidden transition-all duration-200 shadow-sm"
           >
             <h3>
               <button
@@ -49,13 +49,13 @@ export function Accordion({ items, allowMultiple = false, defaultOpenIndex }: Ac
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => toggle(idx)}
-                className="w-full p-5 text-left rtl:text-right flex items-center justify-between gap-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#126E68]"
+                className="w-full p-5 text-left rtl:text-right flex items-center justify-between gap-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
               >
-                <span className="font-semibold text-sm sm:text-base text-stone-900 dark:text-white">
+                <span className="font-semibold text-sm sm:text-base text-[#202D29] dark:text-[#F0F3EC]">
                   {item.title}
                 </span>
                 <ChevronDown
-                  className={`w-5 h-5 text-stone-400 shrink-0 transition-transform duration-200 ${
+                  className={`w-5 h-5 text-[#596760] dark:text-[#B1C0B8] shrink-0 transition-transform duration-200 ${
                     isOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -74,7 +74,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpenIndex }: Ac
                   transition={MOTION_TRANSITIONS.fast}
                   className="overflow-hidden"
                 >
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed border-t border-stone-100 dark:border-white/5">
+                  <div className="px-5 pb-5 pt-2 text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8] leading-relaxed border-t border-[#DCD5C6]/60 dark:border-[#30443D]/60">
                     {item.content}
                   </div>
                 </motion.div>

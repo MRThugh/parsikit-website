@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   Github,
@@ -11,19 +11,21 @@ import {
   Layers,
   History,
   Languages,
+  Check,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { type PageRoute, type AppLang } from '../lib/router';
 import { LOCALES } from '../i18n/config';
 import { getTranslations } from '../i18n/translations';
-import { MOTION_TRANSITIONS } from '../lib/motion';
 import { REPO_METADATA } from '../data/repoMetadata';
 
 export function Header() {
   const { lang, setLang, theme, toggleTheme, route, setRoute, openSearch, isRtl } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+  const langButtonRef = useRef<HTMLButtonElement>(null);
 
   const t = getTranslations(lang);
 
@@ -65,20 +67,44 @@ export function Header() {
   };
 
   const languagesList: { code: AppLang; label: string; short: string; scriptHint: string }[] = [
-    { code: 'fa', label: LOCALES.fa.nameNative, short: LOCALES.fa.shortCode, scriptHint: 'Perso-Arabic' },
-    { code: 'en', label: LOCALES.en.nameNative, short: LOCALES.en.shortCode, scriptHint: 'Latin' },
-    { code: 'prs-af', label: LOCALES['prs-af'].nameNative, short: LOCALES['prs-af'].shortCode, scriptHint: 'Perso-Arabic (Dari)' },
+    { code: 'fa', label: LOCALES.fa.nameNative, short: LOCALES.fa.shortCode, scriptHint: 'Perso-Arabic (فارسی)' },
+    { code: 'en', label: LOCALES.en.nameNative, short: LOCALES.en.shortCode, scriptHint: 'Latin (English)' },
+    { code: 'prs-af', label: LOCALES['prs-af'].nameNative, short: LOCALES['prs-af'].shortCode, scriptHint: 'Perso-Arabic (دری)' },
     { code: 'tg', label: LOCALES.tg.nameNative, short: LOCALES.tg.shortCode, scriptHint: 'Cyrillic (Тоҷикӣ)' },
   ];
 
+  // Close dropdown on click outside or Escape
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && langMenuOpen) {
+        setLangMenuOpen(false);
+        langButtonRef.current?.focus();
+      }
+    };
+
+    if (langMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [langMenuOpen]);
+
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#FAF7F2]/90 dark:bg-[#0E1413]/90 border-b border-stone-200/80 dark:border-white/10 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Brand / Logo */}
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#F7F4EC]/92 dark:bg-[#0D1715]/92 border-b border-[#DCD5C6]/80 dark:border-[#30443D]/80 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-4">
+        {/* Brand Zone */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2 sm:gap-2.5 text-left rtl:text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#126E68] rounded-xl p-1 transition-opacity hover:opacity-90 cursor-pointer min-h-[44px]"
+            className="flex items-center gap-2 sm:gap-2.5 text-left rtl:text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7] rounded-xl p-1 transition-opacity hover:opacity-90 cursor-pointer min-h-[44px]"
             aria-label="ParsiKit Home"
           >
             <img
@@ -90,14 +116,14 @@ export function Header() {
             />
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1.5">
-                <span className="font-bold text-base sm:text-lg tracking-tight text-stone-900 dark:text-white">
+                <span className="font-bold text-base sm:text-lg tracking-tight text-[#202D29] dark:text-[#F0F3EC]">
                   ParsiKit
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-mono text-[#126E68] dark:text-[#52C5BE]">
+                <span className="text-[10px] sm:text-[11px] font-mono text-[#176B65] dark:text-[#69C5B7] font-semibold">
                   v{REPO_METADATA.version}
                 </span>
               </div>
-              <span className="hidden sm:inline-block text-[10px] text-stone-500 dark:text-stone-400 font-medium leading-none">
+              <span className="hidden sm:inline-block text-[10px] text-[#596760] dark:text-[#B1C0B8] font-medium leading-none">
                 {t.nav.tagline}
               </span>
             </div>
@@ -112,18 +138,18 @@ export function Header() {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`text-sm font-medium transition-colors py-2 relative cursor-pointer min-h-[44px] flex items-center ${
+                className={`text-sm font-medium transition-colors py-2 relative cursor-pointer min-h-[44px] flex items-center whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'text-[#126E68] dark:text-[#52C5BE] font-semibold'
-                    : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
+                    ? 'text-[#176B65] dark:text-[#69C5B7] font-semibold'
+                    : 'text-[#596760] dark:text-[#B1C0B8] hover:text-[#202D29] dark:hover:text-white'
                 }`}
               >
                 <span>{item.label}</span>
                 {isActive && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#126E68] dark:bg-[#52C5BE] rounded-full"
-                    transition={MOTION_TRANSITIONS.spring}
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#176B65] dark:bg-[#69C5B7] rounded-full"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
               </button>
@@ -131,78 +157,95 @@ export function Header() {
           })}
         </nav>
 
-        {/* Actions Cluster: Search, Language Switcher, Theme Toggle, GitHub, Mobile Menu */}
+        {/* Actions Cluster: Search, Animated Language Switcher, Theme Toggle, GitHub, Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Search Trigger */}
           <button
             onClick={openSearch}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-white/5 hover:bg-stone-200/70 dark:hover:bg-white/10 border border-stone-200 dark:border-white/5 transition-colors cursor-pointer min-h-[44px]"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs text-[#596760] dark:text-[#B1C0B8] bg-[#EFE9DB]/70 dark:bg-[#182A26] hover:bg-[#E5DEC9] dark:hover:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] transition-colors cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
             aria-label={t.nav.searchDocs}
           >
             <Search className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline-block">
+            <span className="hidden lg:inline-block whitespace-nowrap">
               {t.nav.searchDocs}
             </span>
-            <kbd className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-black/30 border border-stone-200 dark:border-white/10 text-stone-400">
+            <kbd className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-[#101D1A] border border-[#DCD5C6] dark:border-[#30443D] text-[#7A8C85] dark:text-[#788E84]">
               ⌘K
             </kbd>
           </button>
 
-          {/* 4-Language Selector Dropdown */}
-          <div className="relative">
+          {/* Animated 4-Language Selector Dropdown */}
+          <div className="relative" ref={langMenuRef}>
             <button
+              ref={langButtonRef}
               onClick={() => setLangMenuOpen(!langMenuOpen)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 transition-colors cursor-pointer min-h-[44px]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-[#202D29] dark:text-[#F0F3EC] bg-white/60 dark:bg-[#182A26] hover:bg-[#EFE9DB] dark:hover:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] transition-colors cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
               aria-label="Select Language"
+              aria-haspopup="listbox"
               aria-expanded={langMenuOpen}
             >
-              <Languages className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
-              <span className="font-semibold uppercase">{LOCALES[lang]?.shortCode || lang}</span>
+              <Languages className="w-3.5 h-3.5 text-[#176B65] dark:text-[#69C5B7]" />
+              <span className="font-semibold uppercase tracking-wider">{LOCALES[lang]?.shortCode || lang}</span>
             </button>
 
-            {langMenuOpen && (
-              <div
-                className="absolute top-full mt-2 end-0 w-48 rounded-xl border border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#141B19] shadow-xl p-1.5 z-50 text-xs"
-                onMouseLeave={() => setLangMenuOpen(false)}
-              >
-                <div className="px-2 py-1 text-[10px] font-mono text-stone-400 uppercase tracking-wider border-b border-stone-200/60 dark:border-white/5 mb-1">
-                  {t.nav.language}
-                </div>
-                {languagesList.map((l) => (
-                  <button
-                    key={l.code}
-                    onClick={() => {
-                      setLang(l.code);
-                      setLangMenuOpen(false);
-                    }}
-                    className={`w-full text-start px-2.5 py-2 rounded-lg font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                      lang === l.code
-                        ? 'bg-[#126E68]/10 text-[#126E68] dark:text-[#52C5BE] font-bold'
-                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold">{l.label}</span>
-                      <span className="text-[10px] opacity-60 font-sans">{l.scriptHint}</span>
-                    </div>
-                    <span className="text-[10px] uppercase font-mono px-1 py-0.5 rounded bg-stone-200/60 dark:bg-white/10">
-                      {l.short}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <AnimatePresence>
+              {langMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  role="listbox"
+                  aria-label="Select Language"
+                  className="absolute top-full mt-2 end-0 w-52 rounded-xl border border-[#DCD5C6] dark:border-[#30443D] bg-[#FFFFFF] dark:bg-[#182A26] shadow-xl p-1.5 z-50 text-xs"
+                >
+                  <div className="px-2 py-1 text-[10px] font-mono text-[#7A8C85] dark:text-[#788E84] uppercase tracking-wider border-b border-[#DCD5C6]/60 dark:border-[#30443D] mb-1">
+                    {t.nav.language}
+                  </div>
+                  {languagesList.map((l) => {
+                    const isSelected = lang === l.code;
+                    return (
+                      <button
+                        key={l.code}
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => {
+                          setLang(l.code);
+                          setLangMenuOpen(false);
+                        }}
+                        className={`w-full text-start px-2.5 py-2 rounded-lg font-medium transition-colors flex items-center justify-between cursor-pointer min-h-[40px] ${
+                          isSelected
+                            ? 'bg-[#176B65]/10 text-[#176B65] dark:bg-[#69C5B7]/15 dark:text-[#69C5B7] font-bold'
+                            : 'text-[#202D29] dark:text-[#F0F3EC] hover:bg-[#EFE9DB] dark:hover:bg-[#20352F]'
+                        }`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold">{l.label}</span>
+                          <span className="text-[10px] text-[#596760] dark:text-[#B1C0B8]">{l.scriptHint}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#176B65] dark:text-[#69C5B7]" />}
+                          <span className="text-[10px] uppercase font-mono px-1 py-0.5 rounded bg-[#EFE9DB] dark:bg-[#20352F] text-[#596760] dark:text-[#B1C0B8]">
+                            {l.short}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 rounded-xl text-[#596760] dark:text-[#B1C0B8] bg-white/60 dark:bg-[#182A26] hover:bg-[#EFE9DB] dark:hover:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-[#D4A03D]" />
+              <Sun className="w-4 h-4 text-[#D6B36A]" />
             ) : (
               <Moon className="w-4 h-4 text-[#1D3D63]" />
             )}
@@ -213,7 +256,7 @@ export function Header() {
             href="https://github.com/MRThugh/ParsiKit"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 p-2 rounded-xl text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 transition-colors min-h-[44px] min-w-[44px] justify-center"
+            className="hidden sm:flex items-center gap-1.5 p-2 rounded-xl text-[#202D29] dark:text-[#F0F3EC] bg-white/60 dark:bg-[#182A26] hover:bg-[#EFE9DB] dark:hover:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] transition-colors min-h-[44px] min-w-[44px] justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
             aria-label="GitHub Repository"
           >
             <Github className="w-4 h-4" />
@@ -222,7 +265,7 @@ export function Header() {
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="md:hidden p-2 rounded-xl text-[#202D29] dark:text-[#F0F3EC] bg-white/60 dark:bg-[#182A26] hover:bg-[#EFE9DB] dark:hover:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B65] dark:focus-visible:ring-[#69C5B7]"
             aria-expanded={mobileMenuOpen}
             aria-label={isRtl ? 'منوی اصلی' : 'Toggle main menu'}
           >
@@ -238,8 +281,8 @@ export function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={MOTION_TRANSITIONS.fast}
-            className="md:hidden border-t border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0E1413] px-4 pt-3 pb-5 space-y-1 shadow-lg overflow-hidden"
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden border-t border-[#DCD5C6] dark:border-[#30443D] bg-[#F7F4EC] dark:bg-[#0D1715] px-4 pt-3 pb-5 space-y-1 shadow-lg overflow-hidden"
           >
             {navItems.map((item) => {
               const isActive = route === item.id;
@@ -249,8 +292,8 @@ export function Header() {
                   onClick={() => handleNavClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-colors cursor-pointer min-h-[44px] ${
                     isActive
-                      ? 'bg-[#126E68]/10 text-[#126E68] dark:text-[#52C5BE] font-bold'
-                      : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5'
+                      ? 'bg-[#176B65]/10 text-[#176B65] dark:bg-[#69C5B7]/15 dark:text-[#69C5B7] font-bold'
+                      : 'text-[#202D29] dark:text-[#F0F3EC] hover:bg-[#EFE9DB] dark:hover:bg-[#182A26]'
                   }`}
                 >
                   <span>{item.label}</span>
@@ -259,8 +302,8 @@ export function Header() {
             })}
 
             {/* Mobile language options for all 4 languages */}
-            <div className="pt-3 border-t border-stone-200 dark:border-white/10">
-              <span className="text-xs text-stone-500 block mb-2">{t.nav.language}</span>
+            <div className="pt-3 border-t border-[#DCD5C6] dark:border-[#30443D]">
+              <span className="text-xs text-[#596760] dark:text-[#B1C0B8] block mb-2 font-mono uppercase tracking-wider">{t.nav.language}</span>
               <div className="grid grid-cols-2 gap-2">
                 {languagesList.map((l) => (
                   <button
@@ -269,10 +312,10 @@ export function Header() {
                       setLang(l.code);
                       setMobileMenuOpen(false);
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between min-h-[44px] ${
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between min-h-[44px] transition-colors cursor-pointer ${
                       lang === l.code
-                        ? 'bg-[#126E68] text-white shadow-sm'
-                        : 'bg-stone-200/70 dark:bg-white/10 text-stone-700 dark:text-stone-200'
+                        ? 'bg-[#176B65] text-white dark:bg-[#69C5B7] dark:text-[#0D1715] shadow-sm'
+                        : 'bg-[#EFE9DB] dark:bg-[#182A26] text-[#202D29] dark:text-[#F0F3EC] border border-[#DCD5C6] dark:border-[#30443D]'
                     }`}
                   >
                     <span>{l.label}</span>
@@ -282,12 +325,12 @@ export function Header() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between text-xs text-stone-500">
+            <div className="pt-3 border-t border-[#DCD5C6] dark:border-[#30443D] flex items-center justify-between text-xs text-[#596760] dark:text-[#B1C0B8]">
               <a
                 href="https://github.com/MRThugh/ParsiKit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 py-1 text-stone-700 dark:text-stone-300 min-h-[44px]"
+                className="flex items-center gap-1.5 py-1 text-[#202D29] dark:text-[#F0F3EC] min-h-[44px]"
               >
                 <Github className="w-4 h-4" />
                 <span>MRThugh / ParsiKit</span>

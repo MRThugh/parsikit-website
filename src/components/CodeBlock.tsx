@@ -34,28 +34,28 @@ export function CodeBlock({ code, language = 'python', title, showLineNumbers = 
   const lines = code.trim().split('\n');
 
   return (
-    <div className="my-4 rounded-xl border border-[#126E68]/20 dark:border-white/10 bg-[#141B19] text-[#E2E8E7] overflow-hidden shadow-sm group">
+    <div className="my-4 rounded-xl border border-[#DCD5C6] dark:border-[#30443D] bg-[#ECEFE8] dark:bg-[#101D1A] text-[#1B2925] dark:text-[#E6EFEA] overflow-hidden shadow-sm group transition-colors">
       {/* Top Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[#0E1312] border-b border-white/5 text-xs text-slate-400">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#E1E7DC] dark:bg-[#0A1311] border-b border-[#DCD5C6] dark:border-[#30443D] text-xs text-[#596760] dark:text-[#B1C0B8]">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 opacity-60">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#B68A3D] dark:bg-[#D6B36A] inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#176B65] dark:bg-[#69C5B7] inline-block" />
           </div>
-          {title && <span className="font-mono text-slate-300 ml-2">{title}</span>}
-          {!title && <span className="font-mono uppercase tracking-wider text-[11px] text-[#52C5BE]">{language}</span>}
+          {title && <span className="font-mono text-[#202D29] dark:text-[#F0F3EC] ml-2 font-medium">{title}</span>}
+          {!title && <span className="font-mono uppercase tracking-wider text-[11px] text-[#176B65] dark:text-[#69C5B7] font-semibold">{language}</span>}
         </div>
 
         <button
           onClick={handleCopy}
           aria-label={copied ? (lang === 'fa' ? 'کپی شد' : 'Copied') : (lang === 'fa' ? 'کپی کد' : 'Copy code')}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans text-[#202D29] dark:text-[#F0F3EC] hover:bg-white/60 dark:hover:bg-white/10 transition-colors cursor-pointer min-h-[30px]"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
+              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-emerald-700 dark:text-emerald-400 font-medium">{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
             </>
           ) : (
             <>
@@ -75,7 +75,7 @@ export function CodeBlock({ code, language = 'python', title, showLineNumbers = 
           {lines.map((line, idx) => (
             <div key={idx} className="table-row">
               {showLineNumbers && (
-                <span className="table-cell pr-4 select-none text-slate-600 text-right w-8 text-xs">
+                <span className="table-cell pr-4 select-none text-[#7A8C85] dark:text-[#788E84] text-right w-8 text-xs">
                   {idx + 1}
                 </span>
               )}

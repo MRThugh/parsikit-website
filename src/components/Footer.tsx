@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, ArrowUp, BookOpen, Terminal, Layers, History, Code2 } from 'lucide-react';
+import { Github, ArrowUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { REPO_METADATA } from '../data/repoMetadata';
 import { getTranslations } from '../i18n/translations';
@@ -15,9 +15,9 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-stone-200 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0A0F0E] text-stone-700 dark:text-stone-300 transition-colors">
-      {/* Iranian geometric top decorative bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#126E68] via-[#D4A03D] to-[#1D3D63]" />
+    <footer className="relative border-t border-[#DCD5C6]/80 dark:border-[#30443D]/80 bg-[#F7F4EC] dark:bg-[#0D1715] text-[#596760] dark:text-[#B1C0B8] transition-colors">
+      {/* Persian decorative hairline header bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#176B65] via-[#B68A3D] to-[#1D3D63]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-18">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 mb-12">
@@ -32,16 +32,16 @@ export function Footer() {
                 height="40"
               />
               <div className="flex flex-col">
-                <span className="font-extrabold text-lg text-stone-900 dark:text-white">
+                <span className="font-extrabold text-lg text-[#202D29] dark:text-[#F0F3EC]">
                   ParsiKit
                 </span>
-                <span className="text-xs text-stone-500 font-mono">
+                <span className="text-xs text-[#596760] dark:text-[#B1C0B8] font-mono">
                   v{REPO_METADATA.version} · {REPO_METADATA.license} License
                 </span>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed max-w-sm">
+            <p className="text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8] leading-relaxed max-w-sm">
               {t.footer.description}
             </p>
 
@@ -50,7 +50,7 @@ export function Footer() {
                 href={REPO_METADATA.repository}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-200 transition-colors"
+                className="p-2 rounded-xl bg-[#EFE9DB] dark:bg-[#182A26] hover:bg-[#E5DEC9] dark:hover:bg-[#20352F] text-[#202D29] dark:text-[#F0F3EC] border border-[#DCD5C6] dark:border-[#30443D] transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                 aria-label="GitHub Repository"
               >
                 <Github className="w-4 h-4" />
@@ -60,14 +60,14 @@ export function Footer() {
                 href={REPO_METADATA.pyPiUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-xs font-mono text-stone-700 dark:text-stone-200 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-[#EFE9DB] dark:bg-[#182A26] hover:bg-[#E5DEC9] dark:hover:bg-[#20352F] text-xs font-mono text-[#202D29] dark:text-[#F0F3EC] border border-[#DCD5C6] dark:border-[#30443D] transition-colors min-h-[40px] flex items-center"
               >
                 PyPI: parsikit
               </a>
 
               <button
                 onClick={toggleLang}
-                className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-xs font-medium text-stone-700 dark:text-stone-200 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#EFE9DB] dark:bg-[#182A26] hover:bg-[#E5DEC9] dark:hover:bg-[#20352F] text-xs font-medium text-[#202D29] dark:text-[#F0F3EC] border border-[#DCD5C6] dark:border-[#30443D] transition-colors cursor-pointer min-h-[40px] flex items-center"
               >
                 {LOCALES[lang]?.nameNative} ⇄
               </button>
@@ -76,14 +76,14 @@ export function Footer() {
 
           {/* Column 1: Core Navigation */}
           <div className="space-y-3">
-            <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
+            <span className="text-xs font-bold font-mono uppercase tracking-wider text-[#202D29] dark:text-[#F0F3EC] block">
               {t.footer.navHeading}
             </span>
-            <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
+            <ul className="space-y-2 text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8]">
               <li>
                 <button
                   onClick={() => setRoute('home')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.overview}
                 </button>
@@ -91,7 +91,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => setRoute('playground')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.playground}
                 </button>
@@ -99,7 +99,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => setRoute('docs')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.docsHub}
                 </button>
@@ -107,7 +107,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => setRoute('architecture')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.architecture}
                 </button>
@@ -115,7 +115,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => setRoute('changelog')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.changelog}
                 </button>
@@ -125,14 +125,14 @@ export function Footer() {
 
           {/* Column 2: Documentation Highlights */}
           <div className="space-y-3">
-            <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
+            <span className="text-xs font-bold font-mono uppercase tracking-wider text-[#202D29] dark:text-[#F0F3EC] block">
               {t.footer.docsHeading}
             </span>
-            <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
+            <ul className="space-y-2 text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8]">
               <li>
                 <button
                   onClick={() => navigateToDoc('installation')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.installGuide}
                 </button>
@@ -140,7 +140,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('quickstart')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.quickstart}
                 </button>
@@ -148,7 +148,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('tutorials/text_processing')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.textTutorial}
                 </button>
@@ -156,7 +156,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('tutorials/validation')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.validationTutorial}
                 </button>
@@ -164,7 +164,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('tutorials/datetime')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.datetimeTutorial}
                 </button>
@@ -172,7 +172,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('api/index')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.apiReference}
                 </button>
@@ -182,16 +182,16 @@ export function Footer() {
 
           {/* Column 3: Project & Developer */}
           <div className="space-y-3">
-            <span className="text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-white block">
+            <span className="text-xs font-bold font-mono uppercase tracking-wider text-[#202D29] dark:text-[#F0F3EC] block">
               {t.footer.projectHeading}
             </span>
-            <ul className="space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
+            <ul className="space-y-2 text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8]">
               <li>
                 <a
                   href="https://github.com/MRThugh"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors"
                 >
                   Ali Kamrani (MRThugh)
                 </a>
@@ -201,7 +201,7 @@ export function Footer() {
                   href="https://github.com/MRThugh/ParsiKit/issues"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors"
                 >
                   {t.footer.issues}
                 </a>
@@ -209,7 +209,7 @@ export function Footer() {
               <li>
                 <button
                   onClick={() => navigateToDoc('development/contributing')}
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer"
                 >
                   {t.footer.contributing}
                 </button>
@@ -219,7 +219,7 @@ export function Footer() {
                   href="https://opensource.org/licenses/MIT"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors"
+                  className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors"
                 >
                   MIT License
                 </a>
@@ -230,7 +230,7 @@ export function Footer() {
                     href={`${import.meta.env.BASE_URL}sitemap.xml`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors font-mono text-xs"
+                    className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors font-mono text-xs"
                   >
                     sitemap.xml
                   </a>
@@ -241,7 +241,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-stone-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
+        <div className="pt-8 border-t border-[#DCD5C6]/60 dark:border-[#30443D]/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#596760] dark:text-[#B1C0B8]">
           <div>
             <span>© {new Date().getFullYear()} ParsiKit. {t.footer.copyright}</span>
           </div>
@@ -250,7 +250,7 @@ export function Footer() {
             <span className="font-mono">Python &gt;= 3.10</span>
             <button
               onClick={scrollToTop}
-              className="flex items-center gap-1 text-stone-600 dark:text-stone-300 hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-[#202D29] dark:text-[#F0F3EC] hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer min-h-[36px]"
               aria-label={t.footer.backToTop}
             >
               <span>{t.footer.backToTop}</span>

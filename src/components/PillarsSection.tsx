@@ -136,19 +136,19 @@ export function PillarsSection() {
   ];
 
   return (
-    <section className="py-20 md:py-28 border-t border-stone-200/80 dark:border-white/10 bg-[#F7F4ED]/60 dark:bg-[#0C1211]/60">
+    <section className="py-20 md:py-28 border-t border-[#DCD5C6]/80 dark:border-[#30443D]/80 bg-[#EFE9DB]/35 dark:bg-[#12211E]/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
-          <div className="text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
+          <div className="text-xs font-mono text-[#176B65] dark:text-[#69C5B7] uppercase tracking-wider mb-2 font-semibold">
             {isRtl ? 'معماری و قابلیت‌های نسخه ۳.۳.۱' : 'Engineering & Architecture Pillars'}
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-stone-900 dark:text-white leading-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#202D29] dark:text-[#F0F3EC] leading-tight mb-4">
             {isRtl
               ? 'پنج ستون فنی برای توسعه حرفه‌ای با داده‌های زبان فارسی'
               : 'Five Core Architectural Pillars Built for Production'}
           </h2>
-          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-[#596760] dark:text-[#B1C0B8] leading-relaxed">
             {isRtl
               ? 'پارسی‌کیت از اسکریپت‌های ابتدایی عبور کرده و ساختاری استاندارد، ماژولار و امن برای استفاده در سرویس‌های مدرن پایتونی ارائه می‌دهد.'
               : 'Engineered as an enterprise-ready foundation for Python backends (FastAPI, Django, async tasks, and data science pipelines) handling domestic data structures.'}
@@ -162,35 +162,35 @@ export function PillarsSection() {
             return (
               <div
                 key={pillar.num}
-                className="group relative flex flex-col justify-between p-6 rounded-2xl bg-white dark:bg-[#151D1B] border border-stone-200/90 dark:border-white/10 shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
+                className="group relative flex flex-col justify-between p-6 rounded-2xl bg-white dark:bg-[#182A26] border border-[#DCD5C6] dark:border-[#30443D] shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs text-[#D4A03D] font-bold">
+                    <span className="font-mono text-xs text-[#B68A3D] dark:text-[#D6B36A] font-bold">
                       {pillar.num}
                     </span>
-                    <div className="w-8 h-8 rounded-lg bg-[#126E68]/10 dark:bg-[#126E68]/20 flex items-center justify-center text-[#126E68] dark:text-[#52C5BE]">
+                    <div className="w-8 h-8 rounded-lg bg-[#176B65]/10 dark:bg-[#69C5B7]/15 flex items-center justify-center text-[#176B65] dark:text-[#69C5B7]">
                       <Icon className="w-4 h-4" />
                     </div>
                   </div>
 
-                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1" dir="ltr">
+                  <span className="text-[11px] font-mono text-[#596760] dark:text-[#B1C0B8] block mb-1" dir="ltr">
                     {pillar.module}
                   </span>
 
-                  <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-3 group-hover:text-[#126E68] dark:group-hover:text-[#52C5BE] transition-colors">
+                  <h3 className="text-lg font-semibold text-[#202D29] dark:text-[#F0F3EC] mb-3 group-hover:text-[#176B65] dark:group-hover:text-[#69C5B7] transition-colors">
                     {pillar.title}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#596760] dark:text-[#B1C0B8] leading-relaxed">
                     {pillar.desc}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-stone-100 dark:border-white/5">
+                <div className="mt-6 pt-4 border-t border-[#DCD5C6]/60 dark:border-[#30443D]/60">
                   <button
                     onClick={() => navigateToDoc(pillar.docSlug)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#126E68] dark:text-[#52C5BE] hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#176B65] dark:text-[#69C5B7] hover:underline cursor-pointer min-h-[36px]"
                   >
                     <span>{isRtl ? 'مطالعه مستندات مربوطه' : 'Read documentation'}</span>
                     {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}

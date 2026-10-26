@@ -181,23 +181,23 @@ export function DocumentationView() {
   return (
     <div className="relative min-h-screen">
       {/* Reading Progress Indicator */}
-      <div className="fixed top-16 left-0 right-0 z-30 h-0.5 bg-stone-200 dark:bg-white/10">
+      <div className="fixed top-16 left-0 right-0 z-30 h-0.5 bg-[#DCD5C6]/60 dark:bg-[#30443D]/60">
         <div
-          className="h-full bg-[#126E68] dark:bg-[#52C5BE] transition-all duration-150"
+          className="h-full bg-[#176B65] dark:bg-[#69C5B7] transition-all duration-150"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Mobile Sidebar Toggle Button */}
-        <div className="lg:hidden mb-6 flex items-center justify-between p-3 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10">
-          <div className="flex items-center gap-2 text-xs font-medium text-stone-700 dark:text-stone-300">
-            <BookOpen className="w-4 h-4 text-[#126E68]" />
+        <div className="lg:hidden mb-6 flex items-center justify-between p-3 rounded-xl bg-[#EFE9DB]/70 dark:bg-[#182A26] border border-[#DCD5C6] dark:border-[#30443D]">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#202D29] dark:text-[#F0F3EC]">
+            <BookOpen className="w-4 h-4 text-[#176B65] dark:text-[#69C5B7]" />
             <span className="truncate max-w-[200px]">{currentDoc.title}</span>
           </div>
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-black/30 border border-stone-200 dark:border-white/10 cursor-pointer min-h-[36px]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-[#20352F] border border-[#DCD5C6] dark:border-[#30443D] text-[#202D29] dark:text-[#F0F3EC] cursor-pointer min-h-[36px]"
           >
             {mobileSidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             <span>{t.docs.tableOfContents}</span>
@@ -219,8 +219,8 @@ export function DocumentationView() {
 
                 return (
                   <div key={cat.id} className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider text-stone-900 dark:text-stone-200 px-2 py-1">
-                      <Icon className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
+                    <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider text-[#202D29] dark:text-[#F0F3EC] px-2 py-1">
+                      <Icon className="w-3.5 h-3.5 text-[#176B65] dark:text-[#69C5B7]" />
                       <span>{cat.name}</span>
                     </div>
 
@@ -237,8 +237,8 @@ export function DocumentationView() {
                               }}
                               className={`w-full text-left rtl:text-right px-2.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer block truncate min-h-[38px] ${
                                 isActive
-                                  ? 'bg-[#126E68]/15 dark:bg-[#126E68]/25 text-[#126E68] dark:text-[#52C5BE] font-semibold'
-                                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/70 dark:hover:bg-white/5'
+                                  ? 'bg-[#176B65]/10 dark:bg-[#69C5B7]/15 text-[#176B65] dark:text-[#69C5B7] font-bold'
+                                  : 'text-[#596760] dark:text-[#B1C0B8] hover:text-[#202D29] dark:hover:text-[#F0F3EC] hover:bg-[#EFE9DB]/60 dark:hover:bg-[#182A26]'
                               }`}
                             >
                               {doc.title}
@@ -254,32 +254,32 @@ export function DocumentationView() {
           </aside>
 
           {/* Main Content Area */}
-          <main className="lg:col-span-6 xl:col-span-7 bg-white dark:bg-[#131B19] rounded-2xl border border-stone-200 dark:border-white/10 p-6 sm:p-10 shadow-sm">
+          <main className="lg:col-span-6 xl:col-span-7 bg-white dark:bg-[#182A26] rounded-2xl border border-[#DCD5C6] dark:border-[#30443D] p-6 sm:p-10 shadow-sm">
             {/* Breadcrumb Navigation */}
-            <div className="flex items-center gap-2 text-xs text-stone-400 dark:text-stone-500 mb-6 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-[#596760] dark:text-[#B1C0B8] mb-6 flex-wrap">
               <button
                 onClick={() => setActiveDocSlug('index')}
-                className="hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
+                className="hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors"
               >
                 {t.nav.docs}
               </button>
               <ChevronRight className="w-3 h-3 rtl:rotate-180" />
               <span className="capitalize">{getCategoryTitle(currentDoc.category)}</span>
               <ChevronRight className="w-3 h-3 rtl:rotate-180" />
-              <span className="text-stone-700 dark:text-stone-300 font-medium">
+              <span className="text-[#202D29] dark:text-[#F0F3EC] font-semibold">
                 {currentDoc.title}
               </span>
             </div>
 
             {/* Language Counterpart & Actions Bar */}
-            <div className="flex items-center justify-between pb-6 mb-8 border-b border-stone-200 dark:border-white/10 flex-wrap gap-4">
+            <div className="flex items-center justify-between pb-6 mb-8 border-b border-[var(--border)] flex-wrap gap-4">
               <div className="flex items-center gap-2">
                 {currentDoc.counterpartSlug && (
                   <button
                     onClick={toggleLang}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-white/5 hover:bg-[#126E68]/10 transition-colors cursor-pointer min-h-[44px]"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors cursor-pointer min-h-[44px]"
                   >
-                    <Languages className="w-3.5 h-3.5 text-[#126E68] dark:text-[#52C5BE]" />
+                    <Languages className="w-3.5 h-3.5 text-[var(--primary)]" />
                     <span>
                       {isRtl ? 'Read in English / Тоҷикӣ' : 'مطالعه به فارسی و دری'}
                     </span>
@@ -290,7 +290,7 @@ export function DocumentationView() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleShare}
-                  className="p-2 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-white/5 text-xs flex items-center gap-1.5 cursor-pointer min-h-[44px]"
+                  className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--primary-surface)] text-xs flex items-center gap-1.5 cursor-pointer min-h-[44px] transition-colors"
                   title={t.docs.shareLink}
                   aria-label={t.docs.shareLink}
                 >
@@ -340,20 +340,20 @@ export function DocumentationView() {
             />
 
             {/* Next / Previous Document Navigation */}
-            <div className="mt-12 pt-8 border-t border-stone-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mt-12 pt-8 border-t border-[#DCD5C6] dark:border-[#30443D] grid grid-cols-1 sm:grid-cols-2 gap-4">
               {prevDoc ? (
                 <button
                   onClick={() => {
                     setActiveDocSlug(prevDoc.slug);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="p-4 rounded-xl border border-stone-200 dark:border-white/10 hover:border-[#126E68]/40 dark:hover:border-[#52C5BE]/40 text-left rtl:text-right transition-all hover:bg-stone-50 dark:hover:bg-white/5 cursor-pointer flex flex-col justify-between min-h-[72px]"
+                  className="p-4 rounded-xl border border-[#DCD5C6] dark:border-[#30443D] hover:border-[#176B65] dark:hover:border-[#69C5B7] text-left rtl:text-right transition-all hover:bg-[#EFE9DB]/40 dark:hover:bg-[#20352F] cursor-pointer flex flex-col justify-between min-h-[72px]"
                 >
-                  <span className="text-xs text-stone-400 mb-1 flex items-center gap-1">
+                  <span className="text-xs text-[#7A8C85] dark:text-[#788E84] mb-1 flex items-center gap-1">
                     {isRtl ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
                     <span>{t.docs.prevDoc}</span>
                   </span>
-                  <span className="text-sm font-semibold text-stone-900 dark:text-white">
+                  <span className="text-sm font-semibold text-[#202D29] dark:text-[#F0F3EC]">
                     {prevDoc.title}
                   </span>
                 </button>
@@ -365,13 +365,13 @@ export function DocumentationView() {
                     setActiveDocSlug(nextDoc.slug);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="p-4 rounded-xl border border-stone-200 dark:border-white/10 hover:border-[#126E68]/40 dark:hover:border-[#52C5BE]/40 text-right rtl:text-left transition-all hover:bg-stone-50 dark:hover:bg-white/5 cursor-pointer flex flex-col justify-between min-h-[72px]"
+                  className="p-4 rounded-xl border border-[#DCD5C6] dark:border-[#30443D] hover:border-[#176B65] dark:hover:border-[#69C5B7] text-right rtl:text-left transition-all hover:bg-[#EFE9DB]/40 dark:hover:bg-[#20352F] cursor-pointer flex flex-col justify-between min-h-[72px]"
                 >
-                  <span className="text-xs text-stone-400 mb-1 flex items-center justify-end rtl:justify-start gap-1">
+                  <span className="text-xs text-[#7A8C85] dark:text-[#788E84] mb-1 flex items-center justify-end rtl:justify-start gap-1">
                     <span>{t.docs.nextDoc}</span>
                     {isRtl ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </span>
-                  <span className="text-sm font-semibold text-stone-900 dark:text-white">
+                  <span className="text-sm font-semibold text-[#202D29] dark:text-[#F0F3EC]">
                     {nextDoc.title}
                   </span>
                 </button>
@@ -381,25 +381,25 @@ export function DocumentationView() {
 
           {/* Desktop Right Sidebar (In-Page Table of Contents) */}
           <aside className="hidden lg:col-span-3 xl:col-span-2 lg:sticky lg:top-24 lg:block space-y-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-900 dark:text-stone-300 block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#202D29] dark:text-[#F0F3EC] block">
               {t.docs.onThisPage}
             </span>
 
             {currentDoc.headings.length === 0 ? (
-              <span className="text-xs text-stone-400 italic">
+              <span className="text-xs text-[#7A8C85] dark:text-[#788E84] italic">
                 {isRtl ? 'سرتیتر دیگری موجود نیست' : 'No sections'}
               </span>
             ) : (
-              <ul className="space-y-1.5 text-xs text-stone-600 dark:text-stone-400 border-l rtl:border-l-0 rtl:border-r border-stone-200 dark:border-white/10 pl-3 rtl:pl-0 rtl:pr-3">
+              <ul className="space-y-1.5 text-xs text-[#596760] dark:text-[#B1C0B8] border-l rtl:border-l-0 rtl:border-r border-[#DCD5C6] dark:border-[#30443D] pl-3 rtl:pl-0 rtl:pr-3">
                 {currentDoc.headings.map((h) => {
                   const isActive = activeHeadingId === h.id;
                   return (
                     <li key={h.id} style={{ paddingLeft: `${(h.level - 1) * 8}px` }}>
                       <button
                         onClick={() => scrollToHeading(h.id)}
-                        className={`text-left rtl:text-right hover:text-[#126E68] dark:hover:text-[#52C5BE] transition-colors cursor-pointer truncate max-w-full block py-1 ${
+                        className={`text-left rtl:text-right hover:text-[#176B65] dark:hover:text-[#69C5B7] transition-colors cursor-pointer truncate max-w-full block py-1 ${
                           isActive
-                            ? 'text-[#126E68] dark:text-[#52C5BE] font-semibold'
+                            ? 'text-[#176B65] dark:text-[#69C5B7] font-semibold'
                             : ''
                         }`}
                       >

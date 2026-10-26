@@ -145,6 +145,13 @@ export function getDeploymentBasePath(): string {
   if (!envBasePath && !envViteBasePath && typeof import.meta !== 'undefined' && (import.meta as any).env) {
     envBasePath = (import.meta as any).env.BASE_PATH;
     envViteBasePath = (import.meta as any).env.VITE_BASE_PATH;
+    // Check Vite's built-in BASE_URL
+    if (!envBasePath && !envViteBasePath && (import.meta as any).env.BASE_URL) {
+      const viteBase = (import.meta as any).env.BASE_URL;
+      if (viteBase && viteBase !== '/') {
+        envViteBasePath = viteBase;
+      }
+    }
   }
 
   // Check for silent configuration conflict between BASE_PATH and VITE_BASE_PATH
@@ -159,7 +166,24 @@ export function getDeploymentBasePath(): string {
   }
 
   const raw = envViteBasePath || envBasePath;
-  return normalizeBasePath(raw);
+  const normalized = normalizeBasePath(raw);
+  if (normalized) return normalized;
+
+  // Browser runtime fallback: detect GitHub Pages repository subpath automatically
+  if (typeof window !== 'undefined' && window.location) {
+    const pathname = window.location.pathname;
+    if (pathname === '/parsikit-website' || pathname.startsWith('/parsikit-website/')) {
+      return '/parsikit-website';
+    }
+    if (window.location.hostname.endsWith('.github.io')) {
+      const segments = pathname.replace(/^\/+/, '').split('/');
+      if (segments.length > 0 && segments[0] === 'parsikit-website') {
+        return '/parsikit-website';
+      }
+    }
+  }
+
+  return '';
 }
 
 /**

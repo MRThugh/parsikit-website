@@ -67,9 +67,9 @@ export function computePageMetadata(
     : `${basePath || ''}/parsikit-logo.png`;
   const twitterImage = ogImage;
 
-  let title = 'ParsiKit — Persian Data Infrastructure';
+  let title = 'ParsiKit — Persian Data Processing & Validation for Python';
   let description =
-    'Official website and documentation for ParsiKit, a production-grade pure Python library for Persian data infrastructure by Ali Kamrani.';
+    'A Python library for Persian text normalization, Iranian national data validation, Jalali dates, and sensitive personal information masking.';
   let schemaType: SeoMetadata['schemaType'] = 'SoftwareApplication';
 
   // Base alternates for static non-doc routes (all 4 languages guaranteed)
@@ -111,9 +111,9 @@ export function computePageMetadata(
       description =
         'Китобхонаи мустақил барои поксозии матн, танзими фосилаҳо, тафтиши дурустии рақамҳои миллӣ ва кортҳои бонкӣ, тақвими шамсӣ ва ҳисоботи молӣ.';
     } else {
-      title = 'ParsiKit — Persian Data Infrastructure for Python';
+      title = 'ParsiKit — Persian Data Processing & Validation for Python';
       description =
-        'Production-grade, zero-dependency Python library for Persian text normalization, national checksums, astronomical Jalali calendar, financial calculations, and sensitive data masking.';
+        'A Python library for Persian text normalization, Iranian national data validation, Jalali dates, and sensitive personal information masking.';
     }
   } else if (route === 'playground') {
     if (lang === 'fa') {

@@ -145,11 +145,11 @@ function MainContent() {
             </Suspense>
 
             {/* Quickstart Callout Spotlight */}
-            <section className="py-16 md:py-24 border-t border-stone-200/80 dark:border-white/10 bg-[#FAF7F2] dark:bg-[#0D1312]">
+            <section className="py-16 md:py-24 border-t border-[#DCD5C6]/80 dark:border-[#30443D]/80 bg-[#F7F4EC] dark:bg-[#0D1715]">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-br from-[#126E68] to-[#1D3D63] text-white shadow-2xl relative overflow-hidden">
+                <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-br from-[#176B65] via-[#105650] to-[#1D3D63] text-white shadow-2xl relative overflow-hidden">
                   <div className="relative z-10 max-w-2xl">
-                    <span className="text-xs font-mono uppercase tracking-widest text-amber-300 font-bold block mb-2">
+                    <span className="text-xs font-mono uppercase tracking-widest text-[#D6B36A] font-bold block mb-2">
                       {isRtl ? 'آماده برای توسعه و سرورهای پروداکشن' : lang === 'tg' ? 'Омода барои истифодаи расмӣ' : 'Ready for Production'}
                     </span>
                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-4 leading-tight">
@@ -172,7 +172,7 @@ function MainContent() {
                         variant="primary"
                         size="md"
                         onClick={() => navigateToDoc('quickstart')}
-                        className="bg-white text-[#126E68] hover:bg-stone-100 font-bold"
+                        className="bg-white text-[#176B65] hover:bg-[#F7F4EC] font-bold"
                       >
                         {isRtl ? 'مطالعه راهنمای شروع سریع' : lang === 'tg' ? 'Хондани роҳнамои оғоз' : 'Read Quickstart Guide'}
                       </Button>
@@ -193,11 +193,11 @@ function MainContent() {
             {/* FAQ Accordion Section */}
             <section className="py-16 md:py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-1.5 text-xs font-mono text-[#126E68] dark:text-[#52C5BE] uppercase tracking-wider mb-2">
+                <div className="inline-flex items-center gap-1.5 text-xs font-mono text-[#176B65] dark:text-[#69C5B7] uppercase tracking-wider mb-2 font-semibold">
                   <HelpCircle className="w-4 h-4" />
                   <span>{isRtl ? 'پرسش‌های متداول' : lang === 'tg' ? 'Саволҳои маъмул' : 'Frequently Asked Questions'}</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#202D29] dark:text-[#F0F3EC]">
                   {isRtl ? 'سوالات پرتکرار توسعه‌دهندگان' : lang === 'tg' ? 'Саволҳо ва посухҳои асосӣ' : 'Common Questions & Answers'}
                 </h2>
               </div>

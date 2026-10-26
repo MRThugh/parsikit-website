@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Button } from './ui/Button';
-import { Home, BookOpen, Search, HelpCircle, Compass, FileQuestion } from 'lucide-react';
+import { Home, BookOpen, Search, Compass, FileQuestion } from 'lucide-react';
 import { SUPPORTED_LANG_PREFIXES, LOCALES } from '../i18n/config';
 
 export function NotFoundView() {
@@ -54,25 +54,25 @@ export function NotFoundView() {
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-16">
       <div className="max-w-2xl w-full text-center">
         {/* Visual Badge */}
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-6 border border-amber-500/20 shadow-inner">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[var(--accent-surface)] text-[var(--accent)] mb-6 border border-[var(--accent)]/20 shadow-sm">
           <FileQuestion className="w-10 h-10" />
         </div>
 
         {/* 404 Code */}
-        <div className="font-mono text-5xl sm:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-[#126E68] via-emerald-600 to-[#1D3D63] dark:from-[#52C5BE] dark:via-emerald-400 dark:to-blue-400 bg-clip-text text-transparent mb-4">
+        <div className="font-mono text-5xl sm:text-7xl font-extrabold tracking-tight text-[var(--primary)] mb-4 select-none">
           404
         </div>
 
         {/* Heading & Details */}
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-stone-900 dark:text-white mb-4 tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-[var(--text-primary)] mb-4 tracking-tight">
           {headingText}
         </h1>
-        <p className="text-stone-600 dark:text-stone-300 text-base sm:text-lg mb-6 leading-relaxed max-w-lg mx-auto">
+        <p className="text-[var(--text-secondary)] text-base sm:text-lg mb-6 leading-relaxed max-w-lg mx-auto">
           {descriptionText}
         </p>
 
         {activeDocSlug && activeDocSlug !== 'index' && (
-          <div className="inline-block px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono text-xs mb-8 border border-stone-200 dark:border-white/10" dir="ltr">
+          <div className="inline-block px-3 py-1.5 rounded-lg bg-[var(--surface)] text-[var(--text-muted)] font-mono text-xs mb-8 border border-[var(--border)]" dir="ltr">
             Requested: /docs/{activeDocSlug}
           </div>
         )}
@@ -111,32 +111,32 @@ export function NotFoundView() {
         </div>
 
         {/* Popular Quick Links */}
-        <div className="border-t border-stone-200 dark:border-white/10 pt-8 max-w-lg mx-auto">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-4 font-bold">
+        <div className="border-t border-[var(--border)] pt-8 max-w-lg mx-auto">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-4 font-semibold">
             {popularLinksTitle}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium">
             <button
               onClick={() => navigateToDoc('installation')}
-              className="p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 bg-white/50 dark:bg-stone-900/40 hover:border-[#126E68] dark:hover:border-[#52C5BE] transition-colors text-stone-700 dark:text-stone-200"
+              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--primary)] hover:bg-[var(--primary-surface)] transition-colors text-[var(--text-primary)] cursor-pointer"
             >
               {isRtl ? 'نصب و راه‌اندازی' : isTg ? 'Дастури насб' : 'Installation'}
             </button>
             <button
               onClick={() => navigateToDoc('quickstart')}
-              className="p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 bg-white/50 dark:bg-stone-900/40 hover:border-[#126E68] dark:hover:border-[#52C5BE] transition-colors text-stone-700 dark:text-stone-200"
+              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--primary)] hover:bg-[var(--primary-surface)] transition-colors text-[var(--text-primary)] cursor-pointer"
             >
               {isRtl ? 'شروع سریع' : isTg ? 'Оғози зуд' : 'Quickstart'}
             </button>
             <button
               onClick={() => navigateToDoc('api/validators')}
-              className="p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 bg-white/50 dark:bg-stone-900/40 hover:border-[#126E68] dark:hover:border-[#52C5BE] transition-colors text-stone-700 dark:text-stone-200"
+              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--primary)] hover:bg-[var(--primary-surface)] transition-colors text-[var(--text-primary)] cursor-pointer"
             >
               {isRtl ? 'اعتبارسنج‌ها' : isTg ? 'Тафтишгарҳо' : 'Validators'}
             </button>
             <button
               onClick={() => navigate('playground')}
-              className="p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 bg-white/50 dark:bg-stone-900/40 hover:border-[#126E68] dark:hover:border-[#52C5BE] transition-colors text-stone-700 dark:text-stone-200"
+              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--primary)] hover:bg-[var(--primary-surface)] transition-colors text-[var(--text-primary)] cursor-pointer"
             >
               {isRtl ? 'محیط آزمایشی' : isTg ? 'Озмоишгоҳ' : 'Playground'}
             </button>
@@ -149,10 +149,10 @@ export function NotFoundView() {
             <button
               key={l}
               onClick={() => setLang(l)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
                 lang === l
-                  ? 'bg-[#126E68] text-white'
-                  : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 bg-stone-100 dark:bg-stone-800'
+                  ? 'bg-[var(--primary)] text-white border-[var(--primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface)] border-[var(--border)] hover:border-[var(--primary)]'
               }`}
             >
               {LOCALES[l].nameNative}
